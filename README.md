@@ -97,7 +97,7 @@ For full documentation and API, see: [https://docdeid.readthedocs.io/en/latest/]
 
 For setting up dev environment, see: [docs/environment](https://docdeid.readthedocs.io/en/latest/environment.html)
 
-For contributing, see: [docs/contributing](https://docdeid.readthedocs.io/en/latest/contributing.html).
+For contributing, see: [docs/contributing](https://docdeid.readthedocs.io/en/latest/contributing.html)
 
 ## Authors
 Vincent Menger - *Author, maintainer*
