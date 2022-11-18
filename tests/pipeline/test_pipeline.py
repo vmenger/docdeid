@@ -95,3 +95,30 @@ class TestDeidentify:
 
         assert doc.annotations == expected_annotations
         assert doc.deidentified_text == expected_text
+
+    def test_processors_disabled(self, long_text):
+
+        deidentifier = DocDeid()
+        tokenizer = SpaceSplitTokenizer()
+        deidentifier.tokenizers["default"] = tokenizer
+        deidentifier.processors.add_processor(
+            "name_annotator", SingleTokenLookupAnnotator(lookup_values=["Bob"], tag="name")
+        )
+        deidentifier.processors.add_processor(
+            "location_annotator",
+            MultiTokenLookupAnnotator(
+                lookup_values=["the United States of America"], tokenizer=tokenizer, tag="location"
+            ),
+        )
+        deidentifier.processors.add_processor("redactor", SimpleRedactor())
+
+        doc = deidentifier.deidentify(text=long_text, processors_disabled={"name_annotator"})
+
+        expected_annotations = AnnotationSet(
+            [Annotation(text="the United States of America", start_char=35, end_char=63, tag="location")]
+        )
+
+        expected_text = "Hello my name is Bob and I live in [LOCATION-1]"
+
+        assert doc.annotations == expected_annotations
+        assert doc.deidentified_text == expected_text

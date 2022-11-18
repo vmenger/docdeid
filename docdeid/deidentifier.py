@@ -26,14 +26,21 @@ class DocDeid:
         modified by interacting with this attribute directly. """
 
     def deidentify(
-        self, text: str, processors_enabled: Optional[set[str]] = None, metadata: Optional[dict] = None
+        self,
+        text: str,
+        processors_enabled: Optional[set[str]] = None,
+        processors_disabled: Optional[set[str]] = None,
+        metadata: Optional[dict] = None,
     ) -> Document:
         """
         Main interface to de-identifying text.
 
         Args:
             text: The input text, that needs de-identification.
-            processors_enabled: A set of processors names that should be executed for this text.
+            processors_enabled: A set of processors names that should be executed for this text. Cannot be used with
+                processors_disabled.
+            processors_enabled: A set of processors names that should not be executed for this text. Cannot be used with
+                processors_enabled.
             metadata: A dictionary containing additional information on this text, that is accessible to processors.
 
         Returns:
@@ -42,6 +49,6 @@ class DocDeid:
         """
 
         doc = Document(text, tokenizers=self.tokenizers, metadata=metadata)
-        self.processors.process(doc, processors_enabled=processors_enabled)
+        self.processors.process(doc, processors_enabled=processors_enabled, processors_disabled=processors_disabled)
 
         return doc
