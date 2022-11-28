@@ -9,7 +9,7 @@
 ![license](https://img.shields.io/github/license/vmenger/docdeid)
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-[Installation](#installation) - [Getting started](#getting-started) - [Features](#features) - [Documentation](#documentation) - [Development and contributiong](#development-and-contributing) - [Authors](#authors)  
+[Installation](#installation) - [Getting started](#getting-started) - [Features](#features) - [Documentation](#documentation) - [Development and contributiong](#development-and-contributing) - [Authors](#authors) - [License](#license)  
 
 <!-- start include in docs -->
 
@@ -100,4 +100,9 @@ For setting up dev environment, see: [docs/environment](https://docdeid.readthed
 For contributing, see: [docs/contributing](https://docdeid.readthedocs.io/en/latest/contributing.html)
 
 ## Authors
+
 Vincent Menger - *Author, maintainer*
+
+## License
+
+This project is licensed under the MIT license - see the [LICENSE.md](LICENSE.md) file for details.

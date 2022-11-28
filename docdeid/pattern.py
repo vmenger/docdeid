@@ -16,8 +16,7 @@ class TokenPattern(ABC):
     def __init__(self, tag: str) -> None:
         self.tag = tag
 
-    @staticmethod
-    def doc_precondition(doc: Document) -> bool:
+    def doc_precondition(self, doc: Document) -> bool:
         """
         Use this to check if the pattern is applicable to a document (e.g. check if some piece of metadata is included.
         By default returns ``True``.
@@ -31,8 +30,7 @@ class TokenPattern(ABC):
 
         return True
 
-    @staticmethod
-    def token_precondition(token: Token) -> bool:
+    def token_precondition(self, token: Token) -> bool:
         """
         Use this to check if the pattern is applicable to a token (e.g. check if it has neighbours). By default returns
         ``True``.

@@ -1,7 +1,7 @@
 # Developer environment
 
 * This project uses poetry for package management. Install it with ```pip install poetry```
-* Set up the environment is easy, just use ```poetry install``` (or ``poetry install --with docs`` if you want to build those)
+* Set up the environment is easy, just use ```poetry install```
 * The makefile contains some useful commands when developing:
   * `make test` runs the tests (including coverage)
   * `make format` formats the package code
