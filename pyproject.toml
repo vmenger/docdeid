@@ -20,6 +20,9 @@ classifiers = [
     "Topic :: Text Processing :: Linguistic",
     ]
 
+include = ["docdeid/py.typed"]
+
+
 [tool.sphinx]
 author = "Vincent Menger"
 
