@@ -1,12 +1,12 @@
 # docdeid
 
-[![tests](https://github.com/vmenger/docdeid/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/vmenger/docdeid/actions/workflows/test.yml)
-[![coverage](https://coveralls.io/repos/github/vmenger/docdeid/badge.svg?branch=main)](https://coveralls.io/github/vmenger/docdeid?branch=main)
-[![build](https://github.com/vmenger/docdeid/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/vmenger/docdeid/actions/workflows/build.yml)
-[![Documentation Status](https://readthedocs.org/projects/docdeid/badge/?version=latest)](https://docdeid.readthedocs.io/en/latest/?badge=latest)
-![pypy version](https://img.shields.io/pypi/v/docdeid)
-![python versions](https://img.shields.io/pypi/pyversions/docdeid)
-![license](https://img.shields.io/github/license/vmenger/docdeid)
+[![tests](https://github.com/vmenger/docdeid/actions/workflows/test.yml/badge.svg)](https://github.com/vmenger/docdeid/actions/workflows/test.yml)
+[![coverage](https://coveralls.io/repos/github/vmenger/docdeid/badge.svg)](https://coveralls.io/github/vmenger/docdeid)
+[![build](https://github.com/vmenger/docdeid/actions/workflows/build.yml/badge.svg)](https://github.com/vmenger/docdeid/actions/workflows/build.yml)
+[![Documentation Status](https://readthedocs.org/projects/docdeid/badge/?version=latest)](https://docdeid.readthedocs.io/en/latest/)
+[![pypy version](https://img.shields.io/pypi/v/docdeid)](https://pypi.org/project/docdeid/)
+[![python versions](https://img.shields.io/pypi/pyversions/docdeid)](https://pypi.org/project/docdeid/)
+[![license](https://img.shields.io/github/license/vmenger/docdeid)](https://github.com/vmenger/docdeid/blob/main/LICENSE.md)
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 [Installation](#installation) - [Getting started](#getting-started) - [Features](#features) - [Documentation](#documentation) - [Development and contributiong](#development-and-contributing) - [Authors](#authors) - [License](#license)  
