@@ -34,7 +34,7 @@ class TestDocProcessorGroup:
         assert dpg.get_names() == ["proc_1", "proc_3", "proc_2"]
 
     @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
-    def test_create_doc_processor_group_processor_enabled(self):
+    def test_create_doc_processor_group_enabled(self):
 
         proc_1 = DocProcessor()
         proc_2 = DocProcessor()
@@ -45,13 +45,13 @@ class TestDocProcessorGroup:
 
         with patch.object(proc_1, "process") as proc_1_process, patch.object(proc_2, "process") as proc_2_process:
 
-            dpg.process(Document(text="test"), processors_enabled={"proc_2"})
+            dpg.process(Document(text="test"), enabled={"proc_2"})
 
             proc_1_process.assert_not_called()
             proc_2_process.assert_called_once()
 
     @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
-    def test_create_doc_processor_group_processor_disabled(self):
+    def test_create_doc_processor_group_disabled(self):
 
         proc_1 = DocProcessor()
         proc_2 = DocProcessor()
@@ -62,7 +62,7 @@ class TestDocProcessorGroup:
 
         with patch.object(proc_1, "process") as proc_1_process, patch.object(proc_2, "process") as proc_2_process:
 
-            dpg.process(Document(text="test"), processors_disabled={"proc_1"})
+            dpg.process(Document(text="test"), disabled={"proc_1"})
 
             proc_1_process.assert_not_called()
             proc_2_process.assert_called_once()
