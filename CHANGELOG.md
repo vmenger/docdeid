@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.1.4 (2022-11-29)
 
 ### Changed
-* renamed `processors_enabled` and `processors_disabled` to `enabled` and `disabled, respectively
+* renamed `processors_enabled` and `processors_disabled` to `enabled` and `disabled`, respectively
 
 ## 0.1.3 (2022-11-28)
 
