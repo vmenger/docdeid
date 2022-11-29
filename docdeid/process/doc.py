@@ -104,28 +104,28 @@ class DocProcessorGroup(DocProcessor):
 
         Args:
             doc: The document to be processed.
-            processors_enabled: A set of strings, indicating which document processors to run for this document. By
+            enabled: A set of strings, indicating which document processors to run for this document. By
                 default all document processors are used. In case of nested, it's necessary to supply both the name of
                 the processor group, as well as all of its containing processors (or a subset thereof).
-            processors_disabled: A set of strings, indicating which document processors not to run for this
-                document. Cannot be used together with processors_enabled.
+            disabled: A set of strings, indicating which document processors not to run for this
+                document. Cannot be used together with `enabled`.
         """
 
-        processors_enabled = kwargs.get("processors_enabled", None)
-        processors_disabled = kwargs.get("processors_disabled", None)
+        enabled = kwargs.get("enabled", None)
+        disabled = kwargs.get("disabled", None)
 
-        if (processors_enabled is not None) and (processors_disabled is not None):
-            raise RuntimeError("Cannot use processors_enabled and processors_disabled simultaneously")
+        if (enabled is not None) and (disabled is not None):
+            raise RuntimeError("Cannot use enabled and disabled simultaneously")
 
         for name, proc in self._processors.items():
 
-            if (processors_enabled is not None) and (name not in processors_enabled):
+            if (enabled is not None) and (name not in enabled):
                 continue
 
-            if (processors_disabled is not None) and (name in processors_disabled):
+            if (disabled is not None) and (name in disabled):
                 continue
 
-            proc.process(doc, processors_enabled=processors_enabled, processors_disabled=processors_disabled)
+            proc.process(doc, enabled=enabled, disabled=disabled)
 
     def __iter__(self) -> Iterator:
         """
