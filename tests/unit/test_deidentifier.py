@@ -7,14 +7,12 @@ from docdeid.tokenize import Tokenizer
 
 class TestDocDeid:
     def test_create_docdeid(self):
-
         dd = DocDeid()
         doc = dd.deidentify(text="test")
         assert doc.text == "test"
 
     @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
     def test_add_processors(self):
-
         proc_1 = DocProcessor()
         proc_2 = DocProcessor()
 
@@ -31,7 +29,6 @@ class TestDocDeid:
 
     @patch("docdeid.tokenize.Tokenizer.__abstractmethods__", set())
     def test_add_tokenizers(self):
-
         tokenizer_1 = Tokenizer()
         tokenizer_2 = Tokenizer()
 
@@ -45,7 +42,6 @@ class TestDocDeid:
         assert doc._tokenizers["tokenizer_2"] is tokenizer_2
 
     def test_metadata(self):
-
         metadata = {"some_item": "some_value"}
         dd = DocDeid()
 

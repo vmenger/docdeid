@@ -5,7 +5,6 @@ from docdeid.ds.ds import Datastructure, DsCollection
 
 class TestDsCollection:
     def test_ds_collection(self):
-
         ds = Datastructure()
         dsc = DsCollection()
 
@@ -14,7 +13,6 @@ class TestDsCollection:
         assert dsc["name"] is ds
 
     def test_ds_collection_remove(self):
-
         ds = Datastructure()
         dsc = DsCollection()
 

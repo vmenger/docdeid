@@ -4,7 +4,6 @@ from docdeid.process.redactor import RedactAllText, SimpleRedactor
 
 class TestRedactAllText:
     def test_redact_all_text(self):
-
         redactor = RedactAllText()
 
         deidentified_text = redactor.redact(text="some text", annotations=AnnotationSet([]))
@@ -14,7 +13,6 @@ class TestRedactAllText:
 
 class TestSimpleRedactor:
     def test_redact_one_annotation(self):
-
         text = "Hello I'm Bob"
         annotations = AnnotationSet([Annotation(text="Bob", start_char=10, end_char=13, tag="name")])
         redactor = SimpleRedactor()
@@ -24,7 +22,6 @@ class TestSimpleRedactor:
         assert deidentified_text == "Hello I'm [NAME-1]"
 
     def test_redact_multiple_annotations_different(self):
-
         text = "Hello I'm Bob, and this is Rita"
         annotations = AnnotationSet(
             [
@@ -39,7 +36,6 @@ class TestSimpleRedactor:
         assert deidentified_text == "Hello I'm [NAME-1], and this is [NAME-2]"
 
     def test_redact_multiple_annotations_same(self):
-
         text = "Hello I'm Bob, and Bob is my name"
 
         annotations = AnnotationSet(
@@ -55,7 +51,6 @@ class TestSimpleRedactor:
         assert deidentified_text == "Hello I'm [NAME-1], and [NAME-1] is my name"
 
     def test_redact_multiple_annotations_different_tag(self):
-
         text = "Hello I'm Bob, and I live in London"
         annotations = AnnotationSet(
             [

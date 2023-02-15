@@ -12,24 +12,31 @@ class Token:
     """A token is an atomic part of a text, as determined by a tokenizer."""
 
     text: str
-    """ The text. """
+    """The text."""
 
     start_char: int
-    """ The start char. """
+    """The start char."""
 
     end_char: int
-    """ The end char. """
+    """The end char."""
 
     _previous_token: Optional[Token] = field(default=None, repr=False, compare=False)
-    """ The previous token. Note that this does not have to be the literal next token in the text, the logic is
-    dictated by :meth:`.Tokenizer._previous_token`, which could for example take the previous alpha token. """
+    """
+    The previous token.
+
+    Note that this does not have to be the literal next token in the text, the logic is dictated by
+    :meth:`.Tokenizer._previous_token`, which could for example take the previous alpha token.
+    """
 
     _next_token: Optional[Token] = field(default=None, repr=False, compare=False)
-    """ The next token. Note that this does not have to be the literal next token in the text, the logic is
-    dictated by :meth:`.Tokenizer._next_token`, which could for example take the next alpha token. """
+    """
+    The next token.
+
+    Note that this does not have to be the literal next token in the text, the logic is dictated by
+    :meth:`.Tokenizer._next_token`, which could for example take the next alpha token.
+    """
 
     def __post_init__(self) -> None:
-
         if len(self.text) != (self.end_char - self.start_char):
             raise ValueError("The span does not match the length of the text.")
 
@@ -315,7 +322,6 @@ class SpaceSplitTokenizer(Tokenizer):
     """
 
     def _split_text(self, text: str) -> list[Token]:
-
         return [
             Token(text=match.group(0), start_char=match.start(), end_char=match.end())
             for match in re.finditer(r"[^\s]+", text)
@@ -330,7 +336,6 @@ class WordBoundaryTokenizer(Tokenizer):
     """
 
     def _split_text(self, text: str) -> list[Token]:
-
         tokens = []
         matches = [*re.finditer(r"\b", text)]
 

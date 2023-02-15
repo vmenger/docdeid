@@ -22,7 +22,6 @@ def long_text():
 
 class TestDeidentify:
     def test_single_annotator(self, short_text):
-
         deidentifier = DocDeid()
         deidentifier.tokenizers["default"] = SpaceSplitTokenizer()
         deidentifier.processors.add_processor(
@@ -40,7 +39,6 @@ class TestDeidentify:
         assert doc.deidentified_text == expected_text
 
     def test_multipe_annotators(self, long_text):
-
         deidentifier = DocDeid()
         tokenizer = SpaceSplitTokenizer()
         deidentifier.tokenizers["default"] = tokenizer
@@ -70,7 +68,6 @@ class TestDeidentify:
         assert doc.deidentified_text == expected_text
 
     def test_enabled(self, long_text):
-
         deidentifier = DocDeid()
         tokenizer = SpaceSplitTokenizer()
         deidentifier.tokenizers["default"] = tokenizer
@@ -97,7 +94,6 @@ class TestDeidentify:
         assert doc.deidentified_text == expected_text
 
     def test_disabled(self, long_text):
-
         deidentifier = DocDeid()
         tokenizer = SpaceSplitTokenizer()
         deidentifier.tokenizers["default"] = tokenizer

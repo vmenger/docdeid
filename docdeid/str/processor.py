@@ -103,7 +103,6 @@ class ReplaceNonAsciiCharacters(StringModifier):
 
     @staticmethod
     def _normalize_value(text: str) -> str:
-
         text = unicodedata.normalize("NFD", text)
         text = text.encode("ascii", "ignore").decode("utf-8")
 
@@ -159,5 +158,4 @@ class FilterByLength(StringFilter):
         self.min_len = min_len
 
     def filter(self, item: str) -> bool:
-
         return len(item) >= self.min_len
