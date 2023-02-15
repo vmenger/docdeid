@@ -7,7 +7,6 @@ from docdeid.process.doc import DocProcessor, DocProcessorGroup
 class TestDocProcessorGroup:
     @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
     def test_create_doc_processor_group(self):
-
         proc_1 = DocProcessor()
         proc_2 = DocProcessor()
 
@@ -24,7 +23,6 @@ class TestDocProcessorGroup:
 
     @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
     def test_doc_processor_add_at_position(self):
-
         dpg = DocProcessorGroup()
         proc = DocProcessor()
         dpg.add_processor("proc_1", proc)
@@ -35,7 +33,6 @@ class TestDocProcessorGroup:
 
     @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
     def test_create_doc_processor_group_enabled(self):
-
         proc_1 = DocProcessor()
         proc_2 = DocProcessor()
 
@@ -52,7 +49,6 @@ class TestDocProcessorGroup:
 
     @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
     def test_create_doc_processor_group_disabled(self):
-
         proc_1 = DocProcessor()
         proc_2 = DocProcessor()
 
@@ -69,7 +65,6 @@ class TestDocProcessorGroup:
 
     @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
     def test_doc_processor_group_names(self):
-
         dpg = DocProcessorGroup()
         dpg.add_processor("proc_1", DocProcessor())
         dpg.add_processor("proc_2", DocProcessor())
@@ -84,7 +79,6 @@ class TestDocProcessorGroup:
 
     @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
     def test_remove_doc_processor(self):
-
         dpg = DocProcessorGroup()
         proc_1 = DocProcessor()
         dpg.add_processor("proc_1", proc_1)
@@ -96,7 +90,6 @@ class TestDocProcessorGroup:
 
     @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
     def test_get_doc_processor(self):
-
         dpg = DocProcessorGroup()
         proc_1 = DocProcessor()
         dpg.add_processor("proc_1", proc_1)

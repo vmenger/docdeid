@@ -11,14 +11,12 @@ from docdeid.str.processor import (
 
 class TestStringModifier:
     def test_lowercase_string(self):
-
         proc = LowercaseString()
 
         assert proc.process("albert") == "albert"
         assert proc.process("Albert") == "albert"
 
     def test_strip_string(self):
-
         proc = StripString()
 
         assert proc.process("test") == "test"
@@ -26,7 +24,6 @@ class TestStringModifier:
         assert proc.process("test\n") == "test"
 
     def test_remove_non_ascii(self):
-
         proc = RemoveNonAsciiCharacters()
 
         assert proc.process("test") == "test"
@@ -34,7 +31,6 @@ class TestStringModifier:
         assert proc.process("áóçëū") == ""
 
     def test_replace_non_ascii(self):
-
         proc = ReplaceNonAsciiCharacters()
 
         assert proc.process("test") == "test"
@@ -42,7 +38,6 @@ class TestStringModifier:
         assert proc.process("áóçëū") == "aoceu"
 
     def test_replace_value(self):
-
         proc = ReplaceValue(find_value="cat", replace_value="dog")
 
         assert proc.process("test") == "test"
@@ -50,7 +45,6 @@ class TestStringModifier:
         assert proc.process("My favorite animal is a dog") == "My favorite animal is a dog"
 
     def test_replace_value_regexp(self):
-
         proc = ReplaceValueRegexp(find_value=r"\d+", replace_value="number")
 
         assert proc.process("test") == "test"
@@ -60,7 +54,6 @@ class TestStringModifier:
 
 class TestStringFilter:
     def test_filter_by_length(self):
-
         proc = FilterByLength(min_len=5)
 
         assert not proc.filter("")

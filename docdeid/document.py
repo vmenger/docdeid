@@ -71,7 +71,7 @@ class Document:
         self._tokenizers = tokenizers
 
         self.metadata = MetaData(metadata)
-        """ The :class:`.MetaData` of this :class:`.Document`, that can be interacted with directly. """
+        """The :class:`.MetaData` of this :class:`.Document`, that can be interacted with directly."""
 
         self._token_lists: dict[str, TokenList] = {}
         self._annotations = AnnotationSet()

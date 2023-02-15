@@ -4,7 +4,6 @@ from docdeid.utils import annotate_intext
 
 class TestAnnotateIntext:
     def test_annotate_intext(self):
-
         text = "My name is John and I live in Japan"
         doc = Document(text=text)
         doc.annotations.add(Annotation(text="John", start_char=11, end_char=15, tag="name"))

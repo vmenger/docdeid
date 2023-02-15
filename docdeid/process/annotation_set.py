@@ -14,7 +14,6 @@ class AnnotationProcessor(DocProcessor, ABC):
     """Processes an :class:`.AnnotationSet`."""
 
     def process(self, doc: Document, **kwargs) -> None:
-
         if len(doc.annotations) == 0:
             return
 
@@ -47,7 +46,6 @@ class OverlapResolver(AnnotationProcessor):
     """
 
     def __init__(self, sort_by: list[str], sort_by_callbacks: Optional[dict[str, Callable]] = None) -> None:
-
         self._sort_by = sort_by
         self._sort_by_callbacks = sort_by_callbacks
 
@@ -72,7 +70,6 @@ class OverlapResolver(AnnotationProcessor):
         return np.where(absdiff == 1)[0].reshape(-1, 2)
 
     def process_annotations(self, annotations: AnnotationSet, text: str) -> AnnotationSet:
-
         processed_annotations = []
 
         mask = np.zeros(max(annotation.end_char for annotation in annotations))
@@ -194,7 +191,6 @@ class MergeAdjacentAnnotations(AnnotationProcessor):
         )
 
     def process_annotations(self, annotations: AnnotationSet, text: str) -> AnnotationSet:
-
         if self.check_overlap and annotations.has_overlap():
             raise ValueError(f"{self.__class__} received input with overlapping annotations.")
 

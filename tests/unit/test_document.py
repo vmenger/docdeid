@@ -8,21 +8,18 @@ from docdeid.tokenize import Tokenizer, TokenList
 
 class TestDocument:
     def test_create_document(self):
-
         text = "Hello I'm Bob"
         doc = Document(text=text)
 
         assert doc.text == text
 
     def test_deidentified_text_noset(self):
-
         text = "Hello I'm Bob"
         doc = Document(text=text)
 
         assert doc.deidentified_text is None
 
     def test_deidentified_text(self):
-
         text = "Hello I'm Bob"
         deidentified_text = "Hello I'm <NAME>"
         doc = Document(text=text)
@@ -33,7 +30,6 @@ class TestDocument:
         assert doc.deidentified_text == deidentified_text
 
     def test_annotation(self, annotations):
-
         text = "Hello I'm Bob"
         doc = Document(text=text)
 
@@ -44,7 +40,6 @@ class TestDocument:
 
     @patch("docdeid.tokenize.Tokenizer.__abstractmethods__", set())
     def test_get_tokens(self, short_tokens):
-
         text = "Hello I'm Bob"
         tokenizer = Tokenizer()
         doc = Document(text=text, tokenizers={"default": tokenizer})
@@ -54,7 +49,6 @@ class TestDocument:
 
     @patch("docdeid.tokenize.Tokenizer.__abstractmethods__", set())
     def test_get_tokens_multiple_tokenizers(self, short_tokens):
-
         text = "Hello I'm Bob"
         tokenizer1 = Tokenizer()
         tokenizer2 = Tokenizer()
@@ -68,7 +62,6 @@ class TestDocument:
             assert doc.get_tokens(tokenizer_name="tokenizer_2") == TokenList([])
 
     def test_metadata(self):
-
         text = "Hello I'm Bob"
         metadata = {"person_name": "Bob"}
 
@@ -79,7 +72,6 @@ class TestDocument:
 
 class TestMetaData:
     def test_add_metadata_item(self):
-
         metadata = MetaData()
 
         metadata["person_name"] = "Bob"
@@ -87,7 +79,6 @@ class TestMetaData:
         assert metadata["person_name"] == "Bob"
 
     def test_overwrite_metadata_item_error(self):
-
         metadata = MetaData()
 
         metadata["person_name"] = "Bob"
@@ -96,7 +87,6 @@ class TestMetaData:
             metadata["person_name"] = "Mary"
 
     def test_metadata_item_nonexistant(self):
-
         metadata = MetaData()
 
         metadata["person_name"] = "Bob"

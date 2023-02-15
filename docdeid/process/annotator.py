@@ -21,7 +21,6 @@ class Annotator(DocProcessor, ABC):
     """
 
     def __init__(self, tag: str) -> None:
-
         self.tag = tag
 
     def process(self, doc: Document, **kwargs) -> None:
@@ -96,7 +95,6 @@ class SingleTokenLookupAnnotator(Annotator):
         ]
 
     def annotate(self, doc: Document) -> list[Annotation]:
-
         annotate_tokens: list[Token]
         tokens = doc.get_tokens(tokenizer_name=self._tokenizer_name)
 
@@ -139,7 +137,6 @@ class MultiTokenLookupAnnotator(Annotator):
         super().__init__(tag=tag)
 
     def annotate(self, doc: Document) -> list[Annotation]:
-
         tokens = doc.get_tokens()
         tokens_text = [token.text for token in tokens]
         annotations = []
@@ -182,13 +179,11 @@ class RegexpAnnotator(Annotator):
     """
 
     def __init__(self, tag: str, regexp_pattern: re.Pattern, capturing_group: int = 0) -> None:
-
         self.regexp_pattern = regexp_pattern
         self.capturing_group = capturing_group
         super().__init__(tag=tag)
 
     def annotate(self, doc: Document) -> list[Annotation]:
-
         annotations = []
 
         for match in self.regexp_pattern.finditer(doc.text):
@@ -214,7 +209,6 @@ class TokenPatternAnnotator(Annotator):
         super().__init__(pattern.tag)
 
     def annotate(self, doc: Document) -> list[Annotation]:
-
         annotations: list[Annotation] = []
 
         if not self.pattern.doc_precondition(doc):

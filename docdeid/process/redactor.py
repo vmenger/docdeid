@@ -54,7 +54,6 @@ class RedactAllText(Redactor):
         self.close_char = close_char
 
     def redact(self, text: str, annotations: AnnotationSet) -> str:
-
         return f"{self.open_char}REDACTED{self.close_char}"
 
 
@@ -120,7 +119,6 @@ class SimpleRedactor(Redactor):
         return text
 
     def redact(self, text: str, annotations: AnnotationSet) -> str:
-
         if self.check_overlap and annotations.has_overlap():
             raise ValueError(f"{self.__class__} received input with overlapping annotations.")
 

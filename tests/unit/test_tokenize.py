@@ -11,7 +11,6 @@ from docdeid.tokenize import (
 
 class TestToken:
     def test_create_token(self):
-
         t = Token(text="test", start_char=0, end_char=4)
 
         assert t.text == "test"
@@ -19,7 +18,6 @@ class TestToken:
         assert t.end_char == 4
 
     def test_equality(self):
-
         data = {"text": "test", "start_char": 0, "end_char": 4}
 
         t1 = Token(**data)
@@ -28,13 +26,11 @@ class TestToken:
         assert t1 == t2
 
     def test_len(self):
-
         t = Token(text="test", start_char=0, end_char=4)
 
         assert len(t) == len("test")
 
     def test_next_token(self, short_tokens):
-
         short_tokens[0].set_next_token(short_tokens[1])
         short_tokens[1].set_next_token(short_tokens[2])
 
@@ -46,7 +42,6 @@ class TestToken:
         assert short_tokens[2].next() is None
 
     def test_previous_token(self, short_tokens):
-
         short_tokens[2].set_previous_token(short_tokens[1])
         short_tokens[1].set_previous_token(short_tokens[0])
 
@@ -60,13 +55,11 @@ class TestToken:
 
 class TestTokenList:
     def test_create_tokenlist(self, short_tokens):
-
         token_list = TokenList(short_tokens)
 
         assert len(token_list) == len(short_tokens)
 
     def test_iterate(self, short_tokens):
-
         token_list = TokenList(short_tokens)
 
         for token1, token2 in zip(short_tokens, token_list):
@@ -76,14 +69,12 @@ class TestTokenList:
             assert token == token_list[i]
 
     def test_tokenlist_equal(self, short_tokens):
-
         token_list_1 = TokenList(short_tokens)
         token_list_2 = TokenList(short_tokens)
 
         assert token_list_1 == token_list_2
 
     def test_init_token_lookup(self, short_tokens):
-
         token_list = TokenList(short_tokens)
         words, text_to_tokens = token_list._init_token_lookup()
 
@@ -94,7 +85,6 @@ class TestTokenList:
         assert text_to_tokens["something_else"] == []
 
     def test_token_lookup(self, long_tokens):
-
         token_list = TokenList(long_tokens)
 
         assert token_list.token_lookup(lookup_values=set()) == set()
@@ -115,20 +105,17 @@ class TestTokenList:
 
 class TestBaseTokenizer:
     def test_previous_token(self, short_tokens):
-
         assert Tokenizer._previous_token(0, short_tokens) is None
         assert Tokenizer._previous_token(1, short_tokens) is short_tokens[0]
         assert Tokenizer._previous_token(2, short_tokens) is short_tokens[1]
 
     def test_next_token(self, short_tokens):
-
         assert Tokenizer._next_token(0, short_tokens) is short_tokens[1]
         assert Tokenizer._next_token(1, short_tokens) is short_tokens[2]
         assert Tokenizer._next_token(2, short_tokens) is None
 
     @patch("docdeid.tokenize.Tokenizer.__abstractmethods__", set())
     def test_tokenize_link(self, short_text, short_tokens):
-
         tokenizer = Tokenizer(link_tokens=True)
 
         with patch.object(tokenizer, "_split_text", return_value=short_tokens):
@@ -142,7 +129,6 @@ class TestBaseTokenizer:
 
     @patch("docdeid.tokenize.Tokenizer.__abstractmethods__", set())
     def test_tokenize_no_link(self, short_text, short_tokens):
-
         tokenizer = Tokenizer(link_tokens=False)
 
         with patch.object(tokenizer, "_split_text", return_value=short_tokens):
@@ -156,7 +142,6 @@ class TestBaseTokenizer:
 
 class TestSpaceSplitTokenizer:
     def test_space_split_tokenizer(self):
-
         text = "these are words"
         tokenizer = SpaceSplitTokenizer()
         expected_tokens = [
@@ -172,7 +157,6 @@ class TestSpaceSplitTokenizer:
 
 class TestWordBoundaryTokenizer:
     def test_word_boundary_tokenizer(self):
-
         text = "Jane Keith-Lucas"
         tokenizer = WordBoundaryTokenizer()
         expected_tokens = [

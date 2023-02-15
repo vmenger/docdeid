@@ -16,7 +16,6 @@ from docdeid.tokenize import WordBoundaryTokenizer
 
 class TestSingleTokenLookupAnnotator:
     def test_single_token(self, long_text, long_tokens):
-
         doc = Document(long_text)
         annotator = SingleTokenLookupAnnotator(lookup_values=["John", "Jane", "Lucas"], tag="first_name")
         expected_annotations = [
@@ -31,7 +30,6 @@ class TestSingleTokenLookupAnnotator:
         assert set(annotations) == set(expected_annotations)
 
     def test_single_token_with_matching_pipeline(self, long_text, long_tokens):
-
         doc = Document(long_text)
         annotator = SingleTokenLookupAnnotator(
             lookup_values=["John", "Jane", "Lucas"], matching_pipeline=[LowercaseString()], tag="first_name"
@@ -51,7 +49,6 @@ class TestSingleTokenLookupAnnotator:
 
 class TestMultiTokenLookupAnnotator:
     def test_multi_token(self, long_text, long_tokens):
-
         doc = Document(long_text)
         annotator = MultiTokenLookupAnnotator(
             lookup_values=["my name", "my wife"], tokenizer=WordBoundaryTokenizer(), tag="prefix"
@@ -67,7 +64,6 @@ class TestMultiTokenLookupAnnotator:
         assert annotations == expected_annotations
 
     def test_multi_token_with_matching_pipeline(self, long_text, long_tokens):
-
         doc = Document(long_text)
 
         annotator = MultiTokenLookupAnnotator(
@@ -125,7 +121,6 @@ class TestRegexpAnnotator:
 class TestTokenPatternAnnotator:
     @patch("docdeid.pattern.TokenPattern.__abstractmethods__", set())
     def test_doc_precondition(self):
-
         doc = Document("_")
         pattern = TokenPattern(tag="_")
         annotator = TokenPatternAnnotator(pattern)
@@ -137,7 +132,6 @@ class TestTokenPatternAnnotator:
             mock_match.assert_not_called()
 
     def test_basic_pattern(self, long_text, long_tokens, basic_pattern):
-
         annotator = TokenPatternAnnotator(pattern=basic_pattern)
         doc = Document(text=long_text)
 
@@ -155,7 +149,6 @@ class TestTokenPatternAnnotator:
         assert annotations == expected_annotations
 
     def test_multi_pattern(self, long_text, long_tokens_linked, multi_pattern):
-
         annotator = TokenPatternAnnotator(pattern=multi_pattern)
         doc = Document(text=long_text)
 

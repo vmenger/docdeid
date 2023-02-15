@@ -11,30 +11,35 @@ class Annotation:
     """An annotation contains information on a specific span of text that is tagged."""
 
     text: str
-    """ The exact text."""
+    """The exact text."""
 
     start_char: int
-    """ The start character. """
+    """The start character."""
 
     end_char: int
-    """ The end character. """
+    """The end character."""
 
     tag: str
-    """ The tag (e.g. name, location). """
+    """The tag (e.g. name, location)."""
 
     start_token: Optional[Token] = field(default=None, repr=False, compare=False)
-    """ Optionally, the first :class:`.Token` in the sequence of tokens corresponding to this annotation. Should only
-    be used when the annotation starts on a token boundary. """
+    """
+    Optionally, the first :class:`.Token` in the sequence of tokens corresponding to this annotation.
+
+    Should only be used when the annotation starts on a token boundary.
+    """
 
     end_token: Optional[Token] = field(default=None, repr=False, compare=False)
-    """ Optionally, the last :class:`.Token` in the sequence of tokens corresponding to this annotation. Should only
-    be used when the annotation ends on a token boundary. """
+    """
+    Optionally, the last :class:`.Token` in the sequence of tokens corresponding to this annotation.
+
+    Should only be used when the annotation ends on a token boundary.
+    """
 
     length: int = field(init=False)
-    """ The number of characters of the annotation text. """
+    """The number of characters of the annotation text."""
 
     def __post_init__(self) -> None:
-
         if len(self.text) != (self.end_char - self.start_char):
             raise ValueError("The span does not match the length of the text.")
 
