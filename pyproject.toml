@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "docdeid"
-version = "0.1.5"
+version = "0.1.6"
 description = "Create your own document de-identifier using docdeid, a simple framework independent of language or domain."
 license = "MIT"
 authors = [
