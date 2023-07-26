@@ -16,6 +16,7 @@ class Redactor(DocProcessor, ABC):
     def process(self, doc: Document, **kwargs) -> None:
         """
         Process a document by redacting it, according to the logic in :meth:`.Redactor.redact`.
+
         Args:
             doc: The document to process.
             **kwargs: Any other arguments.

@@ -47,10 +47,10 @@ class TokenPattern(ABC):
     @abstractmethod
     def match(self, token: Token, metadata: MetaData) -> Optional[tuple[Token, Token]]:
         """
-        Check if the token provided matches this pattern. Instantiations of :class:`.TokenPattern` should implement
-        the logic of the pattern in this method. For example, by checking if the text is lowercase, titlecase, longer
-        than a certain number of characters, etc. The :class:`.Token` neighbours may be accessible by
-        :meth:`.Token.previous` and :meth:`.Token.next`, if linked by the tokenizer.
+        Check if the token provided matches this pattern. Instantiations of :class:`.TokenPattern` should implement the
+        logic of the pattern in this method. For example, by checking if the text is lowercase, titlecase, longer than a
+        certain number of characters, etc. The :class:`.Token` neighbours may be accessible by :meth:`.Token.previous`
+        and :meth:`.Token.next`, if linked by the tokenizer.
 
         Args:
             token: The token.

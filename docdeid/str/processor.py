@@ -97,8 +97,8 @@ class ReplaceNonAsciiCharacters(StringModifier):
     """
     Maps non-ascii characters to ascii characters.
 
-    E.g.: Renée -> Renee. It's advised to test this before using as
-    mapping can be tricky in practice for some characters.
+    E.g.: Renée -> Renee. It's advised to test this before using as mapping can be tricky in practice for some
+    characters.
     """
 
     @staticmethod
