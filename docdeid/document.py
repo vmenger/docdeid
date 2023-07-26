@@ -6,10 +6,10 @@ from docdeid.tokenize import Tokenizer, TokenList
 
 class MetaData:
     """
-    Contains additional information on a text that is provided by the user on input. A :class:`.MetaData` object is
-    kept with the text in a :class:`.Document`, where it can be accessed by document processors. Note that a
-    :class:`.MetaData` object does not allow overwriting keys. This is done to prevent document processors
-    accidentally interfering with each other.
+    Contains additional information on a text that is provided by the user on input. A :class:`.MetaData` object is kept
+    with the text in a :class:`.Document`, where it can be accessed by document processors. Note that a
+    :class:`.MetaData` object does not allow overwriting keys. This is done to prevent document processors accidentally
+    interfering with each other.
 
     Args:
         items: A ``dict`` of items to initialize with.
