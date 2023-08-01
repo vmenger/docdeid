@@ -8,9 +8,9 @@ from docdeid.tokenize import Token, TokenList
 @pytest.fixture
 def annotations():
     return [
-        Annotation(text="Hello", start_char=0, end_char=5, tag="word"),
-        Annotation(text="I'm", start_char=6, end_char=9, tag="word"),
-        Annotation(text="Bob", start_char=10, end_char=13, tag="name"),
+        Annotation(text="Hello", start_char=0, end_char=5, tag="word", priority=10),
+        Annotation(text="I'm", start_char=6, end_char=9, tag="word", priority=10),
+        Annotation(text="Bob", start_char=10, end_char=13, tag="name", priority=5),
     ]
 
 

@@ -20,8 +20,9 @@ class Annotator(DocProcessor, ABC):
         tag: The tag to use in the annotations.
     """
 
-    def __init__(self, tag: str) -> None:
+    def __init__(self, tag: str, priority: Optional[int] = 0) -> None:
         self.tag = tag
+        self.priority = priority
 
     def process(self, doc: Document, **kwargs) -> None:
         """
@@ -88,6 +89,7 @@ class SingleTokenLookupAnnotator(Annotator):
                 start_char=token.start_char,
                 end_char=token.end_char,
                 tag=self.tag,
+                priority=self.priority,
                 start_token=token,
                 end_token=token,
             )
@@ -157,6 +159,7 @@ class MultiTokenLookupAnnotator(Annotator):
                     start_char=start_char,
                     end_char=end_char,
                     tag=self.tag,
+                    priority=self.priority,
                 )
             )
 
@@ -232,6 +235,7 @@ class TokenPatternAnnotator(Annotator):
                     start_char=start_token.start_char,
                     end_char=end_token.end_char,
                     tag=self.pattern.tag,
+                    priority=self.priority,
                     start_token=start_token,
                     end_token=end_token,
                 )
