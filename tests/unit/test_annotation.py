@@ -45,6 +45,9 @@ class TestAnnotation:
         with pytest.raises(ValueError):
             _ = Annotation(text="cat", start_char=0, end_char=100, tag="animal")
 
+    def test_create_annotation_with_prio(self):
+        _ = Annotation(text="cat", start_char=0, end_char=3, tag="animal", priority=10)
+
     def test_get_sort_key(self):
         annotation = Annotation(text="cat", start_char=0, end_char=3, tag="animal")
 
@@ -122,3 +125,10 @@ class TestAnnotationSet:
         sorted_annotations = annotation_set.sorted(by=["tag", "end_char"], callbacks={"end_char": lambda x: -x})
 
         assert sorted_annotations == [annotations[2], annotations[1], annotations[0]]
+
+    def test_get_annotations_sorted_priority(self, annotations):
+        annotation_set = AnnotationSet(annotations)
+
+        sorted_annotations = annotation_set.sorted(by=["priority", "length"], callbacks={"length": lambda x: -x})
+
+        assert sorted_annotations == [annotations[2], annotations[0], annotations[1]]

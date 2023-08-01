@@ -22,6 +22,9 @@ class Annotation:
     tag: str
     """The tag (e.g. name, location)."""
 
+    priority: Optional[int] = field(default=0, repr=True, compare=False)
+    """An additional priority attribute, that can be used for resolving overlap/merges."""
+
     start_token: Optional[Token] = field(default=None, repr=False, compare=False)
     """
     Optionally, the first :class:`.Token` in the sequence of tokens corresponding to this annotation.
