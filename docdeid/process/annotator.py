@@ -20,7 +20,7 @@ class Annotator(DocProcessor, ABC):
         tag: The tag to use in the annotations.
     """
 
-    def __init__(self, tag: str, priority: Optional[int] = 0) -> None:
+    def __init__(self, tag: str, priority: int = 0) -> None:
         self.tag = tag
         self.priority = priority
 
