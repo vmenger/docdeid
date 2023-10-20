@@ -1,3 +1,4 @@
+import inspect
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
@@ -22,7 +23,7 @@ class Annotation:
     tag: str
     """The tag (e.g. name, location)."""
 
-    priority: Optional[int] = field(default=0, repr=True, compare=False)
+    priority: int = field(default=0, repr=True, compare=False)
     """An additional priority attribute, that can be used for resolving overlap/merges."""
 
     start_token: Optional[Token] = field(default=None, repr=False, compare=False)
@@ -47,6 +48,23 @@ class Annotation:
             raise ValueError("The span does not match the length of the text.")
 
         object.__setattr__(self, "length", len(self.text))
+
+    @classmethod
+    def optional_fields(cls) -> set[str]:
+        """
+        List the optional fields of the class, by inspecting it.
+
+        Returns: A set of strings denoting the optional fields.
+        """
+
+        sign = inspect.signature(cls)
+        params = set()
+
+        for name in sign.parameters:
+            if str(getattr(sign.parameters[name], "_annotation")).startswith("typing.Optional"):
+                params.add(str(name))
+
+        return params
 
     def get_sort_key(
         self,
@@ -82,7 +100,7 @@ class Annotation:
 
         if deterministic:
 
-            extra_attrs = sorted(set(self.__dict__.keys()) - set(by))
+            extra_attrs = sorted(set(self.__dict__.keys()) - set(by) - self.optional_fields())
 
             for attr in extra_attrs:
                 key.append(getattr(self, attr, UNKNOWN_ATTR_DEFAULT))

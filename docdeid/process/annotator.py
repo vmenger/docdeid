@@ -20,7 +20,7 @@ class Annotator(DocProcessor, ABC):
         tag: The tag to use in the annotations.
     """
 
-    def __init__(self, tag: str, priority: Optional[int] = 0) -> None:
+    def __init__(self, tag: str, priority: int = 0) -> None:
         self.tag = tag
         self.priority = priority
 
@@ -150,14 +150,16 @@ class MultiTokenLookupAnnotator(Annotator):
             if longest_matching_prefix is None:
                 continue
 
-            start_char = tokens[i].start_char
-            end_char = tokens[i + len(longest_matching_prefix) - 1].end_char
+            start_token = tokens[i]
+            end_token = tokens[i + len(longest_matching_prefix) - 1]
 
             annotations.append(
                 Annotation(
-                    text=doc.text[start_char:end_char],
-                    start_char=start_char,
-                    end_char=end_char,
+                    text=doc.text[start_token.start_char : end_token.end_char],
+                    start_char=start_token.start_char,
+                    end_char=end_token.end_char,
+                    start_token=start_token,
+                    end_token=end_token,
                     tag=self.tag,
                     priority=self.priority,
                 )
