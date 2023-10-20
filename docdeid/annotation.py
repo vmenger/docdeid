@@ -51,6 +51,11 @@ class Annotation:
 
     @classmethod
     def optional_fields(cls) -> set[str]:
+        """
+        List the optional fields of the class, by inspecting it.
+
+        Returns: A set of strings denoting the optional fields.
+        """
 
         sign = inspect.signature(cls)
         params = set()
