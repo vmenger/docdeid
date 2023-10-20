@@ -1,9 +1,8 @@
+import inspect
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
 from docdeid.tokenize import Token
-
-import inspect
 
 UNKNOWN_ATTR_DEFAULT: Any = 0
 
@@ -57,11 +56,10 @@ class Annotation:
         params = set()
 
         for name in sign.parameters:
-            if str(getattr(sign.parameters[name], '_annotation')).startswith("typing.Optional"):
+            if str(getattr(sign.parameters[name], "_annotation")).startswith("typing.Optional"):
                 params.add(str(name))
 
         return params
-
 
     def get_sort_key(
         self,
@@ -97,11 +95,7 @@ class Annotation:
 
         if deterministic:
 
-            extra_attrs = sorted(
-                set(self.__dict__.keys()) -
-                set(by) -
-                self.optional_fields()
-            )
+            extra_attrs = sorted(set(self.__dict__.keys()) - set(by) - self.optional_fields())
 
             for attr in extra_attrs:
                 key.append(getattr(self, attr, UNKNOWN_ATTR_DEFAULT))

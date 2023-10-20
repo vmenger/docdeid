@@ -155,7 +155,7 @@ class MultiTokenLookupAnnotator(Annotator):
 
             annotations.append(
                 Annotation(
-                    text=doc.text[start_token.start_char:end_token.end_char],
+                    text=doc.text[start_token.start_char : end_token.end_char],
                     start_char=start_token.start_char,
                     end_char=end_token.end_char,
                     start_token=start_token,
