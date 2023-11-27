@@ -100,6 +100,21 @@ class TestRegexpAnnotator:
 
         assert annotations == expected_annotations
 
+    def test_regexp_annotator_with_string(self, short_text):
+
+        doc = Document(short_text)
+
+        annotator = RegexpAnnotator(regexp_pattern=r"[A-Z][a-z]+", tag="capitalized")
+
+        expected_annotations = [
+            Annotation(text="Hello", start_char=0, end_char=5, tag="capitalized"),
+            Annotation(text="Bob", start_char=10, end_char=13, tag="capitalized"),
+        ]
+
+        annotations = annotator.annotate(doc)
+
+        assert annotations == expected_annotations
+
     def test_regexp_annotator_with_group(self, long_text):
         doc = Document(long_text)
         annotator = RegexpAnnotator(
@@ -116,6 +131,16 @@ class TestRegexpAnnotator:
         annotations = annotator.annotate(doc)
 
         assert annotations == expected_annotations
+
+    def test_regexp_with_validate(self, long_text):
+
+        doc = Document(long_text)
+        annotator = RegexpAnnotator(
+            regexp_pattern=re.compile(r"([A-Z])[a-z]+"), capturing_group=1, tag="only_the_capital"
+        )
+
+        with patch.object(annotator, "_validate_match", return_value=False):
+            assert annotator.annotate(doc) == []
 
 
 class TestTokenPatternAnnotator:
