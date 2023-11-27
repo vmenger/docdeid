@@ -1,6 +1,6 @@
 import re
 from abc import ABC, abstractmethod
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Union
 
 from docdeid.annotation import Annotation
 from docdeid.document import Document
@@ -185,7 +185,11 @@ class RegexpAnnotator(Annotator):
             the entire match is used.
     """
 
-    def __init__(self, tag: str, regexp_pattern: re.Pattern, capturing_group: int = 0) -> None:
+    def __init__(self, regexp_pattern: Union[re.Pattern, str], *args, capturing_group: int = 0, **kwargs) -> None:
+
+        if isinstance(regexp_pattern, str):
+            regexp_pattern = re.compile(regexp_pattern)
+
         self.regexp_pattern = regexp_pattern
         self.capturing_group = capturing_group
         super().__init__(*args, **kwargs)
