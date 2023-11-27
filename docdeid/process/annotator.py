@@ -194,15 +194,20 @@ class RegexpAnnotator(Annotator):
         self.capturing_group = capturing_group
         super().__init__(*args, **kwargs)
 
+    def _validate_match(self, match: re.Match, doc: Document) -> bool:
+        return True
     def annotate(self, doc: Document) -> list[Annotation]:
         annotations = []
 
         for match in self.regexp_pattern.finditer(doc.text):
 
-            text = match.group(self.capturing_group)
-            start, end = match.span(self.capturing_group)
+            if not self._validate_match(match, doc):
+                continue
 
-            annotations.append(Annotation(text, start, end, self.tag))
+            text = match.group(self.capturing_group)
+            start_char, end_char = match.span(self.capturing_group)
+
+            annotations.append(Annotation(text=text, start_char=start_char, end_char=end_char, tag=self.tag, priority=self.priority))
 
         return annotations
 
