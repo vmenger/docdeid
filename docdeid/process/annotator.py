@@ -196,6 +196,7 @@ class RegexpAnnotator(Annotator):
 
     def _validate_match(self, match: re.Match, doc: Document) -> bool:
         return True
+
     def annotate(self, doc: Document) -> list[Annotation]:
         annotations = []
 
@@ -207,7 +208,9 @@ class RegexpAnnotator(Annotator):
             text = match.group(self.capturing_group)
             start_char, end_char = match.span(self.capturing_group)
 
-            annotations.append(Annotation(text=text, start_char=start_char, end_char=end_char, tag=self.tag, priority=self.priority))
+            annotations.append(
+                Annotation(text=text, start_char=start_char, end_char=end_char, tag=self.tag, priority=self.priority)
+            )
 
         return annotations
 
