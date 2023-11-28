@@ -1,6 +1,6 @@
 import re
 from abc import ABC, abstractmethod
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Union
 
 from docdeid.annotation import Annotation
 from docdeid.document import Document
@@ -62,16 +62,17 @@ class SingleTokenLookupAnnotator(Annotator):
 
     def __init__(
         self,
-        tag: str,
         lookup_values: Iterable[str],
+        *args,
         matching_pipeline: Optional[list[StringModifier]] = None,
         tokenizer_name: str = "default",
+        **kwargs,
     ) -> None:
 
         self.lookup_set = LookupSet(matching_pipeline=matching_pipeline)
         self.lookup_set.add_items_from_iterable(items=lookup_values)
         self._tokenizer_name = tokenizer_name
-        super().__init__(tag=tag)
+        super().__init__(*args, **kwargs)
 
     def _tokens_to_annotations(self, tokens: list[Token]) -> list[Annotation]:
         """
@@ -123,11 +124,12 @@ class MultiTokenLookupAnnotator(Annotator):
 
     def __init__(
         self,
-        tag: str,
         lookup_values: Iterable[str],
         tokenizer: Tokenizer,
+        *args,
         matching_pipeline: Optional[list[StringModifier]] = None,
         overlapping: bool = False,
+        **kwargs,
     ) -> None:
 
         self.overlapping = overlapping
@@ -136,7 +138,7 @@ class MultiTokenLookupAnnotator(Annotator):
         for val in lookup_values:
             self.trie.add_item([token.text for token in tokenizer.tokenize(val)])
 
-        super().__init__(tag=tag)
+        super().__init__(*args, **kwargs)
 
     def annotate(self, doc: Document) -> list[Annotation]:
         tokens = doc.get_tokens()
@@ -183,20 +185,32 @@ class RegexpAnnotator(Annotator):
             the entire match is used.
     """
 
-    def __init__(self, tag: str, regexp_pattern: re.Pattern, capturing_group: int = 0) -> None:
+    def __init__(self, regexp_pattern: Union[re.Pattern, str], *args, capturing_group: int = 0, **kwargs) -> None:
+
+        if isinstance(regexp_pattern, str):
+            regexp_pattern = re.compile(regexp_pattern)
+
         self.regexp_pattern = regexp_pattern
         self.capturing_group = capturing_group
-        super().__init__(tag=tag)
+        super().__init__(*args, **kwargs)
+
+    def _validate_match(self, match: re.Match, doc: Document) -> bool:
+        return True
 
     def annotate(self, doc: Document) -> list[Annotation]:
         annotations = []
 
         for match in self.regexp_pattern.finditer(doc.text):
 
-            text = match.group(self.capturing_group)
-            start, end = match.span(self.capturing_group)
+            if not self._validate_match(match, doc):
+                continue
 
-            annotations.append(Annotation(text, start, end, self.tag))
+            text = match.group(self.capturing_group)
+            start_char, end_char = match.span(self.capturing_group)
+
+            annotations.append(
+                Annotation(text=text, start_char=start_char, end_char=end_char, tag=self.tag, priority=self.priority)
+            )
 
         return annotations
 
@@ -209,9 +223,10 @@ class TokenPatternAnnotator(Annotator):
         pattern: The token pattern that should be used.
     """
 
-    def __init__(self, pattern: TokenPattern) -> None:
+    def __init__(self, pattern: TokenPattern, *args, **kwargs) -> None:
         self.pattern = pattern
-        super().__init__(pattern.tag)
+        kwargs["tag"] = pattern.tag
+        super().__init__(*args, **kwargs)
 
     def annotate(self, doc: Document) -> list[Annotation]:
         annotations: list[Annotation] = []
@@ -236,7 +251,7 @@ class TokenPatternAnnotator(Annotator):
                     text=doc.text[start_token.start_char : end_token.end_char],
                     start_char=start_token.start_char,
                     end_char=end_token.end_char,
-                    tag=self.pattern.tag,
+                    tag=self.tag,
                     priority=self.priority,
                     start_token=start_token,
                     end_token=end_token,
