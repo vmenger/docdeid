@@ -124,8 +124,12 @@ class TokenList:
 
     def __init__(self, tokens: list[Token]) -> None:
         self._tokens = tokens
+        self._token_index = {token: i for i, token in enumerate(tokens)}
         self._words: Optional[set[str]] = None
         self._text_to_tokens: Optional[defaultdict[str, list[Token]]] = None
+
+    def token_index(self, token: Token) -> int:
+        return self._token_index[token]
 
     def _init_token_lookup(self) -> tuple[set[str], defaultdict[str, list[Token]]]:
         """
