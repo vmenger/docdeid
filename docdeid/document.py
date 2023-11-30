@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
 from docdeid.annotation import AnnotationSet
-from docdeid.tokenize import Tokenizer, TokenList
+from docdeid.tokenizer import Tokenizer, TokenList
 
 
 class MetaData:

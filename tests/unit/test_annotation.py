@@ -1,7 +1,7 @@
 import pytest
 
 from docdeid.annotation import Annotation, AnnotationSet
-from docdeid.tokenize import Token
+from docdeid.tokenizer import Token
 
 
 class TestAnnotation:

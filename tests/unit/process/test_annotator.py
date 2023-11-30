@@ -11,7 +11,7 @@ from docdeid.process.annotator import (
     TokenPatternAnnotator,
 )
 from docdeid.str.processor import LowercaseString
-from docdeid.tokenize import WordBoundaryTokenizer
+from docdeid.tokenizer import WordBoundaryTokenizer
 
 
 class TestSingleTokenLookupAnnotator:

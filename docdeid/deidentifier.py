@@ -2,7 +2,7 @@ from typing import Optional
 
 from docdeid.document import Document
 from docdeid.process.doc import DocProcessorGroup
-from docdeid.tokenize import Tokenizer
+from docdeid.tokenizer import Tokenizer
 
 
 class DocDeid:

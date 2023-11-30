@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from docdeid.document import Document, MetaData
-from docdeid.tokenize import Token
+from docdeid.tokenizer import Token
 
 
 class TokenPattern(ABC):

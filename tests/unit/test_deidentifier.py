@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from docdeid.deidentifier import DocDeid
 from docdeid.process.doc import DocProcessor
-from docdeid.tokenize import Tokenizer
+from docdeid.tokenizer import Tokenizer
 
 
 class TestDocDeid:
@@ -27,7 +27,7 @@ class TestDocDeid:
             proc1_process.assert_called_once()
             proc2_process.assert_called_once()
 
-    @patch("docdeid.tokenize.Tokenizer.__abstractmethods__", set())
+    @patch("docdeid.tokenizer.Tokenizer.__abstractmethods__", set())
     def test_add_tokenizers(self):
         tokenizer_1 = Tokenizer()
         tokenizer_2 = Tokenizer()

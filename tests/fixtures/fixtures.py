@@ -2,7 +2,7 @@ import pytest
 
 from docdeid.annotation import Annotation
 from docdeid.pattern import TokenPattern
-from docdeid.tokenize import Token, TokenList
+from docdeid.tokenizer import Token, TokenList
 
 
 @pytest.fixture

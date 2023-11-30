@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from docdeid.tokenize import (
+from docdeid.tokenizer import (
     SpaceSplitTokenizer,
     Token,
     Tokenizer,
@@ -114,7 +114,7 @@ class TestBaseTokenizer:
         assert Tokenizer._next_token(1, short_tokens) is short_tokens[2]
         assert Tokenizer._next_token(2, short_tokens) is None
 
-    @patch("docdeid.tokenize.Tokenizer.__abstractmethods__", set())
+    @patch("docdeid.tokenizer.Tokenizer.__abstractmethods__", set())
     def test_tokenize_link(self, short_text, short_tokens):
         tokenizer = Tokenizer(link_tokens=True)
 
@@ -127,7 +127,7 @@ class TestBaseTokenizer:
             assert tokens[0].next() is tokens[1]
             assert tokens[1].next() is tokens[2]
 
-    @patch("docdeid.tokenize.Tokenizer.__abstractmethods__", set())
+    @patch("docdeid.tokenizer.Tokenizer.__abstractmethods__", set())
     def test_tokenize_no_link(self, short_text, short_tokens):
         tokenizer = Tokenizer(link_tokens=False)
 

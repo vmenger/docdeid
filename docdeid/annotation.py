@@ -2,7 +2,7 @@ import inspect
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
-from docdeid.tokenize import Token
+from docdeid.tokenizer import Token
 
 UNKNOWN_ATTR_DEFAULT: Any = 0
 

@@ -7,7 +7,7 @@ from docdeid.process.annotator import (
     SingleTokenLookupAnnotator,
 )
 from docdeid.process.redactor import SimpleRedactor
-from docdeid.tokenize import SpaceSplitTokenizer
+from docdeid.tokenizer import SpaceSplitTokenizer
 
 
 @pytest.fixture

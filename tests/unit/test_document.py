@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 
 from docdeid.document import Document, MetaData
-from docdeid.tokenize import Tokenizer, TokenList
+from docdeid.tokenizer import Tokenizer, TokenList
 
 
 class TestDocument:
@@ -38,7 +38,7 @@ class TestDocument:
         for annotation in annotations:
             assert annotation in doc.annotations
 
-    @patch("docdeid.tokenize.Tokenizer.__abstractmethods__", set())
+    @patch("docdeid.tokenizer.Tokenizer.__abstractmethods__", set())
     def test_get_tokens(self, short_tokens):
         text = "Hello I'm Bob"
         tokenizer = Tokenizer()
@@ -47,7 +47,7 @@ class TestDocument:
         with patch.object(tokenizer, "tokenize", return_value=short_tokens):
             assert doc.get_tokens() == short_tokens
 
-    @patch("docdeid.tokenize.Tokenizer.__abstractmethods__", set())
+    @patch("docdeid.tokenizer.Tokenizer.__abstractmethods__", set())
     def test_get_tokens_multiple_tokenizers(self, short_tokens):
         text = "Hello I'm Bob"
         tokenizer1 = Tokenizer()
