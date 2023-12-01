@@ -15,7 +15,7 @@ from docdeid.tokenizer import WordBoundaryTokenizer
 
 
 class TestSingleTokenLookupAnnotator:
-    def test_single_token(self, long_text, long_tokens):
+    def test_single_token(self, long_text, long_tokenlist):
         doc = Document(long_text)
         annotator = SingleTokenLookupAnnotator(lookup_values=["John", "Jane", "Lucas"], tag="first_name")
         expected_annotations = [
@@ -23,13 +23,13 @@ class TestSingleTokenLookupAnnotator:
             Annotation(text="Lucas", start_char=58, end_char=63, tag="first_name"),
         ]
 
-        with patch.object(doc, "get_tokens", return_value=long_tokens):
+        with patch.object(doc, "get_tokens", return_value=long_tokenlist):
 
             annotations = annotator.annotate(doc)
 
         assert set(annotations) == set(expected_annotations)
 
-    def test_single_token_with_matching_pipeline(self, long_text, long_tokens):
+    def test_single_token_with_matching_pipeline(self, long_text, long_tokenlist):
         doc = Document(long_text)
         annotator = SingleTokenLookupAnnotator(
             lookup_values=["John", "Jane", "Lucas"], matching_pipeline=[LowercaseString()], tag="first_name"
@@ -40,7 +40,7 @@ class TestSingleTokenLookupAnnotator:
             Annotation(text="Lucas", start_char=58, end_char=63, tag="first_name"),
         }
 
-        with patch.object(doc, "get_tokens", return_value=long_tokens):
+        with patch.object(doc, "get_tokens", return_value=long_tokenlist):
 
             annotations = set(annotator.annotate(doc))
 
@@ -48,7 +48,7 @@ class TestSingleTokenLookupAnnotator:
 
 
 class TestMultiTokenLookupAnnotator:
-    def test_multi_token(self, long_text, long_tokens):
+    def test_multi_token(self, long_text, long_tokenlist):
         doc = Document(long_text)
         annotator = MultiTokenLookupAnnotator(
             lookup_values=["my name", "my wife"], tokenizer=WordBoundaryTokenizer(), tag="prefix"
@@ -57,13 +57,13 @@ class TestMultiTokenLookupAnnotator:
             Annotation(text="my wife", start_char=39, end_char=46, tag="prefix"),
         ]
 
-        with patch.object(doc, "get_tokens", return_value=long_tokens):
+        with patch.object(doc, "get_tokens", return_value=long_tokenlist):
 
             annotations = annotator.annotate(doc)
 
         assert annotations == expected_annotations
 
-    def test_multi_token_with_matching_pipeline(self, long_text, long_tokens):
+    def test_multi_token_with_matching_pipeline(self, long_text, long_tokenlist):
         doc = Document(long_text)
 
         annotator = MultiTokenLookupAnnotator(
@@ -77,7 +77,7 @@ class TestMultiTokenLookupAnnotator:
             Annotation(text="my wife", start_char=39, end_char=46, tag="prefix"),
         ]
 
-        with patch.object(doc, "get_tokens", return_value=long_tokens):
+        with patch.object(doc, "get_tokens", return_value=long_tokenlist):
 
             annotations = annotator.annotate(doc)
 
@@ -156,7 +156,7 @@ class TestTokenPatternAnnotator:
             annotator.annotate(doc)
             mock_match.assert_not_called()
 
-    def test_basic_pattern(self, long_text, long_tokens, basic_pattern):
+    def test_basic_pattern(self, long_text, long_tokenlist, basic_pattern):
         annotator = TokenPatternAnnotator(pattern=basic_pattern)
         doc = Document(text=long_text)
 
@@ -168,7 +168,7 @@ class TestTokenPatternAnnotator:
             Annotation(text="Lucas", start_char=58, end_char=63, tag="capitalized"),
         ]
 
-        with patch.object(doc, "get_tokens", return_value=long_tokens):
+        with patch.object(doc, "get_tokens", return_value=long_tokenlist):
             annotations = annotator.annotate(doc)
 
         assert annotations == expected_annotations

@@ -165,7 +165,7 @@ class MultiTokenLookupAnnotator(Annotator):
             if i < min_i:
                 continue
 
-            longest_matching_prefix = self.trie.longest_matching_prefix(tokens_text, offset=i)
+            longest_matching_prefix = self.trie.longest_matching_prefix(tokens_text, start_i=i)
 
             if longest_matching_prefix is None:
                 continue

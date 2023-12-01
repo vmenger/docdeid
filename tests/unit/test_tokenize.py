@@ -68,6 +68,21 @@ class TestTokenList:
         for i, token in enumerate(short_tokens):
             assert token == token_list[i]
 
+    def test_create_tokenlist_link(self, short_tokens):
+        token_list = TokenList(short_tokens)
+
+        assert token_list[1].previous() is token_list[0]
+        assert token_list[2].previous() is token_list[1]
+        assert token_list[0].next() is token_list[1]
+        assert token_list[1].next() is token_list[2]
+
+    def test_create_tokenlist_non_linked(self, short_tokens):
+        token_list = TokenList(short_tokens, link_tokens=False)
+
+        for token in token_list:
+            assert token.previous() is None
+            assert token.next() is None
+
     def test_tokenlist_equal(self, short_tokens):
         token_list_1 = TokenList(short_tokens)
         token_list_2 = TokenList(short_tokens)
@@ -104,40 +119,29 @@ class TestTokenList:
 
 
 class TestBaseTokenizer:
-    def test_previous_token(self, short_tokens):
-        assert Tokenizer._previous_token(0, short_tokens) is None
-        assert Tokenizer._previous_token(1, short_tokens) is short_tokens[0]
-        assert Tokenizer._previous_token(2, short_tokens) is short_tokens[1]
-
-    def test_next_token(self, short_tokens):
-        assert Tokenizer._next_token(0, short_tokens) is short_tokens[1]
-        assert Tokenizer._next_token(1, short_tokens) is short_tokens[2]
-        assert Tokenizer._next_token(2, short_tokens) is None
 
     @patch("docdeid.tokenizer.Tokenizer.__abstractmethods__", set())
     def test_tokenize_link(self, short_text, short_tokens):
         tokenizer = Tokenizer(link_tokens=True)
 
         with patch.object(tokenizer, "_split_text", return_value=short_tokens):
-
             tokens = tokenizer.tokenize(short_text)
 
-            assert tokens[1].previous() is tokens[0]
-            assert tokens[2].previous() is tokens[1]
-            assert tokens[0].next() is tokens[1]
-            assert tokens[1].next() is tokens[2]
+        assert tokens[1].previous() is tokens[0]
+        assert tokens[2].previous() is tokens[1]
+        assert tokens[0].next() is tokens[1]
+        assert tokens[1].next() is tokens[2]
 
     @patch("docdeid.tokenizer.Tokenizer.__abstractmethods__", set())
     def test_tokenize_no_link(self, short_text, short_tokens):
         tokenizer = Tokenizer(link_tokens=False)
 
         with patch.object(tokenizer, "_split_text", return_value=short_tokens):
-
             tokens = tokenizer.tokenize(short_text)
 
-            for token in tokens:
-                assert token.previous() is None
-                assert token.next() is None
+        for token in tokens:
+            assert token.previous() is None
+            assert token.next() is None
 
 
 class TestSpaceSplitTokenizer:
