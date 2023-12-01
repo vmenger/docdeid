@@ -34,15 +34,15 @@ class TestSingleTokenLookupAnnotator:
         annotator = SingleTokenLookupAnnotator(
             lookup_values=["John", "Jane", "Lucas"], matching_pipeline=[LowercaseString()], tag="first_name"
         )
-        expected_annotations = [
+        expected_annotations = {
             Annotation(text="John", start_char=15, end_char=19, tag="first_name"),
             Annotation(text="jane", start_char=47, end_char=51, tag="first_name"),
             Annotation(text="Lucas", start_char=58, end_char=63, tag="first_name"),
-        ]
+        }
 
         with patch.object(doc, "get_tokens", return_value=long_tokens):
 
-            annotations = annotator.annotate(doc)
+            annotations = set(annotator.annotate(doc))
 
         assert annotations == expected_annotations
 
