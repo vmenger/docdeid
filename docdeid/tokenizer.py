@@ -129,22 +129,34 @@ class TokenList:
         self._token_index = {token: i for i, token in enumerate(tokens)}
 
         if link_tokens:
-            for i in range(len(tokens) - 1):
-                tokens[i].set_next_token(tokens[i + 1])
-                tokens[i + 1].set_previous_token(tokens[i])
+            self._link_tokens()
 
         self._words: dict[str, set[str]] = {}
         self._text_to_tokens: dict[str, defaultdict[str, list[Token]]] = {}
 
+    def _link_tokens(self) -> None:
+        """Links the tokens."""
+        for i in range(len(self._tokens) - 1):
+            self._tokens[i].set_next_token(self._tokens[i + 1])
+            self._tokens[i + 1].set_previous_token(self._tokens[i])
+
     def token_index(self, token: Token) -> int:
+        """
+        Find the token index in this list, i.e. its nominal position in the list.
+        Args:
+            token: The input token.
+
+        Returns: The index in this tokenlist.
+
+        """
         return self._token_index[token]
 
-    def _init_token_lookup(self, matching_pipeline: Optional[list[StringModifier]] = None):
+    def _init_token_lookup(self, matching_pipeline: Optional[list[StringModifier]] = None) -> None:
         """
         Initialize token lookup structures.
 
-        Returns:
-            A set of words (``string``), and a mapping of word (``string``) to one or more :class:`.Token`.
+        Args:
+            matching_pipeline: The matching pipeline to use.
         """
 
         matching_pipeline = matching_pipeline or []
@@ -167,6 +179,14 @@ class TokenList:
         self._text_to_tokens[pipe_key] = text_to_tokens
 
     def get_words(self, matching_pipeline: Optional[list[StringModifier]] = None) -> set[str]:
+        """
+        Get all words in this list of tokens. Evaluates lazily.
+
+        Args:
+            matching_pipeline: The matching pipeline to apply.
+
+        Returns: A set of strings, with all words in this list of tokens.
+        """
 
         matching_pipeline = matching_pipeline or []
         pipe_key = str(matching_pipeline)
@@ -179,6 +199,15 @@ class TokenList:
     def token_lookup(
         self, lookup_values: set[str], matching_pipeline: Optional[list[StringModifier]] = None
     ) -> set[Token]:
+        """
+        Lookup all tokens of which the text matches a certain set of lookup values. Evaluates lazily.
+
+        Args:
+            lookup_values: The set of lookup values to match the token text against.
+            matching_pipeline: The matching pipeline.
+
+        Returns: A set of ``Token``, of which the text matches one of the lookup values.
+        """
 
         matching_pipeline = matching_pipeline or []
         pipe_key = str(matching_pipeline)

@@ -69,6 +69,13 @@ class TestTokenList:
         for i, token in enumerate(short_tokens):
             assert token == token_list[i]
 
+    def test_index(self, short_tokens):
+
+        token_list = TokenList(short_tokens)
+
+        for i, token in enumerate(short_tokens):
+            assert token_list.token_index(token) == i
+
     def test_create_tokenlist_link(self, short_tokens):
         token_list = TokenList(short_tokens)
 
