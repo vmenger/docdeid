@@ -6,6 +6,8 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Iterator, Literal, Optional
 
+from docdeid.str import StringModifier
+
 
 @dataclass(frozen=True)
 class Token:
@@ -125,17 +127,19 @@ class TokenList:
     def __init__(self, tokens: list[Token], link_tokens: bool = True) -> None:
         self._tokens = tokens
         self._token_index = {token: i for i, token in enumerate(tokens)}
-        self._words: Optional[set[str]] = None
 
         if link_tokens:
             for i in range(len(tokens)-1):
                 tokens[i].set_next_token(tokens[i+1])
                 tokens[i+1].set_previous_token(tokens[i])
 
+        self._words: dict[str, set[str]] = {}
+        self._text_to_tokens: dict[str, defaultdict[str, list[Token]]] = {}
+
     def token_index(self, token: Token) -> int:
         return self._token_index[token]
 
-    def _init_token_lookup(self) -> tuple[set[str], defaultdict[str, list[Token]]]:
+    def _init_token_lookup(self, matching_pipeline: Optional[list[StringModifier]] = None):
         """
         Initialize token lookup structures.
 
@@ -143,35 +147,48 @@ class TokenList:
             A set of words (``string``), and a mapping of word (``string``) to one or more :class:`.Token`.
         """
 
+        matching_pipeline = matching_pipeline or []
+        pipe_key = str(matching_pipeline)
+
         words = set()
         text_to_tokens = defaultdict(list)
 
         for token in self._tokens:
-            words.add(token.text)
-            text_to_tokens[token.text].append(token)
 
-        return words, text_to_tokens
+            text = token.text
 
-    def token_lookup(self, lookup_values: set[str]) -> set[Token]:
-        """
-        Find the tokens in this set, which have matching text to any of the texts given as input.
+            for string_modifier in matching_pipeline:
+                text = string_modifier.process(text)
 
-        Args:
-            lookup_values: The string values to look for matching tokens.
+            words.add(text)
+            text_to_tokens[text].append(token)
 
-        Returns:
-            A set of :class:`.Token` matching the input.
-        """
+        self._words[pipe_key] = words
+        self._text_to_tokens[pipe_key] = text_to_tokens
 
-        # Lazy init
-        if (self._words is None) or (self._text_to_tokens is None):
-            self._words, self._text_to_tokens = self._init_token_lookup()
+    def get_words(self, matching_pipeline: Optional[list[StringModifier]] = None) -> set[str]:
+
+        matching_pipeline = matching_pipeline or []
+        pipe_key = str(matching_pipeline)
+
+        if pipe_key not in self._words:
+            self._init_token_lookup(matching_pipeline)
+
+        return self._words[pipe_key]
+
+    def token_lookup(self, lookup_values: set[str], matching_pipeline: Optional[list[StringModifier]] = None) -> set[Token]:
+
+        matching_pipeline = matching_pipeline or []
+        pipe_key = str(matching_pipeline)
+
+        if pipe_key not in self._text_to_tokens:
+            self._init_token_lookup(matching_pipeline)
 
         tokens = set()
-        texts = lookup_values.intersection(self._words)
+        words = self.get_words(matching_pipeline)
 
-        for text in texts:
-            tokens.update(self._text_to_tokens[text])
+        for word in words.intersection(lookup_values):
+            tokens.update(self._text_to_tokens[pipe_key][word])
 
         return tokens
 
