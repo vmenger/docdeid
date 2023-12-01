@@ -94,14 +94,14 @@ class TestTokenList:
 
         token_list = TokenList(short_tokens)
 
-        assert token_list.get_words()  == {'Hello', "I'm", 'Bob'}
+        assert token_list.get_words() == {"Hello", "I'm", "Bob"}
 
     def test_get_words_with_matching_pipeline(self, short_tokens):
 
         token_list = TokenList(short_tokens)
         matching_pipeline = [docdeid.str.LowercaseString()]
 
-        assert token_list.get_words(matching_pipeline) == {'hello', "i'm", 'bob'}
+        assert token_list.get_words(matching_pipeline) == {"hello", "i'm", "bob"}
 
     def test_token_lookup(self, long_tokens):
 
@@ -128,12 +128,14 @@ class TestTokenList:
         matching_pipeline = [docdeid.str.LowercaseString()]
 
         assert token_list.token_lookup(lookup_values=set(), matching_pipeline=matching_pipeline) == set()
-        assert token_list.token_lookup(lookup_values={"john", "lucas"}, matching_pipeline=matching_pipeline) == {long_tokens[8], long_tokens[24]}
+        assert token_list.token_lookup(lookup_values={"john", "lucas"}, matching_pipeline=matching_pipeline) == {
+            long_tokens[8],
+            long_tokens[24],
+        }
         assert token_list.token_lookup(lookup_values={"John", "Lucas"}, matching_pipeline=matching_pipeline) == set()
 
 
 class TestBaseTokenizer:
-
     @patch("docdeid.tokenizer.Tokenizer.__abstractmethods__", set())
     def test_tokenize_link(self, short_text, short_tokens):
         tokenizer = Tokenizer(link_tokens=True)

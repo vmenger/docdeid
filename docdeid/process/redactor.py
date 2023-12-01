@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 from collections import defaultdict
 
+from frozendict import frozendict
+
 from docdeid.annotation import Annotation, AnnotationSet
 from docdeid.document import Document
 from docdeid.process.doc import DocProcessor
 
-from frozendict import frozendict
 
 class Redactor(DocProcessor, ABC):
     """

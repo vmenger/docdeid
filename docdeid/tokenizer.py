@@ -129,9 +129,9 @@ class TokenList:
         self._token_index = {token: i for i, token in enumerate(tokens)}
 
         if link_tokens:
-            for i in range(len(tokens)-1):
-                tokens[i].set_next_token(tokens[i+1])
-                tokens[i+1].set_previous_token(tokens[i])
+            for i in range(len(tokens) - 1):
+                tokens[i].set_next_token(tokens[i + 1])
+                tokens[i + 1].set_previous_token(tokens[i])
 
         self._words: dict[str, set[str]] = {}
         self._text_to_tokens: dict[str, defaultdict[str, list[Token]]] = {}
@@ -176,7 +176,9 @@ class TokenList:
 
         return self._words[pipe_key]
 
-    def token_lookup(self, lookup_values: set[str], matching_pipeline: Optional[list[StringModifier]] = None) -> set[Token]:
+    def token_lookup(
+        self, lookup_values: set[str], matching_pipeline: Optional[list[StringModifier]] = None
+    ) -> set[Token]:
 
         matching_pipeline = matching_pipeline or []
         pipe_key = str(matching_pipeline)

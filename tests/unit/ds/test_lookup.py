@@ -244,6 +244,6 @@ class TestLookupTrie:
         trie.add_item(item=["a", "b"])
         trie.add_item(item=["cat", "dog"])
 
-        assert trie.longest_matching_prefix(item=["a", "b"], start_i=0) == ['a', 'b']
+        assert trie.longest_matching_prefix(item=["a", "b"], start_i=0) == ["a", "b"]
         assert trie.longest_matching_prefix(item=["a", "b"], start_i=1) == None
         assert trie.longest_matching_prefix(item=["horse", "cat", "dog"], start_i=1) == ["cat", "dog"]

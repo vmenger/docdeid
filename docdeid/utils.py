@@ -1,5 +1,7 @@
-from docdeid.document import Document
 from frozendict import frozendict
+
+from docdeid.document import Document
+
 
 def annotate_intext(doc: Document) -> str:
     """

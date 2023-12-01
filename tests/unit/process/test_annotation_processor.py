@@ -1,9 +1,10 @@
 import numpy as np
 import pytest
+from frozendict import frozendict
 
 from docdeid.annotation import Annotation, AnnotationSet
 from docdeid.process.annotation_set import MergeAdjacentAnnotations, OverlapResolver
-from frozendict import frozendict
+
 
 class TestOverlapResolver:
     def test_zero_runs(self):
@@ -79,7 +80,9 @@ class TestOverlapResolver:
                 Annotation(text="Billy ", start_char=11, end_char=17, tag="fist_name"),
             ]
         )
-        proc = OverlapResolver(sort_by=("start_char",), sort_by_callbacks=frozendict(start_char=lambda x: -x))  # right-left
+        proc = OverlapResolver(
+            sort_by=("start_char",), sort_by_callbacks=frozendict(start_char=lambda x: -x)
+        )  # right-left
 
         processed_annotations = proc.process_annotations(annotations, text)
 

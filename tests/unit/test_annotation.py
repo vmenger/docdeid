@@ -1,9 +1,9 @@
 import pytest
+from frozendict import frozendict
 
 from docdeid.annotation import Annotation, AnnotationSet
 from docdeid.tokenizer import Token
 
-from frozendict import frozendict
 
 class TestAnnotation:
     def test_create_annotation(self):

@@ -102,7 +102,9 @@ class SingleTokenLookupAnnotator(Annotator):
 
         tokens = doc.get_tokens(tokenizer_name=self._tokenizer_name)
 
-        annotate_tokens = tokens.token_lookup(self.lookup_set.items(), matching_pipeline=self.lookup_set.matching_pipeline)
+        annotate_tokens = tokens.token_lookup(
+            self.lookup_set.items(), matching_pipeline=self.lookup_set.matching_pipeline
+        )
 
         return self._tokens_to_annotations(annotate_tokens)
 
@@ -154,7 +156,10 @@ class MultiTokenLookupAnnotator(Annotator):
     def annotate(self, doc: Document) -> list[Annotation]:
 
         tokens = doc.get_tokens()
-        start_positions = sorted(tokens.token_lookup(self.start_tokens, matching_pipeline=self.matching_pipeline), key=lambda token: token.start_char)
+        start_positions = sorted(
+            tokens.token_lookup(self.start_tokens, matching_pipeline=self.matching_pipeline),
+            key=lambda token: token.start_char,
+        )
         start_positions = [tokens.token_index(token) for token in start_positions]
         tokens_text = [token.text for token in tokens]
         annotations = []
@@ -203,7 +208,14 @@ class RegexpAnnotator(Annotator):
             the entire match is used.
     """
 
-    def __init__(self, regexp_pattern: Union[re.Pattern, str], *args, capturing_group: int = 0, pre_tokens: Optional[list[str]] = None, **kwargs) -> None:
+    def __init__(
+        self,
+        regexp_pattern: Union[re.Pattern, str],
+        *args,
+        capturing_group: int = 0,
+        pre_tokens: Optional[list[str]] = None,
+        **kwargs,
+    ) -> None:
 
         if isinstance(regexp_pattern, str):
             regexp_pattern = re.compile(regexp_pattern)

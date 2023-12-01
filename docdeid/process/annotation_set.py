@@ -1,11 +1,10 @@
-from frozendict import frozendict
-
 import re
 from abc import ABC, abstractmethod
 from typing import Callable, Optional
 
 import numpy as np
 import numpy.typing as npt
+from frozendict import frozendict
 
 from docdeid.annotation import Annotation, AnnotationSet
 from docdeid.document import Document

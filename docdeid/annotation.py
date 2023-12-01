@@ -1,8 +1,9 @@
-from frozendict import frozendict
 import functools
 import inspect
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
+
+from frozendict import frozendict
 
 from docdeid.tokenizer import Token
 

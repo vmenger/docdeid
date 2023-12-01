@@ -307,9 +307,15 @@ class LookupTrie(LookupStructure):
             if current_node.is_terminal:
                 longest_match = i
 
-            if start_i+i >= len(item) or (self._apply_matching_pipeline(item[start_i+i]) not in current_node.children):
+            if start_i + i >= len(item) or (
+                self._apply_matching_pipeline(item[start_i + i]) not in current_node.children
+            ):
                 break
 
-            current_node = current_node.children[self._apply_matching_pipeline(item[start_i+i])]
+            current_node = current_node.children[self._apply_matching_pipeline(item[start_i + i])]
 
-        return [self._apply_matching_pipeline(item) for item in item[start_i:start_i+longest_match]] if longest_match else None
+        return (
+            [self._apply_matching_pipeline(item) for item in item[start_i : start_i + longest_match]]
+            if longest_match
+            else None
+        )
