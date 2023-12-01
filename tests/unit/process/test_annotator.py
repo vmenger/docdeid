@@ -78,7 +78,41 @@ class TestMultiTokenLookupAnnotator:
         ]
 
         with patch.object(doc, "get_tokens", return_value=long_tokenlist):
+            annotations = annotator.annotate(doc)
 
+        assert annotations == expected_annotations
+
+    def test_multi_token_lookup_with_overlap(self, long_text, long_tokenlist):
+
+        doc = Document(long_text)
+
+        annotator = MultiTokenLookupAnnotator(
+            lookup_values=["dr. John", "John Smith"], tokenizer=WordBoundaryTokenizer(), tag="prefix", overlapping=True
+        )
+
+        expected_annotations = [
+            Annotation(text="dr. John", start_char=11, end_char=19, tag="prefix"),
+            Annotation(text="John Smith", start_char=15, end_char=25, tag="prefix"),
+        ]
+
+        with patch.object(doc, "get_tokens", return_value=long_tokenlist):
+            annotations = annotator.annotate(doc)
+
+        assert annotations == expected_annotations
+
+    def test_multi_token_lookup_no_overlap(self, long_text, long_tokenlist):
+
+        doc = Document(long_text)
+
+        annotator = MultiTokenLookupAnnotator(
+            lookup_values=["dr. John", "John Smith"], tokenizer=WordBoundaryTokenizer(), tag="prefix", overlapping=False
+        )
+
+        expected_annotations = [
+            Annotation(text="dr. John", start_char=11, end_char=19, tag="prefix"),
+        ]
+
+        with patch.object(doc, "get_tokens", return_value=long_tokenlist):
             annotations = annotator.annotate(doc)
 
         assert annotations == expected_annotations
