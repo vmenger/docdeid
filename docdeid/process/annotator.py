@@ -2,6 +2,7 @@ import re
 from abc import ABC, abstractmethod
 from typing import Iterable, Optional, Union
 
+import docdeid.str
 from docdeid.annotation import Annotation
 from docdeid.document import Document
 from docdeid.ds.lookup import LookupSet, LookupTrie
@@ -131,20 +132,40 @@ class MultiTokenLookupAnnotator(Annotator):
 
         self.overlapping = overlapping
         self.trie = LookupTrie(matching_pipeline=matching_pipeline)
+        self.matching_pipeline = matching_pipeline or []
+
+        self.start_tokens = set()
 
         for val in lookup_values:
-            self.trie.add_item([token.text for token in tokenizer.tokenize(val)])
+            texts = [token.text for token in tokenizer.tokenize(val)]
+
+            if len(texts) > 0:
+                self.trie.add_item(texts)
+
+                start_token = texts[0]
+
+                for string_modifier in self.matching_pipeline:
+                    start_token = string_modifier.process(start_token)
+
+                self.start_tokens.add(start_token)
 
         super().__init__(*args, **kwargs)
 
     def annotate(self, doc: Document) -> list[Annotation]:
+
         tokens = doc.get_tokens()
+        start_positions = sorted(tokens.token_lookup(self.start_tokens, matching_pipeline=self.matching_pipeline), key=lambda token: token.start_char)
+        start_positions = [tokens.token_index(token) for token in start_positions]
         tokens_text = [token.text for token in tokens]
         annotations = []
+        min_i = 0
 
-        for i in range(len(tokens_text)):
+        for i in start_positions:
 
-            longest_matching_prefix = self.trie.longest_matching_prefix(tokens_text[i:])
+            if i < min_i:
+                continue
+
+            longest_matching_prefix = self.trie.longest_matching_prefix(tokens_text, offset=i)
 
             if longest_matching_prefix is None:
                 continue
@@ -165,7 +186,7 @@ class MultiTokenLookupAnnotator(Annotator):
             )
 
             if not self.overlapping:
-                i += len(longest_matching_prefix)  # skip ahead
+                min_i = i + len(longest_matching_prefix)  # skip ahead
 
         return annotations
 
