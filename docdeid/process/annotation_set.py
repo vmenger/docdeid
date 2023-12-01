@@ -1,3 +1,5 @@
+from frozendict import frozendict
+
 import re
 from abc import ABC, abstractmethod
 from typing import Callable, Optional
@@ -36,8 +38,8 @@ class AnnotationProcessor(DocProcessor, ABC):
 class OverlapResolver(AnnotationProcessor):
     """
     Resolves overlap in an :class:`.AnnotationSet`, if any. Use the ``sort_by`` and ``sort_by_callbacks`` arguments to
-    specify how overlap should be resolved. For instance: ``sort_by=['start_char']`` will solve overlap from left to
-    right, while ``sort_by=['length']`` will sort from short to long.
+    specify how overlap should be resolved. For instance: ``sort_by=('start_char',)`` will solve overlap from left to
+    right, while ``sort_by=('length',)`` will sort from short to long.
 
     Args:
         sort_by: A list of :class:`.Annotation` attributes to use for sorting.
@@ -45,7 +47,7 @@ class OverlapResolver(AnnotationProcessor):
             (e.g. reverse with ``lambda x: -x``).
     """
 
-    def __init__(self, sort_by: list[str], sort_by_callbacks: Optional[dict[str, Callable]] = None) -> None:
+    def __init__(self, sort_by: tuple, sort_by_callbacks: Optional[frozendict[str, Callable]] = None) -> None:
         self._sort_by = sort_by
         self._sort_by_callbacks = sort_by_callbacks
 
@@ -196,7 +198,7 @@ class MergeAdjacentAnnotations(AnnotationProcessor):
 
         processed_annotations = AnnotationSet()
 
-        annotations_sorted = annotations.sorted(by=["start_char"])
+        annotations_sorted = annotations.sorted(by=("start_char",))
 
         for index in range(len(annotations_sorted) - 1):
 

@@ -1,5 +1,5 @@
 from docdeid.document import Document
-
+from frozendict import frozendict
 
 def annotate_intext(doc: Document) -> str:
     """
@@ -13,8 +13,8 @@ def annotate_intext(doc: Document) -> str:
         A string with each annotated span replaced with ``<TAG>text</TAG>``.
     """
     annotations = doc.annotations.sorted(
-        by=["end_char"],
-        callbacks={"end_char": lambda x: -x},
+        by=("end_char",),
+        callbacks=frozendict(end_char=lambda x: -x),
     )
 
     text = doc.text

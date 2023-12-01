@@ -3,6 +3,7 @@ import pytest
 from docdeid.annotation import Annotation, AnnotationSet
 from docdeid.tokenizer import Token
 
+from frozendict import frozendict
 
 class TestAnnotation:
     def test_create_annotation(self):
@@ -51,7 +52,7 @@ class TestAnnotation:
     def test_get_sort_key(self):
         annotation = Annotation(text="cat", start_char=0, end_char=3, tag="animal")
 
-        key = annotation.get_sort_key(by=["text", "tag"])
+        key = annotation.get_sort_key(by=("text", "tag"))
 
         assert key[0] == "cat"
         assert key[1] == "animal"
@@ -59,28 +60,28 @@ class TestAnnotation:
     def test_get_sort_key_reversed(self):
         annotation = Annotation(text="cat", start_char=0, end_char=3, tag="animal")
 
-        key = annotation.get_sort_key(by=["end_char"], callbacks={"end_char": lambda x: -x})
+        key = annotation.get_sort_key(by=("end_char",), callbacks=frozendict(end_char=lambda x: -x))
 
         assert key[0] == -3
 
     def test_get_sort_key_deterministic(self):
         annotation = Annotation(text="cat", start_char=0, end_char=3, tag="animal")
 
-        key = annotation.get_sort_key(by=["start_char"], deterministic=True)
+        key = annotation.get_sort_key(by=("start_char",), deterministic=True)
 
         assert len(key) > 1
 
     def test_get_sort_key_non_deterministic(self):
         annotation = Annotation(text="cat", start_char=0, end_char=3, tag="animal")
 
-        key = annotation.get_sort_key(by=["start_char"], deterministic=False)
+        key = annotation.get_sort_key(by=("start_char",), deterministic=False)
 
         assert len(key) == 1
 
     def test_get_sort_key_unknown_attr(self):
         annotation = Annotation(text="cat", start_char=0, end_char=3, tag="animal")
 
-        key = annotation.get_sort_key(by=["this_attr_does_not_exist"], deterministic=False)
+        key = annotation.get_sort_key(by=("this_attr_does_not_exist",), deterministic=False)
 
         assert len(key) > 0
 
@@ -122,13 +123,13 @@ class TestAnnotationSet:
     def test_get_annotations_sorted(self, annotations):
         annotation_set = AnnotationSet(annotations)
 
-        sorted_annotations = annotation_set.sorted(by=["tag", "end_char"], callbacks={"end_char": lambda x: -x})
+        sorted_annotations = annotation_set.sorted(by=("tag", "end_char"), callbacks=frozendict(end_char=lambda x: -x))
 
         assert sorted_annotations == [annotations[2], annotations[1], annotations[0]]
 
     def test_get_annotations_sorted_priority(self, annotations):
         annotation_set = AnnotationSet(annotations)
 
-        sorted_annotations = annotation_set.sorted(by=["priority", "length"], callbacks={"length": lambda x: -x})
+        sorted_annotations = annotation_set.sorted(by=("priority", "length"), callbacks=frozendict(length=lambda x: -x))
 
         assert sorted_annotations == [annotations[2], annotations[0], annotations[1]]

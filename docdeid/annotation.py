@@ -1,3 +1,5 @@
+from frozendict import frozendict
+import functools
 import inspect
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
@@ -50,6 +52,7 @@ class Annotation:
         object.__setattr__(self, "length", len(self.text))
 
     @classmethod
+    @functools.cache
     def optional_fields(cls) -> set[str]:
         """
         List the optional fields of the class, by inspecting it.
@@ -66,10 +69,11 @@ class Annotation:
 
         return params
 
+    @functools.cache
     def get_sort_key(
         self,
-        by: list[str],
-        callbacks: Optional[dict[str, Callable]] = None,
+        by: tuple,
+        callbacks: Optional[frozendict[str, Callable]] = None,
         deterministic: bool = True,
     ) -> tuple:
         """
@@ -117,8 +121,8 @@ class AnnotationSet(set[Annotation]):
 
     def sorted(
         self,
-        by: list[str],
-        callbacks: Optional[dict[str, Callable]] = None,
+        by: tuple,
+        callbacks: Optional[frozendict[str, Callable]] = None,
         deterministic: bool = True,
     ) -> list[Annotation]:
         """
@@ -148,7 +152,7 @@ class AnnotationSet(set[Annotation]):
             ``True`` if overlapping annotations are found, ``False`` otherwise.
         """
 
-        annotations = self.sorted(by=["start_char"])
+        annotations = self.sorted(by=("start_char",))
 
         for annotation, next_annotation in zip(annotations, annotations[1:]):
 

@@ -5,6 +5,7 @@ from docdeid.annotation import Annotation, AnnotationSet
 from docdeid.document import Document
 from docdeid.process.doc import DocProcessor
 
+from frozendict import frozendict
 
 class Redactor(DocProcessor, ABC):
     """
@@ -111,7 +112,7 @@ class SimpleRedactor(Redactor):
             The text, with each annotation replaced by its defined replacement.
         """
 
-        sorted_annotations = annotations.sorted(by=["end_char"], callbacks={"end_char": lambda x: -x})
+        sorted_annotations = annotations.sorted(by=("end_char",), callbacks=frozendict(end_char=lambda x: -x))
 
         for annotation in sorted_annotations:
 
@@ -129,7 +130,7 @@ class SimpleRedactor(Redactor):
 
             annotation_text_to_counter_group: dict[str, int] = {}
 
-            annotation_group = sorted(annotation_group, key=lambda a: a.get_sort_key(by=["end_char"]))
+            annotation_group = sorted(annotation_group, key=lambda a: a.get_sort_key(by=("end_char",)))
 
             for annotation in annotation_group:
 
