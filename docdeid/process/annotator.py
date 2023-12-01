@@ -185,19 +185,34 @@ class RegexpAnnotator(Annotator):
             the entire match is used.
     """
 
-    def __init__(self, regexp_pattern: Union[re.Pattern, str], *args, capturing_group: int = 0, **kwargs) -> None:
+    def __init__(self, regexp_pattern: Union[re.Pattern, str], *args, capturing_group: int = 0, pre_tokens: Optional[list[str]] = None, **kwargs) -> None:
 
         if isinstance(regexp_pattern, str):
             regexp_pattern = re.compile(regexp_pattern)
 
         self.regexp_pattern = regexp_pattern
         self.capturing_group = capturing_group
+
+        self.pre_tokens = pre_tokens
+
+        if pre_tokens is not None:
+            self.pre_tokens = set(pre_tokens)
+            self.matching_pipeline = [docdeid.str.LowercaseString()]
+
         super().__init__(*args, **kwargs)
 
     def _validate_match(self, match: re.Match, doc: Document) -> bool:
         return True
 
     def annotate(self, doc: Document) -> list[Annotation]:
+
+        if self.pre_tokens is not None:
+            try:
+                if doc.get_tokens().get_words(self.matching_pipeline).isdisjoint(self.pre_tokens):
+                    return []
+            except RuntimeError:
+                pass
+
         annotations = []
 
         for match in self.regexp_pattern.finditer(doc.text):
