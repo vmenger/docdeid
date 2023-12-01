@@ -122,11 +122,15 @@ class TokenList:
         tokens: The input tokens (must be final).
     """
 
-    def __init__(self, tokens: list[Token]) -> None:
+    def __init__(self, tokens: list[Token], link_tokens: bool = True) -> None:
         self._tokens = tokens
         self._token_index = {token: i for i, token in enumerate(tokens)}
         self._words: Optional[set[str]] = None
-        self._text_to_tokens: Optional[defaultdict[str, list[Token]]] = None
+
+        if link_tokens:
+            for i in range(len(tokens)-1):
+                tokens[i].set_next_token(tokens[i+1])
+                tokens[i+1].set_previous_token(tokens[i])
 
     def token_index(self, token: Token) -> int:
         return self._token_index[token]
@@ -236,42 +240,6 @@ class Tokenizer(ABC):
     def __init__(self, link_tokens: bool = True) -> None:
         self.link_tokens = link_tokens
 
-    @staticmethod
-    def _previous_token(position: int, tokens: list[Token]) -> Optional[Token]:
-        """
-        Determines the logic for getting the previous token. By default, just the literal neighbour.
-
-        Args:
-            position: The position to determine the neighbour for.
-            tokens: The list of tokens.
-
-        Returns:
-            The previous token, if any, or ``None`` otherwise.
-        """
-
-        if position == 0:
-            return None
-
-        return tokens[position - 1]
-
-    @staticmethod
-    def _next_token(position: int, tokens: list[Token]) -> Optional[Token]:
-        """
-        Determines the logic for getting the next token. By default, just the literal neighbour.
-
-        Args:
-            position: The position to determine the neighbour for.
-            tokens: The list of tokens.
-
-        Returns:
-            The next token, if any, or ``None`` otherwise.
-        """
-
-        if position == len(tokens) - 1:
-            return None
-
-        return tokens[position + 1]
-
     @abstractmethod
     def _split_text(self, text: str) -> list[Token]:
         """
@@ -282,22 +250,6 @@ class Tokenizer(ABC):
 
         Returns: A list of tokens, as determined by the tokenizer logic.
         """
-
-    def _link_tokens(self, tokens: list[Token]) -> None:
-        """
-        Link the tokens that are obtained by splitting the text, based on the internal logic implemented in
-        :meth:`.Tokenizer._previous_token` and :meth:`.Tokenizer._next_token`.
-
-        Args:
-            tokens: The list of input tokens.
-        """
-
-        for i, token in enumerate(tokens):
-            previous_token = self._previous_token(position=i, tokens=tokens)
-            token.set_previous_token(previous_token)
-
-            next_token = self._next_token(position=i, tokens=tokens)
-            token.set_next_token(next_token)
 
     def tokenize(self, text: str) -> TokenList:
         """
@@ -312,10 +264,7 @@ class Tokenizer(ABC):
 
         tokens = self._split_text(text)
 
-        if self.link_tokens:
-            self._link_tokens(tokens)
-
-        return TokenList(tokens)
+        return TokenList(tokens, link_tokens=self.link_tokens)
 
 
 class SpaceSplitTokenizer(Tokenizer):
