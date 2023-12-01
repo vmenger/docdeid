@@ -133,3 +133,10 @@ class TestAnnotationSet:
         sorted_annotations = annotation_set.sorted(by=("priority", "length"), callbacks=frozendict(length=lambda x: -x))
 
         assert sorted_annotations == [annotations[2], annotations[0], annotations[1]]
+
+    def test_get_annotations_sorted_no_frozendict(self, annotations):
+
+        annotation_set = AnnotationSet(annotations)
+
+        with pytest.raises(RuntimeError):
+            _ = annotation_set.sorted(by=("priority", "length"), callbacks=dict(length=lambda x: -x))

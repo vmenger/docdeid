@@ -140,6 +140,11 @@ class AnnotationSet(set[Annotation]):
             A list with the annotations, sorted as specified.
         """
 
+        if callbacks is not None and not isinstance(callbacks, frozendict):
+            raise RuntimeError(
+                "Please provide the callbacks as a frozen dict, e.g. " "frozendict.frozendict(end_char=lambda x: -x)"
+            )
+
         return sorted(
             list(self),
             key=lambda x: x.get_sort_key(by=by, callbacks=callbacks, deterministic=deterministic),
