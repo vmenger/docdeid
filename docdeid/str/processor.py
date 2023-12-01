@@ -19,7 +19,7 @@ class StringProcessor(ABC):
             The processed items.
         """
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__class__.__name__ + "(" + ", ".join(f"{k}={v}" for k, v in self.__dict__.items()) + ")"
 
 

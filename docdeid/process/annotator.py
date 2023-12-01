@@ -136,13 +136,13 @@ class MultiTokenLookupAnnotator(Annotator):
         self._matching_pipeline = matching_pipeline or []
 
         self._trie = LookupTrie(matching_pipeline=matching_pipeline)
-        self._start_texts = set()
+        self._start_texts: set[str] = set()
 
         self._init_lookup_structures(lookup_values, tokenizer)
 
         super().__init__(*args, **kwargs)
 
-    def _init_lookup_structures(self, lookup_values: Iterable[str], tokenizer: Tokenizer):
+    def _init_lookup_structures(self, lookup_values: Iterable[str], tokenizer: Tokenizer) -> None:
 
         for val in lookup_values:
 
@@ -232,10 +232,11 @@ class RegexpAnnotator(Annotator):
         self.regexp_pattern = regexp_pattern
         self.capturing_group = capturing_group
 
-        self.pre_tokens = pre_match_tokens
+        self.pre_match_tokens: Optional[set[str]] = None
+        self.matching_pipeline: Optional[list[StringModifier]] = None
 
         if pre_match_tokens is not None:
-            self.pre_tokens = set(pre_match_tokens)
+            self.pre_match_tokens = set(pre_match_tokens)
             self.matching_pipeline = [docdeid.str.LowercaseString()]
 
         super().__init__(*args, **kwargs)
@@ -245,9 +246,9 @@ class RegexpAnnotator(Annotator):
 
     def annotate(self, doc: Document) -> list[Annotation]:
 
-        if self.pre_tokens is not None:
+        if self.pre_match_tokens is not None:
             try:
-                if doc.get_tokens().get_words(self.matching_pipeline).isdisjoint(self.pre_tokens):
+                if doc.get_tokens().get_words(self.matching_pipeline).isdisjoint(self.pre_match_tokens):
                     return []
             except RuntimeError:
                 pass
