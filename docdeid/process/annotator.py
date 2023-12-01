@@ -136,7 +136,7 @@ class MultiTokenLookupAnnotator(Annotator):
         self._matching_pipeline = matching_pipeline or []
 
         self._trie = LookupTrie(matching_pipeline=matching_pipeline)
-        self._start_texts: set[str] = set()
+        self._start_words: set[str] = set()
 
         self._init_lookup_structures(lookup_values, tokenizer)
 
@@ -156,14 +156,14 @@ class MultiTokenLookupAnnotator(Annotator):
                 for string_modifier in self._matching_pipeline:
                     start_token = string_modifier.process(start_token)
 
-                self._start_texts.add(start_token)
+                self._start_words.add(start_token)
 
     def annotate(self, doc: Document) -> list[Annotation]:
 
         tokens = doc.get_tokens()
 
         start_tokens = sorted(
-            tokens.token_lookup(self._start_texts, matching_pipeline=self._matching_pipeline),
+            tokens.token_lookup(self._start_words, matching_pipeline=self._matching_pipeline),
             key=lambda token: token.start_char,
         )
 
