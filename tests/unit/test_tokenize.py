@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+import docdeid.str
 from docdeid.tokenizer import (
     SpaceSplitTokenizer,
     Token,
@@ -89,17 +90,21 @@ class TestTokenList:
 
         assert token_list_1 == token_list_2
 
-    def test_init_token_lookup(self, short_tokens):
-        token_list = TokenList(short_tokens)
-        words, text_to_tokens = token_list._init_token_lookup()
+    def test_get_words(self, short_tokens):
 
-        assert words == {"Hello", "I'm", "Bob"}
-        assert text_to_tokens["Hello"] == [short_tokens[0]]
-        assert text_to_tokens["I'm"] == [short_tokens[1]]
-        assert text_to_tokens["Bob"] == [short_tokens[2]]
-        assert text_to_tokens["something_else"] == []
+        token_list = TokenList(short_tokens)
+
+        assert token_list.get_words()  == {'Hello', "I'm", 'Bob'}
+
+    def test_get_words_with_matching_pipeline(self, short_tokens):
+
+        token_list = TokenList(short_tokens)
+        matching_pipeline = [docdeid.str.LowercaseString()]
+
+        assert token_list.get_words(matching_pipeline) == {'hello', "i'm", 'bob'}
 
     def test_token_lookup(self, long_tokens):
+
         token_list = TokenList(long_tokens)
 
         assert token_list.token_lookup(lookup_values=set()) == set()
@@ -116,6 +121,15 @@ class TestTokenList:
             long_tokens[19],
             long_tokens[21],
         }
+
+    def test_token_lookup_with_matching_pipeline(self, long_tokens):
+
+        token_list = TokenList(long_tokens)
+        matching_pipeline = [docdeid.str.LowercaseString()]
+
+        assert token_list.token_lookup(lookup_values=set(), matching_pipeline=matching_pipeline) == set()
+        assert token_list.token_lookup(lookup_values={"john", "lucas"}, matching_pipeline=matching_pipeline) == {long_tokens[8], long_tokens[24]}
+        assert token_list.token_lookup(lookup_values={"John", "Lucas"}, matching_pipeline=matching_pipeline) == set()
 
 
 class TestBaseTokenizer:
