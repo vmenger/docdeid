@@ -286,13 +286,14 @@ class LookupTrie(LookupStructure):
 
         return (head in self.children) and tail in self.children[head]
 
-    def longest_matching_prefix(self, item: list[str], offset: int = 0) -> Union[list[str], None]:
+    def longest_matching_prefix(self, item: list[str], start_i: int = 0) -> Union[list[str], None]:
         """
         Finds the longest matching prefix of a list of strings. This is used to find the longest matching pattern at a
         current position of a text. Respects the matching pipeline.
 
         Args:
             item: The input sequence of strings, of which to find the longest prefix that matches an item in this Trie.
+            start_i: The index of item at which to start the matching. This is useful to avoid making copies of the items.
 
         Returns:
             The longest matching prefix, if any, or ``None`` if no matching prefix is found.
@@ -306,9 +307,9 @@ class LookupTrie(LookupStructure):
             if current_node.is_terminal:
                 longest_match = i
 
-            if offset+i >= len(item) or (self._apply_matching_pipeline(item[offset+i]) not in current_node.children):
+            if start_i+i >= len(item) or (self._apply_matching_pipeline(item[start_i+i]) not in current_node.children):
                 break
 
-            current_node = current_node.children[self._apply_matching_pipeline(item[offset+i])]
+            current_node = current_node.children[self._apply_matching_pipeline(item[start_i+i])]
 
-        return [self._apply_matching_pipeline(item) for item in item[offset:offset+longest_match]] if longest_match else None
+        return [self._apply_matching_pipeline(item) for item in item[start_i:start_i+longest_match]] if longest_match else None
