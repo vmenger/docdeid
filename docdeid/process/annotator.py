@@ -74,7 +74,7 @@ class SingleTokenLookupAnnotator(Annotator):
         self._tokenizer_name = tokenizer_name
         super().__init__(*args, **kwargs)
 
-    def _tokens_to_annotations(self, tokens: list[Token]) -> list[Annotation]:
+    def _tokens_to_annotations(self, tokens: Iterable[Token]) -> list[Annotation]:
         """
         Process the matched tokens to annotations.
 
@@ -98,13 +98,10 @@ class SingleTokenLookupAnnotator(Annotator):
         ]
 
     def annotate(self, doc: Document) -> list[Annotation]:
-        annotate_tokens: list[Token]
+
         tokens = doc.get_tokens(tokenizer_name=self._tokenizer_name)
 
-        if self.lookup_set.has_matching_pipeline():
-            annotate_tokens = [token for token in tokens if token.text in self.lookup_set]
-        else:
-            annotate_tokens = list(tokens.token_lookup(self.lookup_set.items()))
+        annotate_tokens = tokens.token_lookup(self.lookup_set.items(), matching_pipeline=self.lookup_set.matching_pipeline)
 
         return self._tokens_to_annotations(annotate_tokens)
 
