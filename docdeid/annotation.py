@@ -7,7 +7,7 @@ from docdeid.tokenizer import Token
 
 UNKNOWN_ATTR_DEFAULT: Any = 0
 
-_OPTIONAL_FIELDS = {'start_token', 'end_token', '_key_cache'}
+_OPTIONAL_FIELDS = {"start_token", "end_token", "_key_cache"}
 
 
 @dataclass(frozen=True)
@@ -54,14 +54,14 @@ class Annotation:
 
         object.__setattr__(self, "length", len(self.text))
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict:
         return {
-            'text': self.text,
-            'start_char': self.start_char,
-            'end_char': self.end_char,
-            'tag': self.tag,
-            'priority': self.priority,
-            'length': self.length
+            "text": self.text,
+            "start_char": self.start_char,
+            "end_char": self.end_char,
+            "tag": self.tag,
+            "priority": self.priority,
+            "length": self.length,
         }
 
     def get_sort_key(
