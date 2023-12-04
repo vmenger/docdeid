@@ -1,5 +1,3 @@
-import functools
-import inspect
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
@@ -8,6 +6,8 @@ from frozendict import frozendict
 from docdeid.tokenizer import Token
 
 UNKNOWN_ATTR_DEFAULT: Any = 0
+
+_OPTIONAL_FIELDS = {'start_token', 'end_token', '_key_cache'}
 
 
 @dataclass(frozen=True)
@@ -46,31 +46,24 @@ class Annotation:
     length: int = field(init=False)
     """The number of characters of the annotation text."""
 
+    _key_cache: dict = field(default_factory=dict, repr=False, compare=False)
+
     def __post_init__(self) -> None:
         if len(self.text) != (self.end_char - self.start_char):
             raise ValueError("The span does not match the length of the text.")
 
         object.__setattr__(self, "length", len(self.text))
 
-    @classmethod
-    @functools.cache
-    def optional_fields(cls) -> set[str]:
-        """
-        List the optional fields of the class, by inspecting it.
+    def __getstate__(self):
+        return {
+            'text': self.text,
+            'start_char': self.start_char,
+            'end_char': self.end_char,
+            'tag': self.tag,
+            'priority': self.priority,
+            'length': self.length
+        }
 
-        Returns: A set of strings denoting the optional fields.
-        """
-
-        sign = inspect.signature(cls)
-        params = set()
-
-        for name in sign.parameters:
-            if str(getattr(sign.parameters[name], "_annotation")).startswith("typing.Optional"):
-                params.add(str(name))
-
-        return params
-
-    @functools.cache
     def get_sort_key(
         self,
         by: tuple,
@@ -92,7 +85,12 @@ class Annotation:
             of (e.g.) ``list``.
         """
 
-        key = []
+        cache_key = hash((self, by, callbacks, deterministic))
+
+        if cache_key in self._key_cache:
+            return self._key_cache[cache_key]
+
+        sort_key = []
 
         for attr in by:
 
@@ -101,16 +99,20 @@ class Annotation:
             if callbacks is not None and (attr in callbacks):
                 val = callbacks[attr](val)
 
-            key.append(val)
+            sort_key.append(val)
 
         if deterministic:
 
-            extra_attrs = sorted(set(self.__dict__.keys()) - set(by) - self.optional_fields())
+            extra_attrs = sorted(set(self.__dict__.keys()) - set(by) - _OPTIONAL_FIELDS)
 
             for attr in extra_attrs:
-                key.append(getattr(self, attr, UNKNOWN_ATTR_DEFAULT))
+                sort_key.append(getattr(self, attr, UNKNOWN_ATTR_DEFAULT))
 
-        return tuple(key)
+        ret = tuple(sort_key)
+
+        self._key_cache[cache_key] = ret
+
+        return ret
 
 
 class AnnotationSet(set[Annotation]):
