@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added 
 * some internal speedups for `SingleTokenLooupAnnotator`, `MultiTokenLookupAnnotator` and `LookupTrie`
 * the `pre_match_tokens` attribute for `RegexpAnnotator`
+* the option to provide a `LookupTrie` to a `MultiTokenAnnotator` directly 
 
 ### Changed
 * sorting `Annotation` and `AnnotationSet` requires key to be provided as a `tuple`, and callbacks as a `frozendict`. 

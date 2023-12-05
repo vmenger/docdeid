@@ -1,6 +1,7 @@
 import re
 from unittest.mock import patch
 
+import docdeid.ds
 from docdeid.annotation import Annotation
 from docdeid.document import Document
 from docdeid.pattern import TokenPattern
@@ -116,6 +117,32 @@ class TestMultiTokenLookupAnnotator:
             annotations = annotator.annotate(doc)
 
         assert annotations == expected_annotations
+
+    def test_multi_token_lookup_with_trie(self, long_text, long_tokenlist):
+
+        doc = Document(long_text)
+
+        trie = docdeid.ds.LookupTrie(matching_pipeline=[LowercaseString()])
+        trie.add_item(['my', ' ', 'name'])
+        trie.add_item(['my', ' ', 'wife'])
+
+        annotator = MultiTokenLookupAnnotator(
+            trie=trie,
+            tag="prefix",
+        )
+
+        expected_annotations = [
+            Annotation(text="My name", start_char=0, end_char=7, tag="prefix"),
+            Annotation(text="my wife", start_char=39, end_char=46, tag="prefix"),
+        ]
+
+        with patch.object(doc, "get_tokens", return_value=long_tokenlist):
+            annotations = annotator.annotate(doc)
+
+        assert annotations == expected_annotations
+
+
+
 
 
 class TestRegexpAnnotator:

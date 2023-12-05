@@ -124,21 +124,33 @@ class MultiTokenLookupAnnotator(Annotator):
 
     def __init__(
         self,
-        lookup_values: Iterable[str],
-        tokenizer: Tokenizer,
         *args,
+        lookup_values: Optional[Iterable[str]] = None,
         matching_pipeline: Optional[list[StringModifier]] = None,
+        tokenizer: Optional[Tokenizer] = None,
+        trie: Optional[LookupTrie] = None,
         overlapping: bool = False,
         **kwargs,
     ) -> None:
 
-        self.overlapping = overlapping
-        self._matching_pipeline = matching_pipeline or []
-
-        self._trie = LookupTrie(matching_pipeline=matching_pipeline)
         self._start_words: set[str] = set()
 
-        self._init_lookup_structures(lookup_values, tokenizer)
+        if trie is not None:
+
+            if lookup_values is not None:
+
+                raise ValueError("Cannot provide lookup_values and trie "
+                                 "at the same time.")
+
+            self._trie = trie
+            self._matching_pipeline = trie.matching_pipeline or []
+            self._start_words = set(trie.children.keys())
+        else:
+            self._matching_pipeline = matching_pipeline or []
+            self._trie = LookupTrie(matching_pipeline=matching_pipeline)
+            self._init_lookup_structures(lookup_values, tokenizer)
+
+        self.overlapping = overlapping
 
         super().__init__(*args, **kwargs)
 
