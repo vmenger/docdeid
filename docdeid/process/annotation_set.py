@@ -153,7 +153,9 @@ class MergeAdjacentAnnotations(AnnotationProcessor):
 
         return left_tag == right_tag
 
-    def _tag_replacement(self, left_tag: str, right_tag: str) -> str:
+    def _tag_replacement(
+        self, left_tag: str, right_tag: str  # pylint: disable=W0613
+    ) -> str:
         """
         Determine what to replace the tag of two merged annotations with. By default,
         the left tag.

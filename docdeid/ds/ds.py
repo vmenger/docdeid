@@ -1,7 +1,7 @@
 from abc import ABC
 
 
-class Datastructure(ABC):
+class Datastructure(ABC):  # pylint: disable=R0903
     """Something that holds data in an efficient way."""
 
 

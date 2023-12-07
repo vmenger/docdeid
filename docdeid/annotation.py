@@ -11,7 +11,7 @@ _OPTIONAL_FIELDS = {"start_token", "end_token", "_key_cache"}
 
 
 @dataclass(frozen=True)
-class Annotation:  # noqa: R0902
+class Annotation:  # pylint: disable=R0902
     """An annotation contains information on a specific span of text that is tagged."""
 
     text: str
@@ -69,7 +69,7 @@ class Annotation:  # noqa: R0902
 
     def get_sort_key(
         self,
-        by: tuple,  # noqa: C0103
+        by: tuple,  # pylint: disable=C0103
         callbacks: Optional[frozendict[str, Callable]] = None,
         deterministic: bool = True,
     ) -> tuple:
@@ -128,7 +128,7 @@ class AnnotationSet(set[Annotation]):
 
     def sorted(
         self,
-        by: tuple,
+        by: tuple,  # pylint: disable=C0103
         callbacks: Optional[frozendict[str, Callable]] = None,
         deterministic: bool = True,
     ) -> list[Annotation]:

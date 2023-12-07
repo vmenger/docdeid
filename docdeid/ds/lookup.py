@@ -8,7 +8,7 @@ from docdeid.ds.ds import Datastructure
 from docdeid.str.processor import StringModifier, StringProcessor, StripString
 
 
-class LookupStructure(Datastructure):
+class LookupStructure(Datastructure):  # pylint: disable=R0903
     """
     Structure that contain strings, and allow efficiently checking whether a string is
     contained in it.

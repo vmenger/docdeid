@@ -141,21 +141,20 @@ class MultiTokenLookupAnnotator(Annotator):
 
         self._start_words: set[str] = set()
 
-        if trie is not None:
-
-            if lookup_values is not None:
-
-                raise ValueError(
-                    "Cannot provide lookup_values and trie " "at the same time."
-                )
+        if (trie is not None) and (lookup_values is None) and (tokenizer is None) :
 
             self._trie = trie
             self._matching_pipeline = trie.matching_pipeline or []
             self._start_words = set(trie.children.keys())
-        else:
+
+        elif (trie is None) and (lookup_values is not None) and (tokenizer is not None):
             self._matching_pipeline = matching_pipeline or []
             self._trie = LookupTrie(matching_pipeline=matching_pipeline)
             self._init_lookup_structures(lookup_values, tokenizer)
+
+        else:
+            raise RuntimeError("Please provide either looup_values and a tokenizer, "
+                               "or a trie.")
 
         self.overlapping = overlapping
 
@@ -268,7 +267,9 @@ class RegexpAnnotator(Annotator):
 
         super().__init__(*args, **kwargs)
 
-    def _validate_match(self, match: re.Match, doc: Document) -> bool:
+    def _validate_match(
+        self, match: re.Match, doc: Document  # pylint: disable=W0613
+    ) -> bool:
         return True
 
     def annotate(self, doc: Document) -> list[Annotation]:

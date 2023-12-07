@@ -17,7 +17,7 @@ class TokenPattern(ABC):
     def __init__(self, tag: str) -> None:
         self.tag = tag
 
-    def doc_precondition(self, doc: Document) -> bool:
+    def doc_precondition(self, doc: Document) -> bool:  # pylint: disable=W0613
         """
         Use this to check if the pattern is applicable to a document (e.g. check if some
         piece of metadata is included. By default returns ``True``.
@@ -31,7 +31,7 @@ class TokenPattern(ABC):
 
         return True
 
-    def token_precondition(self, token: Token) -> bool:
+    def token_precondition(self, token: Token) -> bool:  # pylint: disable=W0613
         """
         Use this to check if the pattern is applicable to a token (e.g. check if it has
         neighbours). By default returns ``True``.

@@ -148,9 +148,7 @@ class SimpleRedactor(Redactor):
 
         annotation_text_to_counter: dict[str, int] = {}
 
-        for tag, annotation_group in self._group_annotations_by_tag(
-            annotations
-        ).items():
+        for _, annotation_group in self._group_annotations_by_tag(annotations).items():
 
             annotation_text_to_counter_group: dict[str, int] = {}
 

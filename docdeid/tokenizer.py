@@ -290,7 +290,7 @@ class TokenList:
         return self._tokens == other._tokens
 
 
-class Tokenizer(ABC):
+class Tokenizer(ABC):  # pylint: disable=R0903
     """
     Abstract class for tokenizers, which split a text up in its smallest parts called
     tokens. Implementations should implement :meth:`.Tokenizer._split_text`.
@@ -334,7 +334,7 @@ class Tokenizer(ABC):
         return TokenList(tokens, link_tokens=self.link_tokens)
 
 
-class SpaceSplitTokenizer(Tokenizer):
+class SpaceSplitTokenizer(Tokenizer):  # pylint: disable=R0903
     """
     Tokenizes based on splitting on whitespaces.
 
@@ -348,7 +348,7 @@ class SpaceSplitTokenizer(Tokenizer):
         ]
 
 
-class WordBoundaryTokenizer(Tokenizer):
+class WordBoundaryTokenizer(Tokenizer):  # pylint: disable=R0903
     """
     Tokenizes based on word boundary.
 

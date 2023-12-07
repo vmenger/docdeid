@@ -5,7 +5,7 @@ from typing import Iterator, Optional
 from docdeid.document import Document
 
 
-class DocProcessor(ABC):
+class DocProcessor(ABC):  # pylint: disable=R0903
     """Something that processes a document."""
 
     @abstractmethod

@@ -5,7 +5,7 @@ from docdeid.process.doc import DocProcessorGroup
 from docdeid.tokenizer import Tokenizer
 
 
-class DocDeid:
+class DocDeid:  # pylint: disable=R0903
     """
     The main class used for de-identifying text.
 
