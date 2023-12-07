@@ -1,7 +1,6 @@
 # docdeid
 
 [![tests](https://github.com/vmenger/docdeid/actions/workflows/test.yml/badge.svg)](https://github.com/vmenger/docdeid/actions/workflows/test.yml)
-[![coverage](https://coveralls.io/repos/github/vmenger/docdeid/badge.svg)](https://coveralls.io/github/vmenger/docdeid)
 [![build](https://github.com/vmenger/docdeid/actions/workflows/build.yml/badge.svg)](https://github.com/vmenger/docdeid/actions/workflows/build.yml)
 [![Documentation Status](https://readthedocs.org/projects/docdeid/badge/?version=latest)](https://docdeid.readthedocs.io/en/latest/)
 [![pypy version](https://img.shields.io/pypi/v/docdeid)](https://pypi.org/project/docdeid/)

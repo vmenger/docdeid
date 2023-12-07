@@ -409,6 +409,23 @@ attrs = ">=21.4"
 flake8 = ">=3.7"
 
 [[package]]
+name = "flake8-pyproject"
+version = "1.2.3"
+description = "Flake8 plug-in loading the configuration from pyproject.toml"
+optional = false
+python-versions = ">= 3.6"
+files = [
+    {file = "flake8_pyproject-1.2.3-py3-none-any.whl", hash = "sha256:6249fe53545205af5e76837644dc80b4c10037e73a0e5db87ff562d75fb5bd4a"},
+]
+
+[package.dependencies]
+Flake8 = ">=5"
+TOMLi = {version = "*", markers = "python_version < \"3.11\""}
+
+[package.extras]
+dev = ["pyTest", "pyTest-cov"]
+
+[[package]]
 name = "frozendict"
 version = "2.3.10"
 description = "A simple immutable dictionary"
@@ -1460,4 +1477,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "f9dcf07fc13a5f522789b926d61781c6ca36aebdfb90ad4c30cbdc606107c0bb"
+content-hash = "a3412736f499ba08d69e1c74803ab1c27b0dca94effcad55380fe0503caa2ca2"

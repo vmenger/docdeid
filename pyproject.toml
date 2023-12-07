@@ -30,6 +30,7 @@ author = "Vincent Menger"
 python = "^3.9"
 numpy = "^1.23.1"
 frozendict = "^2.3.10"
+flake8-pyproject = "^1.2.3"
 
 [tool.poetry.group.dev]
 optional = false
@@ -57,3 +58,30 @@ myst-parser = "^0.18.1"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[tool.docformatter]
+recursive = true
+in-place = true
+black = true
+pre-summary-newline = true
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ['E203', 'ANN101', 'ANN102', 'ANN002', 'ANN003', 'DC100']
+per-file-ignores = [
+    '__init__.py:F401',
+    'tests/*:ANN,DC',
+]
+
+[tool.pylint]
+disable = ['C0114']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=docdeid --cov-fail-under=85"
