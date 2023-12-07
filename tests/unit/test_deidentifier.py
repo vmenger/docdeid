@@ -20,7 +20,9 @@ class TestDocDeid:
         dd.processors.add_processor("proc_1", proc_1)
         dd.processors.add_processor("proc_2", proc_2)
 
-        with patch.object(proc_1, "process") as proc1_process, patch.object(proc_2, "process") as proc2_process:
+        with patch.object(proc_1, "process") as proc1_process, patch.object(
+            proc_2, "process"
+        ) as proc2_process:
 
             dd.deidentify(text="_")
 

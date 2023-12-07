@@ -208,7 +208,11 @@ class TestLookupTrie:
         assert trie.longest_matching_prefix(item=["a"]) == ["a"]
         assert trie.longest_matching_prefix(item=["a", "b"]) == ["a"]
         assert trie.longest_matching_prefix(item=["a", "b", "c"]) == ["a", "b", "c"]
-        assert trie.longest_matching_prefix(item=["a", "b", "c", "d"]) == ["a", "b", "c"]
+        assert trie.longest_matching_prefix(item=["a", "b", "c", "d"]) == [
+            "a",
+            "b",
+            "c",
+        ]
 
     def test_longest_matching_prefix_3(self):
         trie = LookupTrie()
@@ -245,5 +249,7 @@ class TestLookupTrie:
         trie.add_item(item=["cat", "dog"])
 
         assert trie.longest_matching_prefix(item=["a", "b"], start_i=0) == ["a", "b"]
-        assert trie.longest_matching_prefix(item=["a", "b"], start_i=1) == None
-        assert trie.longest_matching_prefix(item=["horse", "cat", "dog"], start_i=1) == ["cat", "dog"]
+        assert trie.longest_matching_prefix(item=["a", "b"], start_i=1) is None
+        assert trie.longest_matching_prefix(
+            item=["horse", "cat", "dog"], start_i=1
+        ) == ["cat", "dog"]

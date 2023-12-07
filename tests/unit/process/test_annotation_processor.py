@@ -50,14 +50,22 @@ class TestOverlapResolver:
         text = "My name is Billy Bob Thornton"
         annotations = AnnotationSet(
             [
-                Annotation(text="Billy Bob", start_char=11, end_char=20, tag="fist_name"),
-                Annotation(text="Bob Thornton", start_char=17, end_char=29, tag="full_name"),
+                Annotation(
+                    text="Billy Bob", start_char=11, end_char=20, tag="fist_name"
+                ),
+                Annotation(
+                    text="Bob Thornton", start_char=17, end_char=29, tag="full_name"
+                ),
             ]
         )
         expected_annotations = AnnotationSet(
             [
-                Annotation(text="Billy Bob", start_char=11, end_char=20, tag="fist_name"),
-                Annotation(text=" Thornton", start_char=20, end_char=29, tag="full_name"),
+                Annotation(
+                    text="Billy Bob", start_char=11, end_char=20, tag="fist_name"
+                ),
+                Annotation(
+                    text=" Thornton", start_char=20, end_char=29, tag="full_name"
+                ),
             ]
         )
         proc = OverlapResolver(sort_by=("start_char",))  # left-right
@@ -70,18 +78,25 @@ class TestOverlapResolver:
         text = "My name is Billy Bob Thornton"
         annotations = AnnotationSet(
             [
-                Annotation(text="Billy Bob", start_char=11, end_char=20, tag="fist_name"),
-                Annotation(text="Bob Thornton", start_char=17, end_char=29, tag="full_name"),
+                Annotation(
+                    text="Billy Bob", start_char=11, end_char=20, tag="fist_name"
+                ),
+                Annotation(
+                    text="Bob Thornton", start_char=17, end_char=29, tag="full_name"
+                ),
             ]
         )
         expected_annotations = AnnotationSet(
             [
-                Annotation(text="Bob Thornton", start_char=17, end_char=29, tag="full_name"),
+                Annotation(
+                    text="Bob Thornton", start_char=17, end_char=29, tag="full_name"
+                ),
                 Annotation(text="Billy ", start_char=11, end_char=17, tag="fist_name"),
             ]
         )
         proc = OverlapResolver(
-            sort_by=("start_char",), sort_by_callbacks=frozendict(start_char=lambda x: -x)
+            sort_by=("start_char",),
+            sort_by_callbacks=frozendict(start_char=lambda x: -x),
         )  # right-left
 
         processed_annotations = proc.process_annotations(annotations, text)
@@ -98,7 +113,9 @@ class TestMergeAdjacentAnnotations:
                 Annotation(text="Smith", start_char=5, end_char=10, tag="name"),
             ]
         )
-        expected_annotations = AnnotationSet([Annotation(text="John Smith", start_char=0, end_char=10, tag="name")])
+        expected_annotations = AnnotationSet(
+            [Annotation(text="John Smith", start_char=0, end_char=10, tag="name")]
+        )
         proc = MergeAdjacentAnnotations(slack_regexp=r"\s")
 
         processed_annotations = proc.process_annotations(annotations, text=text)
@@ -137,8 +154,12 @@ class TestMergeAdjacentAnnotations:
         text = "My name is Billy Bob Thornton"
         annotations = AnnotationSet(
             [
-                Annotation(text="Billy Bob", start_char=11, end_char=20, tag="fist_name"),
-                Annotation(text="Bob Thornton", start_char=17, end_char=29, tag="full_name"),
+                Annotation(
+                    text="Billy Bob", start_char=11, end_char=20, tag="fist_name"
+                ),
+                Annotation(
+                    text="Bob Thornton", start_char=17, end_char=29, tag="full_name"
+                ),
             ]
         )
 
@@ -157,7 +178,11 @@ class TestMergeAdjacentAnnotations:
             ]
         )
         expected_annotations = AnnotationSet(
-            [Annotation(text="Billy Bob Thornton", start_char=11, end_char=29, tag="name")]
+            [
+                Annotation(
+                    text="Billy Bob Thornton", start_char=11, end_char=29, tag="name"
+                )
+            ]
         )
         proc = MergeAdjacentAnnotations(slack_regexp=r"\s")
 

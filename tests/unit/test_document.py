@@ -52,11 +52,13 @@ class TestDocument:
         text = "Hello I'm Bob"
         tokenizer1 = Tokenizer()
         tokenizer2 = Tokenizer()
-        doc = Document(text=text, tokenizers={"tokenizer_1": tokenizer1, "tokenizer_2": tokenizer2})
+        doc = Document(
+            text=text, tokenizers={"tokenizer_1": tokenizer1, "tokenizer_2": tokenizer2}
+        )
 
-        with patch.object(tokenizer1, "tokenize", return_value=short_tokens), patch.object(
-            tokenizer2, "_split_text", return_value=[]
-        ):
+        with patch.object(
+            tokenizer1, "tokenize", return_value=short_tokens
+        ), patch.object(tokenizer2, "_split_text", return_value=[]):
 
             assert doc.get_tokens(tokenizer_name="tokenizer_1") == short_tokens
             assert doc.get_tokens(tokenizer_name="tokenizer_2") == TokenList([])

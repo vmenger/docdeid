@@ -115,8 +115,14 @@ class TestTokenList:
         token_list = TokenList(long_tokens)
 
         assert token_list.token_lookup(lookup_values=set()) == set()
-        assert token_list.token_lookup(lookup_values={"John", "Lucas"}) == {long_tokens[8], long_tokens[24]}
-        assert token_list.token_lookup(lookup_values={"something", "something_else"}) == set()
+        assert token_list.token_lookup(lookup_values={"John", "Lucas"}) == {
+            long_tokens[8],
+            long_tokens[24],
+        }
+        assert (
+            token_list.token_lookup(lookup_values={"something", "something_else"})
+            == set()
+        )
         assert token_list.token_lookup(lookup_values={" "}) == {
             long_tokens[1],
             long_tokens[3],
@@ -134,12 +140,24 @@ class TestTokenList:
         token_list = TokenList(long_tokens)
         matching_pipeline = [docdeid.str.LowercaseString()]
 
-        assert token_list.token_lookup(lookup_values=set(), matching_pipeline=matching_pipeline) == set()
-        assert token_list.token_lookup(lookup_values={"john", "lucas"}, matching_pipeline=matching_pipeline) == {
+        assert (
+            token_list.token_lookup(
+                lookup_values=set(), matching_pipeline=matching_pipeline
+            )
+            == set()
+        )
+        assert token_list.token_lookup(
+            lookup_values={"john", "lucas"}, matching_pipeline=matching_pipeline
+        ) == {
             long_tokens[8],
             long_tokens[24],
         }
-        assert token_list.token_lookup(lookup_values={"John", "Lucas"}, matching_pipeline=matching_pipeline) == set()
+        assert (
+            token_list.token_lookup(
+                lookup_values={"John", "Lucas"}, matching_pipeline=matching_pipeline
+            )
+            == set()
+        )
 
 
 class TestBaseTokenizer:

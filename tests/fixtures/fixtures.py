@@ -94,7 +94,11 @@ class MultiPattern(TokenPattern):
         return token.previous() is not None and token.next() is not None
 
     def match(self, token, metadata=None):
-        if token.text == "-" and token.previous().text[0].isupper() and token.next().text[0].isupper():
+        if (
+            token.text == "-"
+            and token.previous().text[0].isupper()
+            and token.next().text[0].isupper()
+        ):
             return token.previous(), token.next()
 
 

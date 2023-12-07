@@ -14,7 +14,9 @@ class TestDocProcessorGroup:
         dpg.add_processor("proc_1", proc_1)
         dpg.add_processor("proc_2", proc_2)
 
-        with patch.object(proc_1, "process") as proc_1_process, patch.object(proc_2, "process") as proc_2_process:
+        with patch.object(proc_1, "process") as proc_1_process, patch.object(
+            proc_2, "process"
+        ) as proc_2_process:
 
             dpg.process(Document(text="test"))
 
@@ -40,7 +42,9 @@ class TestDocProcessorGroup:
         dpg.add_processor("proc_1", proc_1)
         dpg.add_processor("proc_2", proc_2)
 
-        with patch.object(proc_1, "process") as proc_1_process, patch.object(proc_2, "process") as proc_2_process:
+        with patch.object(proc_1, "process") as proc_1_process, patch.object(
+            proc_2, "process"
+        ) as proc_2_process:
 
             dpg.process(Document(text="test"), enabled={"proc_2"})
 
@@ -56,7 +60,9 @@ class TestDocProcessorGroup:
         dpg.add_processor("proc_1", proc_1)
         dpg.add_processor("proc_2", proc_2)
 
-        with patch.object(proc_1, "process") as proc_1_process, patch.object(proc_2, "process") as proc_2_process:
+        with patch.object(proc_1, "process") as proc_1_process, patch.object(
+            proc_2, "process"
+        ) as proc_2_process:
 
             dpg.process(Document(text="test"), disabled={"proc_1"})
 
@@ -75,7 +81,12 @@ class TestDocProcessorGroup:
         dpg.add_processor("nested_group", dpg_nested)
 
         assert dpg.get_names(recursive=False) == ["proc_1", "proc_2", "nested_group"]
-        assert dpg.get_names(recursive=True) == ["proc_1", "proc_2", "nested_group", "nested_proc_1"]
+        assert dpg.get_names(recursive=True) == [
+            "proc_1",
+            "proc_2",
+            "nested_group",
+            "nested_proc_1",
+        ]
 
     @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
     def test_remove_doc_processor(self):

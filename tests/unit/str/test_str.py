@@ -41,8 +41,12 @@ class TestStringModifier:
         proc = ReplaceValue(find_value="cat", replace_value="dog")
 
         assert proc.process("test") == "test"
-        assert proc.process("My favorite animal is a cat") == "My favorite animal is a dog"
-        assert proc.process("My favorite animal is a dog") == "My favorite animal is a dog"
+        assert (
+            proc.process("My favorite animal is a cat") == "My favorite animal is a dog"
+        )
+        assert (
+            proc.process("My favorite animal is a dog") == "My favorite animal is a dog"
+        )
 
     def test_replace_value_regexp(self):
         proc = ReplaceValueRegexp(find_value=r"\d+", replace_value="number")

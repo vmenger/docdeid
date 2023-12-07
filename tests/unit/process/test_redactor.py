@@ -6,7 +6,9 @@ class TestRedactAllText:
     def test_redact_all_text(self):
         redactor = RedactAllText()
 
-        deidentified_text = redactor.redact(text="some text", annotations=AnnotationSet([]))
+        deidentified_text = redactor.redact(
+            text="some text", annotations=AnnotationSet([])
+        )
 
         assert deidentified_text == "[REDACTED]"
 
@@ -14,7 +16,9 @@ class TestRedactAllText:
 class TestSimpleRedactor:
     def test_redact_one_annotation(self):
         text = "Hello I'm Bob"
-        annotations = AnnotationSet([Annotation(text="Bob", start_char=10, end_char=13, tag="name")])
+        annotations = AnnotationSet(
+            [Annotation(text="Bob", start_char=10, end_char=13, tag="name")]
+        )
         redactor = SimpleRedactor()
 
         deidentified_text = redactor.redact(text, annotations)

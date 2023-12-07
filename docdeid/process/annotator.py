@@ -14,8 +14,8 @@ from docdeid.tokenizer import Token, Tokenizer
 
 class Annotator(DocProcessor, ABC):
     """
-    Abstract class for annotators, which are responsible for generating annotations from a given document. Instatiations
-    should implement the annotate method.
+    Abstract class for annotators, which are responsible for generating annotations from
+    a given document. Instatiations should implement the annotate method.
 
     Args:
         tag: The tag to use in the annotations.
@@ -55,10 +55,11 @@ class SingleTokenLookupAnnotator(Annotator):
     Args:
         tag: The tag to use in the annotations.
         lookup_values: An iterable of strings that should be used for lookup.
-        matching_pipeline: An optional pipeline that can be used for matching (e.g. lowercasing). Note that this
-            degrades performance.
-        tokenizer_name: If not taking tokens from the ``default`` tokenizer, specify which tokenizer to use. The
-            tokenizer should be present in :attr:`.DocDeid.tokenizers`.
+        matching_pipeline: An optional pipeline that can be used for matching
+            (e.g. lowercasing). Note that this degrades performance.
+        tokenizer_name: If not taking tokens from the ``default`` tokenizer, specify
+            which tokenizer to use. The tokenizer should be present in
+            :attr:`.DocDeid.tokenizers`.
     """
 
     def __init__(
@@ -111,15 +112,20 @@ class SingleTokenLookupAnnotator(Annotator):
 
 class MultiTokenLookupAnnotator(Annotator):
     """
-    Matches lookup values against tokens, where the ``lookup_values`` may themselves be sequences.
+    Matches lookup values against tokens, where the ``lookup_values`` may themselves be
+    sequences.
 
     Args:
         tag: The tag to use in the annotations.
-        lookup_values: An iterable of strings, that should be matched. These are tokenized internally.
-        tokenizer: A tokenizer that is used to create the sequence patterns from ``lookup_values``.
-        matching_pipeline: An optional pipeline that can be used for matching (e.g. lowercasing). This has no specific
-            impact on matching performance, other than overhead for applying the pipeline to each string.
-        overlapping: Whether the annotator should match overlapping sequences, or should process from left to right.
+        lookup_values: An iterable of strings, that should be matched. These are
+        tokenized internally.
+        tokenizer: A tokenizer that is used to create the sequence patterns from
+        ``lookup_values``.
+        matching_pipeline: An optional pipeline that can be used for matching
+        (e.g. lowercasing). This has no specific impact on matching performance, other
+        than overhead for applying the pipeline to each string.
+        overlapping: Whether the annotator should match overlapping sequences,
+        or should process from left to right.
     """
 
     def __init__(
@@ -139,8 +145,9 @@ class MultiTokenLookupAnnotator(Annotator):
 
             if lookup_values is not None:
 
-                raise ValueError("Cannot provide lookup_values and trie "
-                                 "at the same time.")
+                raise ValueError(
+                    "Cannot provide lookup_values and trie " "at the same time."
+                )
 
             self._trie = trie
             self._matching_pipeline = trie.matching_pipeline or []
@@ -154,7 +161,9 @@ class MultiTokenLookupAnnotator(Annotator):
 
         super().__init__(*args, **kwargs)
 
-    def _init_lookup_structures(self, lookup_values: Iterable[str], tokenizer: Tokenizer) -> None:
+    def _init_lookup_structures(
+        self, lookup_values: Iterable[str], tokenizer: Tokenizer
+    ) -> None:
 
         for val in lookup_values:
 
@@ -175,7 +184,9 @@ class MultiTokenLookupAnnotator(Annotator):
         tokens = doc.get_tokens()
 
         start_tokens = sorted(
-            tokens.token_lookup(self._start_words, matching_pipeline=self._matching_pipeline),
+            tokens.token_lookup(
+                self._start_words, matching_pipeline=self._matching_pipeline
+            ),
             key=lambda token: token.start_char,
         )
 
@@ -190,7 +201,9 @@ class MultiTokenLookupAnnotator(Annotator):
             if i < min_i:
                 continue
 
-            longest_matching_prefix = self._trie.longest_matching_prefix(tokens_text, start_i=i)
+            longest_matching_prefix = self._trie.longest_matching_prefix(
+                tokens_text, start_i=i
+            )
 
             if longest_matching_prefix is None:
                 continue
@@ -218,15 +231,17 @@ class MultiTokenLookupAnnotator(Annotator):
 
 class RegexpAnnotator(Annotator):
     """
-    Create annotations based on regular expression patterns. Note that these patterns do not necessarily start/stop on
-    token boundaries.
+    Create annotations based on regular expression patterns. Note that these patterns do
+    not necessarily start/stop on token boundaries.
 
     Args:
         tag: The tag to use in the annotations.
-        regexp_pattern: A pattern, either as a `str` or a ``re.Pattern``, that will be used for matching.
-        capturing_group: The capturing group of the pattern that should be used to produce the annotation. By default,
-            the entire match is used.
-        pre_match_tokens: A list of tokens, of which at least one must be present for the annotator to start matching the regexp at all.
+        regexp_pattern: A pattern, either as a `str` or a ``re.Pattern``, that will
+        be used for matching.
+        capturing_group: The capturing group of the pattern that should be used to
+        produce the annotation. By default, the entire match is used.
+        pre_match_tokens: A list of tokens, of which at least one must be present
+        for the annotator to start matching the regexp at all.
     """
 
     def __init__(
@@ -260,7 +275,11 @@ class RegexpAnnotator(Annotator):
 
         if self.pre_match_tokens is not None:
             try:
-                if doc.get_tokens().get_words(self.matching_pipeline).isdisjoint(self.pre_match_tokens):
+                if (
+                    doc.get_tokens()
+                    .get_words(self.matching_pipeline)
+                    .isdisjoint(self.pre_match_tokens)
+                ):
                     return []
             except RuntimeError:
                 pass
@@ -276,7 +295,13 @@ class RegexpAnnotator(Annotator):
             start_char, end_char = match.span(self.capturing_group)
 
             annotations.append(
-                Annotation(text=text, start_char=start_char, end_char=end_char, tag=self.tag, priority=self.priority)
+                Annotation(
+                    text=text,
+                    start_char=start_char,
+                    end_char=end_char,
+                    tag=self.tag,
+                    priority=self.priority,
+                )
             )
 
         return annotations

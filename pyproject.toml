@@ -75,6 +75,7 @@ pre-summary-newline = true
 max-line-length = 88
 extend-ignore = ['E203', 'ANN101', 'ANN102', 'ANN002', 'ANN003', 'DC100']
 per-file-ignores = [
+    'tests/conftest.py:F401,F403',
     '__init__.py:F401',
     'tests/*:ANN,DC',
 ]

@@ -51,14 +51,17 @@ class DocProcessorGroup(DocProcessor):
 
         return names
 
-    def add_processor(self, name: str, processor: DocProcessor, position: Optional[int] = None) -> None:
+    def add_processor(
+        self, name: str, processor: DocProcessor, position: Optional[int] = None
+    ) -> None:
         """
         Add a document processor to the group.
 
         Args:
             name: The name of the processor.
             processor: The processor.
-            position: The position at which to insert it. Will append if left unspecified.
+            position: The position at which to insert it. Will append if left
+            unspecified.
         """
 
         if position is None:
@@ -67,7 +70,9 @@ class DocProcessorGroup(DocProcessor):
 
         new_processors = OrderedDict()
 
-        for i, (existing_name, existing_processor) in enumerate(self._processors.items()):
+        for i, (existing_name, existing_processor) in enumerate(
+            self._processors.items()
+        ):
 
             if i == position:
                 new_processors[name] = processor
@@ -104,11 +109,12 @@ class DocProcessorGroup(DocProcessor):
 
         Args:
             doc: The document to be processed.
-            enabled: A set of strings, indicating which document processors to run for this document. By
-                default all document processors are used. In case of nested, it's necessary to supply both the name of
-                the processor group, as well as all of its containing processors (or a subset thereof).
-            disabled: A set of strings, indicating which document processors not to run for this
-                document. Cannot be used together with `enabled`.
+            enabled: A set of strings, indicating which document processors to run for
+            this document. By default all document processors are used. In case of
+            nested, it's necessary to supply both the name of the processor group,
+            as well as all of its containing processors (or a subset thereof).
+            disabled: A set of strings, indicating which document processors not to
+            run for this document. Cannot be used together with `enabled`.
         """
 
         enabled = kwargs.get("enabled", None)

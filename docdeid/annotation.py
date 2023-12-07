@@ -11,7 +11,7 @@ _OPTIONAL_FIELDS = {"start_token", "end_token", "_key_cache"}
 
 
 @dataclass(frozen=True)
-class Annotation:
+class Annotation:  # noqa: R0902
     """An annotation contains information on a specific span of text that is tagged."""
 
     text: str
@@ -27,18 +27,21 @@ class Annotation:
     """The tag (e.g. name, location)."""
 
     priority: int = field(default=0, repr=True, compare=False)
-    """An additional priority attribute, that can be used for resolving overlap/merges."""
+    """An additional priority attribute, that can be used for resolving
+    overlap/merges."""
 
     start_token: Optional[Token] = field(default=None, repr=False, compare=False)
     """
-    Optionally, the first :class:`.Token` in the sequence of tokens corresponding to this annotation.
+    Optionally, the first :class:`.Token` in the sequence of tokens corresponding to
+    this annotation.
 
     Should only be used when the annotation starts on a token boundary.
     """
 
     end_token: Optional[Token] = field(default=None, repr=False, compare=False)
     """
-    Optionally, the last :class:`.Token` in the sequence of tokens corresponding to this annotation.
+    Optionally, the last :class:`.Token` in the sequence of tokens corresponding to this
+    annotation.
 
     Should only be used when the annotation ends on a token boundary.
     """
@@ -66,23 +69,24 @@ class Annotation:
 
     def get_sort_key(
         self,
-        by: tuple,
+        by: tuple,  # noqa: C0103
         callbacks: Optional[frozendict[str, Callable]] = None,
         deterministic: bool = True,
     ) -> tuple:
         """
-        The sort key of an :class:`.Annotation` is used to order annotations by one or more of its attributes.
+        The sort key of an :class:`.Annotation` is used to order annotations by one or
+        more of its attributes.
 
         Args:
             by: A list of attributes, used for sorting.
-            callbacks: A map of attributes to a callable function, to modify the value on which is sorted
-                (for example ``lambda x: -x`` for reversing).
-            deterministic: Include all attributes in the sort key, so that ties are not broken randomly but
-                deterministically.
+            callbacks: A map of attributes to a callable function, to modify the value
+            on which is sorted (for example ``lambda x: -x`` for reversing).
+            deterministic: Include all attributes in the sort key, so that ties are
+            not broken randomly but deterministically.
 
         Returns:
-            A tuple of the attributes specified, that can be passed to the key argument of the sorted function
-            of (e.g.) ``list``.
+            A tuple of the attributes specified, that can be passed to the key
+            argument of the sorted function of (e.g.) ``list``.
         """
 
         cache_key = hash((self, by, callbacks, deterministic))
@@ -133,10 +137,11 @@ class AnnotationSet(set[Annotation]):
 
         Args:
             by: A list of :class:`.Annotation` attributes, used for sorting.
-            callbacks: A map of :class:`.Annotation` attributes to a callable function, to modify the value on which
-                is sorted (for example ``lambda x: -x`` for reversing).
-            deterministic: Include all attributes in the sort key, so that ties are not broken randomly but
-                deterministically.
+            callbacks: A map of :class:`.Annotation` attributes to a callable
+            function, to modify the value on which is sorted (for example
+            ``lambda x: -x`` for reversing).
+            deterministic: Include all attributes in the sort key, so that ties are
+            not broken randomly but deterministically.
 
         Returns:
             A list with the annotations, sorted as specified.
@@ -144,12 +149,15 @@ class AnnotationSet(set[Annotation]):
 
         if callbacks is not None and not isinstance(callbacks, frozendict):
             raise RuntimeError(
-                "Please provide the callbacks as a frozen dict, e.g. " "frozendict.frozendict(end_char=lambda x: -x)"
+                "Please provide the callbacks as a frozen dict, e.g. "
+                "frozendict.frozendict(end_char=lambda x: -x)"
             )
 
         return sorted(
             list(self),
-            key=lambda x: x.get_sort_key(by=by, callbacks=callbacks, deterministic=deterministic),
+            key=lambda x: x.get_sort_key(
+                by=by, callbacks=callbacks, deterministic=deterministic
+            ),
         )
 
     def has_overlap(self) -> bool:

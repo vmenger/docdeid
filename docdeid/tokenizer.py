@@ -26,16 +26,18 @@ class Token:
     """
     The previous token.
 
-    Note that this does not have to be the literal next token in the text, the logic is dictated by
-    :meth:`.Tokenizer._previous_token`, which could for example take the previous alpha token.
+    Note that this does not have to be the literal next token in the text, the logic
+    is dictated by :meth:`.Tokenizer._previous_token`, which could for example take
+    the previous alpha token.
     """
 
     _next_token: Optional[Token] = field(default=None, repr=False, compare=False)
     """
     The next token.
 
-    Note that this does not have to be the literal next token in the text, the logic is dictated by
-    :meth:`.Tokenizer._next_token`, which could for example take the next alpha token.
+    Note that this does not have to be the literal next token in the text, the logic
+    is dictated by :meth:`.Tokenizer._next_token`, which could for example take
+    the next alpha token.
     """
 
     def __post_init__(self) -> None:
@@ -60,16 +62,21 @@ class Token:
         """
         object.__setattr__(self, "_next_token", token)
 
-    def _get_linked_token(self, num: int, attr: Literal["_previous_token", "_next_token"]) -> Optional[Token]:
+    def _get_linked_token(
+        self, num: int, attr: Literal["_previous_token", "_next_token"]
+    ) -> Optional[Token]:
         """
-        Helper method for getting previous/next tokens, possibly more than one neighbour.
+        Helper method for getting previous/next tokens, possibly more than one
+        neighbour.
 
         Args:
             num: Searches the ``num``-th token to the left/right.
-            attr: Either ``_previous_token`` or ``_next_token``, depending on which to look for.
+            attr: Either ``_previous_token`` or ``_next_token``, depending on which
+            to look for.
 
         Returns:
-            The token ``num`` positions to the left/right, if any, or ``None`` otherwise.
+            The token ``num`` positions to the left/right, if any, or ``None``
+            otherwise.
         """
 
         token = self
@@ -151,7 +158,9 @@ class TokenList:
         """
         return self._token_index[token]
 
-    def _init_token_lookup(self, matching_pipeline: Optional[list[StringModifier]] = None) -> None:
+    def _init_token_lookup(
+        self, matching_pipeline: Optional[list[StringModifier]] = None
+    ) -> None:
         """
         Initialize token lookup structures.
 
@@ -178,7 +187,9 @@ class TokenList:
         self._words[pipe_key] = words
         self._text_to_tokens[pipe_key] = text_to_tokens
 
-    def get_words(self, matching_pipeline: Optional[list[StringModifier]] = None) -> set[str]:
+    def get_words(
+        self, matching_pipeline: Optional[list[StringModifier]] = None
+    ) -> set[str]:
         """
         Get all words in this list of tokens. Evaluates lazily.
 
@@ -197,10 +208,13 @@ class TokenList:
         return self._words[pipe_key]
 
     def token_lookup(
-        self, lookup_values: set[str], matching_pipeline: Optional[list[StringModifier]] = None
+        self,
+        lookup_values: set[str],
+        matching_pipeline: Optional[list[StringModifier]] = None,
     ) -> set[Token]:
         """
-        Lookup all tokens of which the text matches a certain set of lookup values. Evaluates lazily.
+        Lookup all tokens of which the text matches a certain set of lookup values.
+        Evaluates lazily.
 
         Args:
             lookup_values: The set of lookup values to match the token text against.
@@ -261,11 +275,13 @@ class TokenList:
             other: The other :class:`.TokenList`.
 
         Returns:
-            ``True`` if the tokens exactly match, ``False`` otherwise. Does not check text equality but
+            ``True`` if the tokens exactly match, ``False`` otherwise. Does not check
+            text equality but
                 :class:`.Token` equality.
 
         Raises:
-            ValueError: When trying to check equality of something different than a :class:`.TokenList`.
+            ValueError: When trying to check equality of something different than a
+            :class:`.TokenList`.
         """
 
         if not isinstance(other, TokenList):
@@ -276,13 +292,14 @@ class TokenList:
 
 class Tokenizer(ABC):
     """
-    Abstract class for tokenizers, which split a text up in its smallest parts called tokens. Implementations should
-    implement :meth:`.Tokenizer._split_text`.
+    Abstract class for tokenizers, which split a text up in its smallest parts called
+    tokens. Implementations should implement :meth:`.Tokenizer._split_text`.
 
     Args:
-        link_tokens: Whether to link the produced tokens by calling the :meth:`.Token.set_previous_token` and
-            :meth:`.Token.set_next_token` methods. If true, it uses the logic implemented in the
-            :meth:`.Tokenizer._previous_token` and :meth:`.Tokenizer._next_token` methods.
+        link_tokens: Whether to link the produced tokens by calling the
+        :meth:`.Token.set_previous_token` and :meth:`.Token.set_next_token` methods.
+        If true, it uses the logic implemented in the :meth:`.Tokenizer._previous_token`
+        and :meth:`.Tokenizer._next_token` methods.
     """
 
     def __init__(self, link_tokens: bool = True) -> None:
@@ -291,7 +308,8 @@ class Tokenizer(ABC):
     @abstractmethod
     def _split_text(self, text: str) -> list[Token]:
         """
-        Abstract method for splitting the text. Instantiations of :class:`.Tokenizer` should implement this.
+        Abstract method for splitting the text. Instantiations of :class:`.Tokenizer`
+        should implement this.
 
         Args:
             text: The input text.
@@ -301,7 +319,8 @@ class Tokenizer(ABC):
 
     def tokenize(self, text: str) -> TokenList:
         """
-        Tokenize a text, based on the logic implemented in :meth:`.Tokenizer._split_text`.
+        Tokenize a text, based on the logic implemented in
+        :meth:`.Tokenizer._split_text`.
 
         Args:
             text: The input text.
@@ -345,6 +364,12 @@ class WordBoundaryTokenizer(Tokenizer):
             start_char = start_match.span(0)[0]
             end_char = end_match.span(0)[0]
 
-            tokens.append(Token(text=text[start_char:end_char], start_char=start_char, end_char=end_char))
+            tokens.append(
+                Token(
+                    text=text[start_char:end_char],
+                    start_char=start_char,
+                    end_char=end_char,
+                )
+            )
 
         return tokens
