@@ -30,7 +30,6 @@ author = "Vincent Menger"
 python = "^3.9"
 numpy = "^1.23.1"
 frozendict = "^2.3.10"
-flake8-pyproject = "^1.2.3"
 
 [tool.poetry.group.dev]
 optional = false
@@ -45,6 +44,7 @@ isort = "^5.10.1"
 black = "^22.8.0"
 mypy = "^0.982"
 docformatter = "^1.5.0"
+flake8-pyproject = "^1.2.3"
 
 [tool.poetry.group.docs]
 optional = true
