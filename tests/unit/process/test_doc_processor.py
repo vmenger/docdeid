@@ -1,11 +1,11 @@
 from unittest.mock import patch
 
 from docdeid import Document
-from docdeid.process.doc import DocProcessor, DocProcessorGroup
+from docdeid.process.doc_processor import DocProcessor, DocProcessorGroup
 
 
 class TestDocProcessorGroup:
-    @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
+    @patch("docdeid.process.doc_processor.DocProcessor.__abstractmethods__", set())
     def test_create_doc_processor_group(self):
         proc_1 = DocProcessor()
         proc_2 = DocProcessor()
@@ -23,7 +23,7 @@ class TestDocProcessorGroup:
             proc_1_process.assert_called_once()
             proc_2_process.assert_called_once()
 
-    @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
+    @patch("docdeid.process.doc_processor.DocProcessor.__abstractmethods__", set())
     def test_doc_processor_add_at_position(self):
         dpg = DocProcessorGroup()
         proc = DocProcessor()
@@ -33,7 +33,7 @@ class TestDocProcessorGroup:
 
         assert dpg.get_names() == ["proc_1", "proc_3", "proc_2"]
 
-    @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
+    @patch("docdeid.process.doc_processor.DocProcessor.__abstractmethods__", set())
     def test_create_doc_processor_group_enabled(self):
         proc_1 = DocProcessor()
         proc_2 = DocProcessor()
@@ -51,7 +51,7 @@ class TestDocProcessorGroup:
             proc_1_process.assert_not_called()
             proc_2_process.assert_called_once()
 
-    @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
+    @patch("docdeid.process.doc_processor.DocProcessor.__abstractmethods__", set())
     def test_create_doc_processor_group_disabled(self):
         proc_1 = DocProcessor()
         proc_2 = DocProcessor()
@@ -69,7 +69,7 @@ class TestDocProcessorGroup:
             proc_1_process.assert_not_called()
             proc_2_process.assert_called_once()
 
-    @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
+    @patch("docdeid.process.doc_processor.DocProcessor.__abstractmethods__", set())
     def test_doc_processor_group_names(self):
         dpg = DocProcessorGroup()
         dpg.add_processor("proc_1", DocProcessor())
@@ -88,7 +88,7 @@ class TestDocProcessorGroup:
             "nested_proc_1",
         ]
 
-    @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
+    @patch("docdeid.process.doc_processor.DocProcessor.__abstractmethods__", set())
     def test_remove_doc_processor(self):
         dpg = DocProcessorGroup()
         proc_1 = DocProcessor()
@@ -99,7 +99,7 @@ class TestDocProcessorGroup:
             dpg.process(doc=Document(text="test"))
             proc_1_process.assert_not_called()
 
-    @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
+    @patch("docdeid.process.doc_processor.DocProcessor.__abstractmethods__", set())
     def test_get_doc_processor(self):
         dpg = DocProcessorGroup()
         proc_1 = DocProcessor()

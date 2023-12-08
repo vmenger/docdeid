@@ -8,7 +8,7 @@ from frozendict import frozendict
 
 from docdeid.annotation import Annotation, AnnotationSet
 from docdeid.document import Document
-from docdeid.process.doc import DocProcessor
+from docdeid.process.doc_processor import DocProcessor
 
 
 class AnnotationProcessor(DocProcessor, ABC):

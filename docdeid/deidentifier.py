@@ -1,7 +1,7 @@
 from typing import Optional
 
 from docdeid.document import Document
-from docdeid.process.doc import DocProcessorGroup
+from docdeid.process.doc_processor import DocProcessorGroup
 from docdeid.tokenizer import Tokenizer
 
 

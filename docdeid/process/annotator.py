@@ -7,7 +7,7 @@ from docdeid.annotation import Annotation
 from docdeid.document import Document
 from docdeid.ds.lookup import LookupSet, LookupTrie
 from docdeid.pattern import TokenPattern
-from docdeid.process.doc import DocProcessor
+from docdeid.process.doc_processor import DocProcessor
 from docdeid.str.processor import StringModifier
 from docdeid.tokenizer import Token, Tokenizer
 

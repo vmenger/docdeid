@@ -54,7 +54,7 @@ class TestLookupSet:
 
     def test_add_items_from_file(self):
         lookup_set = LookupSet()
-        lookup_set.add_items_from_file(file_path="tests/unit/test_data/name_list.txt")
+        lookup_set.add_items_from_file(file_path="tests/data/name_list.txt")
 
         assert "John" in lookup_set
         assert "Mary" in lookup_set

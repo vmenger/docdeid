@@ -3,7 +3,7 @@ import pytest
 from frozendict import frozendict
 
 from docdeid.annotation import Annotation, AnnotationSet
-from docdeid.process.annotation_set import MergeAdjacentAnnotations, OverlapResolver
+from docdeid.process.annotation_processor import MergeAdjacentAnnotations, OverlapResolver
 
 
 class TestOverlapResolver:

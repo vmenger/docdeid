@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 from docdeid.deidentifier import DocDeid
-from docdeid.process.doc import DocProcessor
+from docdeid.process.doc_processor import DocProcessor
 from docdeid.tokenizer import Tokenizer
 
 
@@ -11,7 +11,7 @@ class TestDocDeid:
         doc = dd.deidentify(text="test")
         assert doc.text == "test"
 
-    @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
+    @patch("docdeid.process.doc_processor.DocProcessor.__abstractmethods__", set())
     def test_add_processors(self):
         proc_1 = DocProcessor()
         proc_2 = DocProcessor()
