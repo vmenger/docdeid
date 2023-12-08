@@ -10,17 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added 
 * some internal speedups for `SingleTokenLooupAnnotator`, `MultiTokenLookupAnnotator` and `LookupTrie`
 * caching for sorting annotations, which helps with speed
-* the `pre_match_tokens` attribute for `RegexpAnnotator`
+* the `pre_match_words` attribute for `RegexpAnnotator`
 * the option to provide a `LookupTrie` to a `MultiTokenAnnotator` directly
+* a method for getting all words or, for looking up tokens with specific text values in a `TokenList`, with options for `matching_pipeline`
 * automated build/publish on merge to main
-* a method for getting all words or lookup tokens with specific text values in a `TokenList`, with options for `matching_pipeline`
 
 ### Changed
-* sorting `Annotation` and `AnnotationSet` requires key to be provided as a `tuple`, and callbacks as a `frozendict`
+* sorting `Annotation` and `AnnotationSet` now requires sort key to be provided as a `tuple`, and callbacks as a `frozendict`
 * renamed `docdeid.tokenize` to `docdeid.tokenizer`
 * renamed `docdeid.process.doc` to `docdeid.process.doc_processor`
 * renamed `docdeid.process.annotation_set` to `docdeid.process.annotation_processor`
-* `Annotation` now only includes builtin type fields when writing to `json`
+* `Annotation` and `Token` now only include `int`/`str` fields when serializing
 * formatting and linting settings
 * moved the logic for linking tokens to `TokenList` rather than `Tokenizer`
 
