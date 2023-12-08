@@ -344,7 +344,7 @@ class SpaceSplitTokenizer(Tokenizer):  # pylint: disable=R0903
     def _split_text(self, text: str) -> list[Token]:
         return [
             Token(text=match.group(0), start_char=match.start(), end_char=match.end())
-            for match in re.finditer(r"[^\s]+", text)
+            for match in re.finditer(r"\S+", text)
         ]
 
 
