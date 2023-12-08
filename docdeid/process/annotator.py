@@ -141,7 +141,7 @@ class MultiTokenLookupAnnotator(Annotator):
 
         self._start_words: set[str] = set()
 
-        if (trie is not None) and (lookup_values is None) and (tokenizer is None) :
+        if (trie is not None) and (lookup_values is None) and (tokenizer is None):
 
             self._trie = trie
             self._matching_pipeline = trie.matching_pipeline or []
@@ -153,8 +153,9 @@ class MultiTokenLookupAnnotator(Annotator):
             self._init_lookup_structures(lookup_values, tokenizer)
 
         else:
-            raise RuntimeError("Please provide either looup_values and a tokenizer, "
-                               "or a trie.")
+            raise RuntimeError(
+                "Please provide either looup_values and a tokenizer, or a trie."
+            )
 
         self.overlapping = overlapping
 
