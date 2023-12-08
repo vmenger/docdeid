@@ -44,6 +44,13 @@ class Token:
         if len(self.text) != (self.end_char - self.start_char):
             raise ValueError("The span does not match the length of the text.")
 
+    def __getstate__(self) -> dict:
+        return {
+            "text": self.text,
+            "start_char": self.start_char,
+            "end_char": self.end_char,
+        }
+
     def set_previous_token(self, token: Optional[Token]) -> None:
         """
         Set the previous token, in a linked list fashion.
