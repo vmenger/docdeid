@@ -80,9 +80,9 @@ class Annotation:  # pylint: disable=R0902
         Args:
             by: A list of attributes, used for sorting.
             callbacks: A map of attributes to a callable function, to modify the value
-            on which is sorted (for example ``lambda x: -x`` for reversing).
+                on which is sorted (for example ``lambda x: -x`` for reversing).
             deterministic: Include all attributes in the sort key, so that ties are
-            not broken randomly but deterministically.
+                not broken randomly but deterministically.
 
         Returns:
             A tuple of the attributes specified, that can be passed to the key
@@ -138,13 +138,16 @@ class AnnotationSet(set[Annotation]):
         Args:
             by: A list of :class:`.Annotation` attributes, used for sorting.
             callbacks: A map of :class:`.Annotation` attributes to a callable
-            function, to modify the value on which is sorted (for example
-            ``lambda x: -x`` for reversing).
+                function, to modify the value on which is sorted (for example
+                ``lambda x: -x`` for reversing).
             deterministic: Include all attributes in the sort key, so that ties are
-            not broken randomly but deterministically.
+                not broken randomly but deterministically.
 
         Returns:
             A list with the annotations, sorted as specified.
+
+        Raises:
+            A RunTimeError, if the callbacks are not provided as a frozen dict.
         """
 
         if callbacks is not None and not isinstance(callbacks, frozendict):

@@ -72,7 +72,7 @@ class Token:
         Args:
             num: Searches the ``num``-th token to the left/right.
             attr: Either ``_previous_token`` or ``_next_token``, depending on which
-            to look for.
+                to look for.
 
         Returns:
             The token ``num`` positions to the left/right, if any, or ``None``
@@ -142,7 +142,7 @@ class TokenList:
         self._text_to_tokens: dict[str, defaultdict[str, list[Token]]] = {}
 
     def _link_tokens(self) -> None:
-        """Links the tokens."""
+
         for i in range(len(self._tokens) - 1):
             self._tokens[i].set_next_token(self._tokens[i + 1])
             self._tokens[i + 1].set_previous_token(self._tokens[i])
@@ -150,23 +150,17 @@ class TokenList:
     def token_index(self, token: Token) -> int:
         """
         Find the token index in this list, i.e. its nominal position in the list.
+
         Args:
             token: The input token.
 
         Returns: The index in this tokenlist.
-
         """
         return self._token_index[token]
 
     def _init_token_lookup(
         self, matching_pipeline: Optional[list[StringModifier]] = None
     ) -> None:
-        """
-        Initialize token lookup structures.
-
-        Args:
-            matching_pipeline: The matching pipeline to use.
-        """
 
         matching_pipeline = matching_pipeline or []
         pipe_key = str(matching_pipeline)
@@ -191,12 +185,13 @@ class TokenList:
         self, matching_pipeline: Optional[list[StringModifier]] = None
     ) -> set[str]:
         """
-        Get all words in this list of tokens. Evaluates lazily.
+        Get all unique words (i.e. token texts) in this ``TokenList``. Evaluates lazily.
 
         Args:
             matching_pipeline: The matching pipeline to apply.
 
-        Returns: A set of strings, with all words in this list of tokens.
+        Returns:
+            All the words in this ``TokenList`` as a set of strings.
         """
 
         matching_pipeline = matching_pipeline or []
@@ -220,7 +215,8 @@ class TokenList:
             lookup_values: The set of lookup values to match the token text against.
             matching_pipeline: The matching pipeline.
 
-        Returns: A set of ``Token``, of which the text matches one of the lookup values.
+        Returns:
+            A set of ``Token``, of which the text matches one of the lookup values.
         """
 
         matching_pipeline = matching_pipeline or []
@@ -238,33 +234,15 @@ class TokenList:
         return tokens
 
     def __iter__(self) -> Iterator[Token]:
-        """
-        An iterator over the tokens.
 
-        Returns:
-            An iterator over the tokens.
-        """
         return iter(self._tokens)
 
     def __len__(self) -> int:
-        """
-        The number of tokens.
 
-        Returns:
-            The number of tokens.
-        """
         return len(self._tokens)
 
     def __getitem__(self, index: int) -> Token:
-        """
-        Get :class:`.Token` at index.
 
-        Args:
-            index: The requested index.
-
-        Returns:
-            The :class:`.Token` at the specified index.
-        """
         return self._tokens[index]
 
     def __eq__(self, other: object) -> bool:
@@ -280,7 +258,7 @@ class TokenList:
                 :class:`.Token` equality.
 
         Raises:
-            ValueError: When trying to check equality of something different than a
+            ValueError: When trying to check equality of something different from a
             :class:`.TokenList`.
         """
 
@@ -296,10 +274,7 @@ class Tokenizer(ABC):  # pylint: disable=R0903
     tokens. Implementations should implement :meth:`.Tokenizer._split_text`.
 
     Args:
-        link_tokens: Whether to link the produced tokens by calling the
-        :meth:`.Token.set_previous_token` and :meth:`.Token.set_next_token` methods.
-        If true, it uses the logic implemented in the :meth:`.Tokenizer._previous_token`
-        and :meth:`.Tokenizer._next_token` methods.
+        link_tokens: Whether the produced :class:`TokenList` should link the tokens.
     """
 
     def __init__(self, link_tokens: bool = True) -> None:
@@ -314,7 +289,8 @@ class Tokenizer(ABC):  # pylint: disable=R0903
         Args:
             text: The input text.
 
-        Returns: A list of tokens, as determined by the tokenizer logic.
+        Returns:
+            A list of tokens, as determined by the tokenizer logic.
         """
 
     def tokenize(self, text: str) -> TokenList:

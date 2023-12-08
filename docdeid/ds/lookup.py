@@ -10,7 +10,7 @@ from docdeid.str.processor import StringModifier, StringProcessor, StripString
 
 class LookupStructure(Datastructure):  # pylint: disable=R0903
     """
-    Structure that contain strings, and allow efficiently checking whether a string is
+    Structure that contains strings, and allow efficiently checking whether a string is
     contained in it.
 
     Args:
@@ -53,7 +53,7 @@ class LookupStructure(Datastructure):  # pylint: disable=R0903
 
 class LookupSet(LookupStructure):
     """
-    Contains strings, that can efficiently be looked up. Additionally contains some
+    Contains strings, that can efficiently be looked up. Additionally, contains some
     logic for matching.
 
     Args:
@@ -119,9 +119,9 @@ class LookupSet(LookupStructure):
         Args:
             file_path: Full path to the file being opened.
             strip_lines: Whether to strip the lines. Applies :class:`.StripString` to
-            each line.
+                each line.
             cleaning_pipeline: An optional cleaning pipeline applied to the lines
-            in the file.
+                in the file.
             encoding: The encoding with which to open the file.
         """
 
@@ -144,7 +144,7 @@ class LookupSet(LookupStructure):
 
         Args:
             cleaning_pipeline: A cleaning pipeline applied to the items of this set.
-            This can also be used to transform the items.
+                This can also be used to transform the items.
             replace: Whether to replace the items with the new/transformed items.
         """
 
@@ -313,9 +313,9 @@ class LookupTrie(LookupStructure):
 
         Args:
             item: The input sequence of strings, of which to find the longest prefix
-            that matches an item in this Trie.
+                that matches an item in this Trie.
             start_i: The index of item at which to start the matching. This is useful
-            to avoid making copies of the items.
+                to avoid making copies of the items.
 
         Returns:
             The longest matching prefix, if any, or ``None`` if no matching prefix

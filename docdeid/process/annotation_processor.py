@@ -45,8 +45,8 @@ class OverlapResolver(AnnotationProcessor):
 
     Args:
         sort_by: A list of :class:`.Annotation` attributes to use for sorting.
-        sort_by_callbacks: A mapping from class attribute (by string) to callable,
-        to influence sort order (e.g. reverse with ``lambda x: -x``).
+        sort_by_callbacks: A mapping from class attribute (by string) to a callable,
+            to influence sort order (e.g. reverse with ``lambda x: -x``).
     """
 
     def __init__(
@@ -126,10 +126,10 @@ class MergeAdjacentAnnotations(AnnotationProcessor):
 
     Args:
         slack_regexp: A regexp that is used to match the characters between two
-        annotations.
+            annotations.
         check_overlap: If set to ``False``, there is no check if annotations are
-        non-overlapping. This will give some minor performance benefit if you are sure
-        there can be no overlap.
+            non-overlapping. This will give some minor performance benefit if you are
+            sure there can be no overlap.
     """
 
     def __init__(
@@ -209,6 +209,10 @@ class MergeAdjacentAnnotations(AnnotationProcessor):
         Returns:
             A new annotation, that encompasses both old annotations as determined by
             the internal logic.
+
+        Raises:
+            ValueError, when input contains overlapping annotations and `check_overlap`
+            is set to True.
         """
 
         return Annotation(

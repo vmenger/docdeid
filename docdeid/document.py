@@ -60,10 +60,10 @@ class Document:
     Args:
         text: The input text
         tokenizers: A mapping of tokenizer names to :class:`.Tokenizer`. If only one
-        tokenizer is used, ``default`` may be used as name to allow
-        :meth:`Document.get_tokens` to be called without a tokenizer name.
+            tokenizer is used, ``default`` may be used as name to allow
+            :meth:`Document.get_tokens` to be called without a tokenizer name.
         metadata: A dict with items, that can be accessed by document processors.
-        Will be stored in a :class:`.MetaData` object.
+            Will be stored in a :class:`.MetaData` object.
     """
 
     def __init__(

@@ -34,7 +34,7 @@ class TokenPattern(ABC):
     def token_precondition(self, token: Token) -> bool:  # pylint: disable=W0613
         """
         Use this to check if the pattern is applicable to a token (e.g. check if it has
-        neighbours). By default returns ``True``.
+        neighbours). By default, returns ``True``.
 
         Args:
             token: The :class:`.Token` the pattern will be applied to.

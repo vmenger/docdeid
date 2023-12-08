@@ -31,7 +31,6 @@ class Annotator(DocProcessor, ABC):
 
         Args:
             doc: The document to be processed.
-            **kwargs: Any other settings.
         """
         doc.annotations.update(self.annotate(doc))
 
@@ -53,7 +52,6 @@ class SingleTokenLookupAnnotator(Annotator):
     Matches single tokens based on lookup values.
 
     Args:
-        tag: The tag to use in the annotations.
         lookup_values: An iterable of strings that should be used for lookup.
         matching_pipeline: An optional pipeline that can be used for matching
             (e.g. lowercasing). Note that this degrades performance.
@@ -77,14 +75,6 @@ class SingleTokenLookupAnnotator(Annotator):
         super().__init__(*args, **kwargs)
 
     def _tokens_to_annotations(self, tokens: Iterable[Token]) -> list[Annotation]:
-        """
-        Process the matched tokens to annotations.
-
-        Args:
-            tokens: The list of matched tokens.
-
-        Returns: The list of annotations.
-        """
 
         return [
             Annotation(
@@ -116,16 +106,21 @@ class MultiTokenLookupAnnotator(Annotator):
     sequences.
 
     Args:
-        tag: The tag to use in the annotations.
         lookup_values: An iterable of strings, that should be matched. These are
-        tokenized internally.
-        tokenizer: A tokenizer that is used to create the sequence patterns from
-        ``lookup_values``.
+            tokenized internally.
         matching_pipeline: An optional pipeline that can be used for matching
-        (e.g. lowercasing). This has no specific impact on matching performance, other
-        than overhead for applying the pipeline to each string.
+            (e.g. lowercasing). This has no specific impact on matching performance,
+            other than overhead for applying the pipeline to each string.
+        tokenizer: A tokenizer that is used to create the sequence patterns from
+            ``lookup_values``.
+        trie: A trie that is used for matching, rather than a combination of
+            `lookup_values` and a `matching_pipeline` (cannot be used simultaneously).
         overlapping: Whether the annotator should match overlapping sequences,
-        or should process from left to right.
+            or should process from left to right.
+
+    Raises:
+        RunTimeError, when an incorrect combination of `lookup_values`,
+        `matching_pipeline` and `trie` is supplied.
     """
 
     def __init__(
@@ -235,13 +230,13 @@ class RegexpAnnotator(Annotator):
     not necessarily start/stop on token boundaries.
 
     Args:
-        tag: The tag to use in the annotations.
         regexp_pattern: A pattern, either as a `str` or a ``re.Pattern``, that will
-        be used for matching.
+            be used for matching.
         capturing_group: The capturing group of the pattern that should be used to
-        produce the annotation. By default, the entire match is used.
-        pre_match_tokens: A list of tokens, of which at least one must be present
-        for the annotator to start matching the regexp at all.
+            produce the annotation. By default, the entire match is used.
+        pre_match_words: A list of words (lookup values), of which at least one must
+            be present in the tokens for the annotator to start matching the regexp
+            at all.
     """
 
     def __init__(
@@ -249,7 +244,7 @@ class RegexpAnnotator(Annotator):
         regexp_pattern: Union[re.Pattern, str],
         *args,
         capturing_group: int = 0,
-        pre_match_tokens: Optional[list[str]] = None,
+        pre_match_words: Optional[list[str]] = None,
         **kwargs,
     ) -> None:
 
@@ -262,8 +257,8 @@ class RegexpAnnotator(Annotator):
         self.pre_match_tokens: Optional[set[str]] = None
         self.matching_pipeline: Optional[list[StringModifier]] = None
 
-        if pre_match_tokens is not None:
-            self.pre_match_tokens = set(pre_match_tokens)
+        if pre_match_words is not None:
+            self.pre_match_tokens = set(pre_match_words)
             self.matching_pipeline = [docdeid.str.LowercaseString()]
 
         super().__init__(*args, **kwargs)

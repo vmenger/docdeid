@@ -64,7 +64,7 @@ class DocProcessorGroup:
 
         Args:
             name: The name of the processor.
-            processor: The processor.
+            processor: The processor or processor group.
             position: The position at which to insert it. Will append if left
             unspecified.
         """
@@ -120,11 +120,11 @@ class DocProcessorGroup:
         Args:
             doc: The document to be processed.
             enabled: A set of strings, indicating which document processors to run for
-            this document. By default, all document processors are used. In case of
-            nested, it's necessary to supply both the name of the processor group,
-            and all of its containing processors (or a subset thereof).
+                this document. By default, all document processors are used. In case
+                of nested, it's necessary to supply both the name of the processor
+                group, and all of its containing processors (or a subset thereof).
             disabled: A set of strings, indicating which document processors not to
-            run for this document. Cannot be used together with `enabled`.
+                run for this document. Cannot be used together with `enabled`.
         """
 
         if (enabled is not None) and (disabled is not None):
@@ -144,10 +144,5 @@ class DocProcessorGroup:
                 proc.process(doc, enabled=enabled, disabled=disabled)
 
     def __iter__(self) -> Iterator:
-        """
-        Iterator for its processors.
 
-        Returns:
-            Iterator for its processors.
-        """
         return iter(self._processors.items())
