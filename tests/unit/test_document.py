@@ -6,6 +6,30 @@ from docdeid.document import Document, MetaData
 from docdeid.tokenizer import Tokenizer, TokenList
 
 
+class TestMetaData:
+    def test_add_metadata_item(self):
+        metadata = MetaData()
+
+        metadata["person_name"] = "Bob"
+
+        assert metadata["person_name"] == "Bob"
+
+    def test_overwrite_metadata_item_error(self):
+        metadata = MetaData()
+
+        metadata["person_name"] = "Bob"
+
+        with pytest.raises(RuntimeError):
+            metadata["person_name"] = "Mary"
+
+    def test_metadata_item_nonexistant(self):
+        metadata = MetaData()
+
+        metadata["person_name"] = "Bob"
+
+        assert metadata["something_that_doesnt_exist"] is None
+
+
 class TestDocument:
     def test_create_document(self):
         text = "Hello I'm Bob"
@@ -70,27 +94,3 @@ class TestDocument:
         doc = Document(text=text, metadata=metadata)
 
         assert doc.metadata["person_name"] == "Bob"
-
-
-class TestMetaData:
-    def test_add_metadata_item(self):
-        metadata = MetaData()
-
-        metadata["person_name"] = "Bob"
-
-        assert metadata["person_name"] == "Bob"
-
-    def test_overwrite_metadata_item_error(self):
-        metadata = MetaData()
-
-        metadata["person_name"] = "Bob"
-
-        with pytest.raises(RuntimeError):
-            metadata["person_name"] = "Mary"
-
-    def test_metadata_item_nonexistant(self):
-        metadata = MetaData()
-
-        metadata["person_name"] = "Bob"
-
-        assert metadata["something_that_doesnt_exist"] is None
