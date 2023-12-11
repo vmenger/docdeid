@@ -254,11 +254,11 @@ class RegexpAnnotator(Annotator):
         self.regexp_pattern = regexp_pattern
         self.capturing_group = capturing_group
 
-        self.pre_match_tokens: Optional[set[str]] = None
+        self.pre_match_words: Optional[set[str]] = None
         self.matching_pipeline: Optional[list[StringModifier]] = None
 
         if pre_match_words is not None:
-            self.pre_match_tokens = set(pre_match_words)
+            self.pre_match_words = set(pre_match_words)
             self.matching_pipeline = [docdeid.str.LowercaseString()]
 
         super().__init__(*args, **kwargs)
@@ -270,12 +270,12 @@ class RegexpAnnotator(Annotator):
 
     def annotate(self, doc: Document) -> list[Annotation]:
 
-        if self.pre_match_tokens is not None:
+        if self.pre_match_words is not None:
             try:
                 if (
                     doc.get_tokens()
                     .get_words(self.matching_pipeline)
-                    .isdisjoint(self.pre_match_tokens)
+                    .isdisjoint(self.pre_match_words)
                 ):
                     return []
             except RuntimeError:
