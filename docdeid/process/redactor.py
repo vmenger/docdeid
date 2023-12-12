@@ -68,7 +68,7 @@ class SimpleRedactor(Redactor):
     """
     Basic redactor, that replaces each entity in text with its tag. If the same entity
     occurs multiple times (with the same tag), it is replaced with ``tag-n``. Requires
-    the set of annotationst o be non-overlapping.
+    the set of annotations to be non-overlapping.
 
     Args:
         open_char: The open char to use for the replacment tag.
