@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `Annotation` and `Token` now only include `int`/`str` fields when serializing
 * formatting and linting settings
 * moved the logic for linking tokens to `TokenList` rather than `Tokenizer`
+* use `casefold()` instead of `lower()` for lowercasing
 
 ### Fixed
 * a bug with overlapping annotations in `MultiTokenLookupAnnotator`

@@ -71,7 +71,7 @@ class LowercaseString(StringModifier):
     """Lowercase a string."""
 
     def process(self, item: str) -> str:
-        return item.lower()
+        return item.casefold()
 
 
 class StripString(StringModifier):
