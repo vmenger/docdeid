@@ -2,6 +2,8 @@ name: build
 
 on:
   workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
 
@@ -34,7 +36,7 @@ jobs:
         poetry install --only dev
 
     - name: Test build
-      run: make test
+      run: python -m pytest .
 
     - name: Set up Pypi credentials
       run: poetry config pypi-token.pypi ${{ SECRETS.PYPI_TOKEN }}

@@ -1,21 +1,25 @@
 from abc import ABC, abstractmethod
 from collections import defaultdict
 
+from frozendict import frozendict
+
 from docdeid.annotation import Annotation, AnnotationSet
 from docdeid.document import Document
-from docdeid.process.doc import DocProcessor
+from docdeid.process.doc_processor import DocProcessor
 
 
 class Redactor(DocProcessor, ABC):
     """
-    Takes care of redacting the text by modifying it, based on the input text and annotations.
+    Takes care of redacting the text by modifying it, based on the input text and
+    annotations.
 
     Instantiations should implement the logic in :meth:`.Redactor.redact`.
     """
 
     def process(self, doc: Document, **kwargs) -> None:
         """
-        Process a document by redacting it, according to the logic in :meth:`.Redactor.redact`.
+        Process a document by redacting it, according to the logic in
+        :meth:`.Redactor.redact`.
 
         Args:
             doc: The document to process.
@@ -31,7 +35,8 @@ class Redactor(DocProcessor, ABC):
 
         Args:
             text: The input text.
-            annotations: The annotations that are produced by previous document processors.
+            annotations: The annotations that are produced by previous document
+            processors.
 
         Returns:
             The redacted text.
@@ -47,7 +52,8 @@ class RedactAllText(Redactor):
         close_char: The close char to use for the REPLACED tag.
 
     Returns:
-        The text ``REDACTED`` with the open and close char, literally (e.g. ``[REDACTED]``).
+        The text ``REDACTED`` with the open and close char, literally
+        (e.g. ``[REDACTED]``).
     """
 
     def __init__(self, open_char: str = "[", close_char: str = "]") -> None:
@@ -60,26 +66,32 @@ class RedactAllText(Redactor):
 
 class SimpleRedactor(Redactor):
     """
-    Basic redactor, that replaces each entity in text with its tag. If the same entity occurs multiple times (with the
-    same tag), it is replaced with ``tag-n``. Requires the set of annotationst o be non-overlapping.
+    Basic redactor, that replaces each entity in text with its tag. If the same entity
+    occurs multiple times (with the same tag), it is replaced with ``tag-n``. Requires
+    the set of annotations to be non-overlapping.
 
     Args:
         open_char: The open char to use for the replacment tag.
         close_char: The close char to use for the replacment tag.
-        check_overlap: Whether to check whether annotations overlap. If set to ``False`` but annotations are
-            overlapping, will not give correct results.
+        check_overlap: Whether to check whether annotations overlap. If set to
+        ``False`` but annotations are overlapping, will not give correct results.
 
     Returns:
-        The redacted text, with each entity recognized in the set of annotations replaced with the proper tag.
+        The redacted text, with each entity recognized in the set of annotations
+        replaced with the proper tag.
     """
 
-    def __init__(self, open_char: str = "[", close_char: str = "]", check_overlap: bool = True) -> None:
+    def __init__(
+        self, open_char: str = "[", close_char: str = "]", check_overlap: bool = True
+    ) -> None:
         self.open_char = open_char
         self.close_char = close_char
         self.check_overlap = check_overlap
 
     @staticmethod
-    def _group_annotations_by_tag(annotations: AnnotationSet) -> dict[str, list[Annotation]]:
+    def _group_annotations_by_tag(
+        annotations: AnnotationSet,
+    ) -> dict[str, list[Annotation]]:
         """
         Group annotations by tag.
 
@@ -98,9 +110,12 @@ class SimpleRedactor(Redactor):
         return groups
 
     @staticmethod
-    def _replace_annotations_in_text(text: str, annotations: AnnotationSet, replacement: dict[Annotation, str]) -> str:
+    def _replace_annotations_in_text(
+        text: str, annotations: AnnotationSet, replacement: dict[Annotation, str]
+    ) -> str:
         """
-        Replaces each annotation in the text with the string defined in ``replacement`` mapping.
+        Replaces each annotation in the text with the string defined in ``replacement``
+        mapping.
 
         Args:
             text: The original input text.
@@ -111,30 +126,42 @@ class SimpleRedactor(Redactor):
             The text, with each annotation replaced by its defined replacement.
         """
 
-        sorted_annotations = annotations.sorted(by=["end_char"], callbacks={"end_char": lambda x: -x})
+        sorted_annotations = annotations.sorted(
+            by=("end_char",), callbacks=frozendict(end_char=lambda x: -x)
+        )
 
         for annotation in sorted_annotations:
 
-            text = text[: annotation.start_char] + replacement[annotation] + text[annotation.end_char :]
+            text = (
+                text[: annotation.start_char]
+                + replacement[annotation]
+                + text[annotation.end_char :]
+            )
 
         return text
 
     def redact(self, text: str, annotations: AnnotationSet) -> str:
         if self.check_overlap and annotations.has_overlap():
-            raise ValueError(f"{self.__class__} received input with overlapping annotations.")
+            raise ValueError(
+                f"{self.__class__} received input with overlapping annotations."
+            )
 
         annotation_text_to_counter: dict[str, int] = {}
 
-        for tag, annotation_group in self._group_annotations_by_tag(annotations).items():
+        for _, annotation_group in self._group_annotations_by_tag(annotations).items():
 
             annotation_text_to_counter_group: dict[str, int] = {}
 
-            annotation_group = sorted(annotation_group, key=lambda a: a.get_sort_key(by=["end_char"]))
+            annotation_group = sorted(
+                annotation_group, key=lambda a: a.get_sort_key(by=("end_char",))
+            )
 
             for annotation in annotation_group:
 
                 if annotation.text not in annotation_text_to_counter_group:
-                    annotation_text_to_counter_group[annotation.text] = len(annotation_text_to_counter_group) + 1
+                    annotation_text_to_counter_group[annotation.text] = (
+                        len(annotation_text_to_counter_group) + 1
+                    )
 
             annotation_text_to_counter |= annotation_text_to_counter_group
 
@@ -150,4 +177,6 @@ class SimpleRedactor(Redactor):
                 f"{self.close_char}"
             )
 
-        return self._replace_annotations_in_text(text, annotations, annotation_replacement)
+        return self._replace_annotations_in_text(
+            text, annotations, annotation_replacement
+        )

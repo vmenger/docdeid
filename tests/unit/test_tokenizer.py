@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
-from docdeid.tokenize import (
+import docdeid.str
+from docdeid.tokenizer import (
     SpaceSplitTokenizer,
     Token,
     Tokenizer,
@@ -68,28 +69,60 @@ class TestTokenList:
         for i, token in enumerate(short_tokens):
             assert token == token_list[i]
 
+    def test_index(self, short_tokens):
+
+        token_list = TokenList(short_tokens)
+
+        for i, token in enumerate(short_tokens):
+            assert token_list.token_index(token) == i
+
+    def test_create_tokenlist_link(self, short_tokens):
+        token_list = TokenList(short_tokens)
+
+        assert token_list[1].previous() is token_list[0]
+        assert token_list[2].previous() is token_list[1]
+        assert token_list[0].next() is token_list[1]
+        assert token_list[1].next() is token_list[2]
+
+    def test_create_tokenlist_non_linked(self, short_tokens):
+        token_list = TokenList(short_tokens, link_tokens=False)
+
+        for token in token_list:
+            assert token.previous() is None
+            assert token.next() is None
+
     def test_tokenlist_equal(self, short_tokens):
         token_list_1 = TokenList(short_tokens)
         token_list_2 = TokenList(short_tokens)
 
         assert token_list_1 == token_list_2
 
-    def test_init_token_lookup(self, short_tokens):
-        token_list = TokenList(short_tokens)
-        words, text_to_tokens = token_list._init_token_lookup()
+    def test_get_words(self, short_tokens):
 
-        assert words == {"Hello", "I'm", "Bob"}
-        assert text_to_tokens["Hello"] == [short_tokens[0]]
-        assert text_to_tokens["I'm"] == [short_tokens[1]]
-        assert text_to_tokens["Bob"] == [short_tokens[2]]
-        assert text_to_tokens["something_else"] == []
+        token_list = TokenList(short_tokens)
+
+        assert token_list.get_words() == {"Hello", "I'm", "Bob"}
+
+    def test_get_words_with_matching_pipeline(self, short_tokens):
+
+        token_list = TokenList(short_tokens)
+        matching_pipeline = [docdeid.str.LowercaseString()]
+
+        assert token_list.get_words(matching_pipeline) == {"hello", "i'm", "bob"}
 
     def test_token_lookup(self, long_tokens):
+
         token_list = TokenList(long_tokens)
 
         assert token_list.token_lookup(lookup_values=set()) == set()
-        assert token_list.token_lookup(lookup_values={"John", "Lucas"}) == {long_tokens[8], long_tokens[24]}
-        assert token_list.token_lookup(lookup_values={"something", "something_else"}) == set()
+        assert token_list.token_lookup(lookup_values={"John", "Lucas"}) == {
+            long_tokens[8],
+            long_tokens[24],
+        }
+        assert (
+            token_list.token_lookup(lookup_values={"something", "something_else"})
+            == set()
+        )
         assert token_list.token_lookup(lookup_values={" "}) == {
             long_tokens[1],
             long_tokens[3],
@@ -102,42 +135,54 @@ class TestTokenList:
             long_tokens[21],
         }
 
+    def test_token_lookup_with_matching_pipeline(self, long_tokens):
+
+        token_list = TokenList(long_tokens)
+        matching_pipeline = [docdeid.str.LowercaseString()]
+
+        assert (
+            token_list.token_lookup(
+                lookup_values=set(), matching_pipeline=matching_pipeline
+            )
+            == set()
+        )
+        assert token_list.token_lookup(
+            lookup_values={"john", "lucas"}, matching_pipeline=matching_pipeline
+        ) == {
+            long_tokens[8],
+            long_tokens[24],
+        }
+        assert (
+            token_list.token_lookup(
+                lookup_values={"John", "Lucas"}, matching_pipeline=matching_pipeline
+            )
+            == set()
+        )
+
 
 class TestBaseTokenizer:
-    def test_previous_token(self, short_tokens):
-        assert Tokenizer._previous_token(0, short_tokens) is None
-        assert Tokenizer._previous_token(1, short_tokens) is short_tokens[0]
-        assert Tokenizer._previous_token(2, short_tokens) is short_tokens[1]
-
-    def test_next_token(self, short_tokens):
-        assert Tokenizer._next_token(0, short_tokens) is short_tokens[1]
-        assert Tokenizer._next_token(1, short_tokens) is short_tokens[2]
-        assert Tokenizer._next_token(2, short_tokens) is None
-
-    @patch("docdeid.tokenize.Tokenizer.__abstractmethods__", set())
+    @patch("docdeid.tokenizer.Tokenizer.__abstractmethods__", set())
     def test_tokenize_link(self, short_text, short_tokens):
         tokenizer = Tokenizer(link_tokens=True)
 
         with patch.object(tokenizer, "_split_text", return_value=short_tokens):
-
             tokens = tokenizer.tokenize(short_text)
 
-            assert tokens[1].previous() is tokens[0]
-            assert tokens[2].previous() is tokens[1]
-            assert tokens[0].next() is tokens[1]
-            assert tokens[1].next() is tokens[2]
+        assert tokens[1].previous() is tokens[0]
+        assert tokens[2].previous() is tokens[1]
+        assert tokens[0].next() is tokens[1]
+        assert tokens[1].next() is tokens[2]
 
-    @patch("docdeid.tokenize.Tokenizer.__abstractmethods__", set())
+    @patch("docdeid.tokenizer.Tokenizer.__abstractmethods__", set())
     def test_tokenize_no_link(self, short_text, short_tokens):
         tokenizer = Tokenizer(link_tokens=False)
 
         with patch.object(tokenizer, "_split_text", return_value=short_tokens):
-
             tokens = tokenizer.tokenize(short_text)
 
-            for token in tokens:
-                assert token.previous() is None
-                assert token.next() is None
+        for token in tokens:
+            assert token.previous() is None
+            assert token.next() is None
 
 
 class TestSpaceSplitTokenizer:

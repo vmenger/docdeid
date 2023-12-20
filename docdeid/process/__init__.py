@@ -1,4 +1,4 @@
-from .annotation_set import (
+from .annotation_processor import (
     AnnotationProcessor,
     MergeAdjacentAnnotations,
     OverlapResolver,
@@ -10,5 +10,5 @@ from .annotator import (
     SingleTokenLookupAnnotator,
     TokenPatternAnnotator,
 )
-from .doc import DocProcessor, DocProcessorGroup
+from .doc_processor import DocProcessor, DocProcessorGroup
 from .redactor import RedactAllText, Redactor, SimpleRedactor

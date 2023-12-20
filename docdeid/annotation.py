@@ -1,14 +1,17 @@
-import inspect
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
-from docdeid.tokenize import Token
+from frozendict import frozendict
+
+from docdeid.tokenizer import Token
 
 UNKNOWN_ATTR_DEFAULT: Any = 0
 
+_OPTIONAL_FIELDS = {"start_token", "end_token", "_key_cache"}
+
 
 @dataclass(frozen=True)
-class Annotation:
+class Annotation:  # pylint: disable=R0902
     """An annotation contains information on a specific span of text that is tagged."""
 
     text: str
@@ -24,18 +27,21 @@ class Annotation:
     """The tag (e.g. name, location)."""
 
     priority: int = field(default=0, repr=True, compare=False)
-    """An additional priority attribute, that can be used for resolving overlap/merges."""
+    """An additional priority attribute, that can be used for resolving
+    overlap/merges."""
 
     start_token: Optional[Token] = field(default=None, repr=False, compare=False)
     """
-    Optionally, the first :class:`.Token` in the sequence of tokens corresponding to this annotation.
+    Optionally, the first :class:`.Token` in the sequence of tokens corresponding to
+    this annotation.
 
     Should only be used when the annotation starts on a token boundary.
     """
 
     end_token: Optional[Token] = field(default=None, repr=False, compare=False)
     """
-    Optionally, the last :class:`.Token` in the sequence of tokens corresponding to this annotation.
+    Optionally, the last :class:`.Token` in the sequence of tokens corresponding to this
+    annotation.
 
     Should only be used when the annotation ends on a token boundary.
     """
@@ -43,51 +49,52 @@ class Annotation:
     length: int = field(init=False)
     """The number of characters of the annotation text."""
 
+    _key_cache: dict = field(default_factory=dict, repr=False, compare=False)
+
     def __post_init__(self) -> None:
         if len(self.text) != (self.end_char - self.start_char):
             raise ValueError("The span does not match the length of the text.")
 
         object.__setattr__(self, "length", len(self.text))
 
-    @classmethod
-    def optional_fields(cls) -> set[str]:
-        """
-        List the optional fields of the class, by inspecting it.
-
-        Returns: A set of strings denoting the optional fields.
-        """
-
-        sign = inspect.signature(cls)
-        params = set()
-
-        for name in sign.parameters:
-            if str(getattr(sign.parameters[name], "_annotation")).startswith("typing.Optional"):
-                params.add(str(name))
-
-        return params
+    def __getstate__(self) -> dict:
+        return {
+            "text": self.text,
+            "start_char": self.start_char,
+            "end_char": self.end_char,
+            "tag": self.tag,
+            "priority": self.priority,
+            "length": self.length,
+        }
 
     def get_sort_key(
         self,
-        by: list[str],
-        callbacks: Optional[dict[str, Callable]] = None,
+        by: tuple,  # pylint: disable=C0103
+        callbacks: Optional[frozendict[str, Callable]] = None,
         deterministic: bool = True,
     ) -> tuple:
         """
-        The sort key of an :class:`.Annotation` is used to order annotations by one or more of its attributes.
+        The sort key of an :class:`.Annotation` is used to order annotations by one or
+        more of its attributes.
 
         Args:
             by: A list of attributes, used for sorting.
-            callbacks: A map of attributes to a callable function, to modify the value on which is sorted
-                (for example ``lambda x: -x`` for reversing).
-            deterministic: Include all attributes in the sort key, so that ties are not broken randomly but
-                deterministically.
+            callbacks: A map of attributes to a callable function, to modify the value
+                on which is sorted (for example ``lambda x: -x`` for reversing).
+            deterministic: Include all attributes in the sort key, so that ties are
+                not broken randomly but deterministically.
 
         Returns:
-            A tuple of the attributes specified, that can be passed to the key argument of the sorted function
-            of (e.g.) ``list``.
+            A tuple of the attributes specified, that can be passed to the key
+            argument of the sorted function of (e.g.) ``list``.
         """
 
-        key = []
+        cache_key = hash((self, by, callbacks, deterministic))
+
+        if cache_key in self._key_cache:
+            return self._key_cache[cache_key]
+
+        sort_key = []
 
         for attr in by:
 
@@ -96,16 +103,20 @@ class Annotation:
             if callbacks is not None and (attr in callbacks):
                 val = callbacks[attr](val)
 
-            key.append(val)
+            sort_key.append(val)
 
         if deterministic:
 
-            extra_attrs = sorted(set(self.__dict__.keys()) - set(by) - self.optional_fields())
+            extra_attrs = sorted(set(self.__dict__.keys()) - set(by) - _OPTIONAL_FIELDS)
 
             for attr in extra_attrs:
-                key.append(getattr(self, attr, UNKNOWN_ATTR_DEFAULT))
+                sort_key.append(getattr(self, attr, UNKNOWN_ATTR_DEFAULT))
 
-        return tuple(key)
+        ret = tuple(sort_key)
+
+        self._key_cache[cache_key] = ret
+
+        return ret
 
 
 class AnnotationSet(set[Annotation]):
@@ -117,8 +128,8 @@ class AnnotationSet(set[Annotation]):
 
     def sorted(
         self,
-        by: list[str],
-        callbacks: Optional[dict[str, Callable]] = None,
+        by: tuple,  # pylint: disable=C0103
+        callbacks: Optional[frozendict[str, Callable]] = None,
         deterministic: bool = True,
     ) -> list[Annotation]:
         """
@@ -126,18 +137,30 @@ class AnnotationSet(set[Annotation]):
 
         Args:
             by: A list of :class:`.Annotation` attributes, used for sorting.
-            callbacks: A map of :class:`.Annotation` attributes to a callable function, to modify the value on which
-                is sorted (for example ``lambda x: -x`` for reversing).
-            deterministic: Include all attributes in the sort key, so that ties are not broken randomly but
-                deterministically.
+            callbacks: A map of :class:`.Annotation` attributes to a callable
+                function, to modify the value on which is sorted (for example
+                ``lambda x: -x`` for reversing).
+            deterministic: Include all attributes in the sort key, so that ties are
+                not broken randomly but deterministically.
 
         Returns:
             A list with the annotations, sorted as specified.
+
+        Raises:
+            A RunTimeError, if the callbacks are not provided as a frozen dict.
         """
+
+        if callbacks is not None and not isinstance(callbacks, frozendict):
+            raise RuntimeError(
+                "Please provide the callbacks as a frozen dict, e.g. "
+                "frozendict.frozendict(end_char=lambda x: -x)"
+            )
 
         return sorted(
             list(self),
-            key=lambda x: x.get_sort_key(by=by, callbacks=callbacks, deterministic=deterministic),
+            key=lambda x: x.get_sort_key(
+                by=by, callbacks=callbacks, deterministic=deterministic
+            ),
         )
 
     def has_overlap(self) -> bool:
@@ -148,7 +171,7 @@ class AnnotationSet(set[Annotation]):
             ``True`` if overlapping annotations are found, ``False`` otherwise.
         """
 
-        annotations = self.sorted(by=["start_char"])
+        annotations = self.sorted(by=("start_char",))
 
         for annotation, next_annotation in zip(annotations, annotations[1:]):
 

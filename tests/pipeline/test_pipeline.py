@@ -7,7 +7,7 @@ from docdeid.process.annotator import (
     SingleTokenLookupAnnotator,
 )
 from docdeid.process.redactor import SimpleRedactor
-from docdeid.tokenize import SpaceSplitTokenizer
+from docdeid.tokenizer import SpaceSplitTokenizer
 
 
 @pytest.fixture
@@ -25,13 +25,16 @@ class TestDeidentify:
         deidentifier = DocDeid()
         deidentifier.tokenizers["default"] = SpaceSplitTokenizer()
         deidentifier.processors.add_processor(
-            "name_annotator", SingleTokenLookupAnnotator(lookup_values=["Bob"], tag="name")
+            "name_annotator",
+            SingleTokenLookupAnnotator(lookup_values=["Bob"], tag="name"),
         )
         deidentifier.processors.add_processor("redactor", SimpleRedactor())
 
         doc = deidentifier.deidentify(text=short_text)
 
-        expected_annotations = AnnotationSet([Annotation(text="Bob", start_char=17, end_char=20, tag="name")])
+        expected_annotations = AnnotationSet(
+            [Annotation(text="Bob", start_char=17, end_char=20, tag="name")]
+        )
 
         expected_text = "Hello my name is [NAME-1]"
 
@@ -43,12 +46,15 @@ class TestDeidentify:
         tokenizer = SpaceSplitTokenizer()
         deidentifier.tokenizers["default"] = tokenizer
         deidentifier.processors.add_processor(
-            "name_annotator", SingleTokenLookupAnnotator(lookup_values=["Bob"], tag="name")
+            "name_annotator",
+            SingleTokenLookupAnnotator(lookup_values=["Bob"], tag="name"),
         )
         deidentifier.processors.add_processor(
             "location_annotator",
             MultiTokenLookupAnnotator(
-                lookup_values=["the United States of America"], tokenizer=tokenizer, tag="location"
+                lookup_values=["the United States of America"],
+                tokenizer=tokenizer,
+                tag="location",
             ),
         )
         deidentifier.processors.add_processor("redactor", SimpleRedactor())
@@ -58,7 +64,12 @@ class TestDeidentify:
         expected_annotations = AnnotationSet(
             [
                 Annotation(text="Bob", start_char=17, end_char=20, tag="name"),
-                Annotation(text="the United States of America", start_char=35, end_char=63, tag="location"),
+                Annotation(
+                    text="the United States of America",
+                    start_char=35,
+                    end_char=63,
+                    tag="location",
+                ),
             ]
         )
 
@@ -72,20 +83,32 @@ class TestDeidentify:
         tokenizer = SpaceSplitTokenizer()
         deidentifier.tokenizers["default"] = tokenizer
         deidentifier.processors.add_processor(
-            "name_annotator", SingleTokenLookupAnnotator(lookup_values=["Bob"], tag="name")
+            "name_annotator",
+            SingleTokenLookupAnnotator(lookup_values=["Bob"], tag="name"),
         )
         deidentifier.processors.add_processor(
             "location_annotator",
             MultiTokenLookupAnnotator(
-                lookup_values=["the United States of America"], tokenizer=tokenizer, tag="location"
+                lookup_values=["the United States of America"],
+                tokenizer=tokenizer,
+                tag="location",
             ),
         )
         deidentifier.processors.add_processor("redactor", SimpleRedactor())
 
-        doc = deidentifier.deidentify(text=long_text, enabled={"location_annotator", "redactor"})
+        doc = deidentifier.deidentify(
+            text=long_text, enabled={"location_annotator", "redactor"}
+        )
 
         expected_annotations = AnnotationSet(
-            [Annotation(text="the United States of America", start_char=35, end_char=63, tag="location")]
+            [
+                Annotation(
+                    text="the United States of America",
+                    start_char=35,
+                    end_char=63,
+                    tag="location",
+                )
+            ]
         )
 
         expected_text = "Hello my name is Bob and I live in [LOCATION-1]"
@@ -98,12 +121,15 @@ class TestDeidentify:
         tokenizer = SpaceSplitTokenizer()
         deidentifier.tokenizers["default"] = tokenizer
         deidentifier.processors.add_processor(
-            "name_annotator", SingleTokenLookupAnnotator(lookup_values=["Bob"], tag="name")
+            "name_annotator",
+            SingleTokenLookupAnnotator(lookup_values=["Bob"], tag="name"),
         )
         deidentifier.processors.add_processor(
             "location_annotator",
             MultiTokenLookupAnnotator(
-                lookup_values=["the United States of America"], tokenizer=tokenizer, tag="location"
+                lookup_values=["the United States of America"],
+                tokenizer=tokenizer,
+                tag="location",
             ),
         )
         deidentifier.processors.add_processor("redactor", SimpleRedactor())
@@ -111,7 +137,14 @@ class TestDeidentify:
         doc = deidentifier.deidentify(text=long_text, disabled={"name_annotator"})
 
         expected_annotations = AnnotationSet(
-            [Annotation(text="the United States of America", start_char=35, end_char=63, tag="location")]
+            [
+                Annotation(
+                    text="the United States of America",
+                    start_char=35,
+                    end_char=63,
+                    tag="location",
+                )
+            ]
         )
 
         expected_text = "Hello my name is Bob and I live in [LOCATION-1]"

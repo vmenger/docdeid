@@ -1,8 +1,8 @@
 from unittest.mock import patch
 
 from docdeid.deidentifier import DocDeid
-from docdeid.process.doc import DocProcessor
-from docdeid.tokenize import Tokenizer
+from docdeid.process.doc_processor import DocProcessor
+from docdeid.tokenizer import Tokenizer
 
 
 class TestDocDeid:
@@ -11,7 +11,7 @@ class TestDocDeid:
         doc = dd.deidentify(text="test")
         assert doc.text == "test"
 
-    @patch("docdeid.process.doc.DocProcessor.__abstractmethods__", set())
+    @patch("docdeid.process.doc_processor.DocProcessor.__abstractmethods__", set())
     def test_add_processors(self):
         proc_1 = DocProcessor()
         proc_2 = DocProcessor()
@@ -20,14 +20,16 @@ class TestDocDeid:
         dd.processors.add_processor("proc_1", proc_1)
         dd.processors.add_processor("proc_2", proc_2)
 
-        with patch.object(proc_1, "process") as proc1_process, patch.object(proc_2, "process") as proc2_process:
+        with patch.object(proc_1, "process") as proc1_process, patch.object(
+            proc_2, "process"
+        ) as proc2_process:
 
             dd.deidentify(text="_")
 
             proc1_process.assert_called_once()
             proc2_process.assert_called_once()
 
-    @patch("docdeid.tokenize.Tokenizer.__abstractmethods__", set())
+    @patch("docdeid.tokenizer.Tokenizer.__abstractmethods__", set())
     def test_add_tokenizers(self):
         tokenizer_1 = Tokenizer()
         tokenizer_2 = Tokenizer()

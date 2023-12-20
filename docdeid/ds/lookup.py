@@ -8,16 +8,20 @@ from docdeid.ds.ds import Datastructure
 from docdeid.str.processor import StringModifier, StringProcessor, StripString
 
 
-class LookupStructure(Datastructure):
+class LookupStructure(Datastructure):  # pylint: disable=R0903
     """
-    Structure that contain strings, and allow efficiently checking whether a string is contained in it.
+    Structure that contains strings, and allow efficiently checking whether a string is
+    contained in it.
 
     Args:
-        matching_pipeline: An optional list of :class:`.StringModifier`, that will be used to match an item
-            against the structure. Implementations of :class:`.LookupStructure` must implement the logic itself.
+        matching_pipeline: An optional list of :class:`.StringModifier`, that will be
+        used to match an item against the structure. Implementations of
+        :class:`.LookupStructure` must implement the logic itself.
     """
 
-    def __init__(self, matching_pipeline: Optional[list[StringModifier]] = None) -> None:
+    def __init__(
+        self, matching_pipeline: Optional[list[StringModifier]] = None
+    ) -> None:
         self.matching_pipeline = matching_pipeline
 
     def _apply_matching_pipeline(self, item: str) -> str:
@@ -49,10 +53,12 @@ class LookupStructure(Datastructure):
 
 class LookupSet(LookupStructure):
     """
-    Contains strings, that can efficiently be looked up. Additionally contains some logic for matching.
+    Contains strings, that can efficiently be looked up. Additionally, contains some
+    logic for matching.
 
     Args:
-        matching_pipeline: An optional list of :class:`.StringModifier`, that will be used to match an item
+        matching_pipeline: An optional list of :class:`.StringModifier`, that will be
+        used to match an item
             against the set.
     """
 
@@ -74,7 +80,8 @@ class LookupSet(LookupStructure):
 
         Args:
             items: The iterable of strings.
-            cleaning_pipeline: An optional cleaning pipeline applied to the strings in the iterator.
+            cleaning_pipeline: An optional cleaning pipeline applied to the strings
+            in the iterator.
         """
 
         if cleaning_pipeline is not None:
@@ -111,8 +118,10 @@ class LookupSet(LookupStructure):
 
         Args:
             file_path: Full path to the file being opened.
-            strip_lines: Whether to strip the lines. Applies :class:`.StripString` to each line.
-            cleaning_pipeline: An optional cleaning pipeline applied to the lines in the file.
+            strip_lines: Whether to strip the lines. Applies :class:`.StripString` to
+                each line.
+            cleaning_pipeline: An optional cleaning pipeline applied to the lines
+                in the file.
             encoding: The encoding with which to open the file.
         """
 
@@ -130,12 +139,12 @@ class LookupSet(LookupStructure):
         replace: bool = False,
     ) -> None:
         """
-        Add items from self (this items of this :class:`.LookupSet`). This can be used to do a transformation or
-        replacment of the items.
+        Add items from self (this items of this :class:`.LookupSet`). This can be used
+        to do a transformation or replacment of the items.
 
         Args:
-            cleaning_pipeline: A cleaning pipeline applied to the items of this set. This can also be used
-                to transform the items.
+            cleaning_pipeline: A cleaning pipeline applied to the items of this set.
+                This can also be used to transform the items.
             replace: Whether to replace the items with the new/transformed items.
         """
 
@@ -170,7 +179,8 @@ class LookupSet(LookupStructure):
 
     def __add__(self, other: object) -> LookupSet:
         """
-        Adds the items of another :class:`.LookupSet` to this one. Respects this sets matching pipeline.
+        Adds the items of another :class:`.LookupSet` to this one. Respects this sets
+        matching pipeline.
 
         Args:
             other: Another :class:`.LookupSet` to be added.
@@ -183,7 +193,10 @@ class LookupSet(LookupStructure):
         """
 
         if not isinstance(other, LookupSet):
-            raise ValueError(f"Can only add LookupSet together, trying to add a {type(other.__class__)}")
+            raise ValueError(
+                f"Can only add LookupSet together, trying to add a "
+                f"{type(other.__class__)}"
+            )
 
         self.add_items_from_iterable(other)
 
@@ -191,7 +204,8 @@ class LookupSet(LookupStructure):
 
     def __sub__(self, other: object) -> LookupSet:
         """
-        Remove the items of another :class:`.LookupSet` from this one. Respects this sets matching pipeline.
+        Remove the items of another :class:`.LookupSet` from this one. Respects this
+        sets matching pipeline.
 
         Args:
             other: Another :class:`.LookupSet` to be removed.
@@ -200,12 +214,14 @@ class LookupSet(LookupStructure):
             This lookupset.
 
         Raises:
-            ValueError: When trying to subtract something else than a :class:`.LookupSet`.
+            ValueError: When trying to subtract something else than a
+            :class:`.LookupSet`.
         """
 
         if not isinstance(other, LookupSet):
             raise ValueError(
-                f"Can only subtract LookupSet from each other, trying to subtract a {type(other.__class__)}"
+                f"Can only subtract LookupSet from each other, trying to subtract a "
+                f"{type(other.__class__)}"
             )
 
         self.remove_items_from_iterable(other)
@@ -235,12 +251,13 @@ class LookupSet(LookupStructure):
 
 class LookupTrie(LookupStructure):
     """
-    Efficiently contains lists of strings (e.g. tokens), for lookup. This is done by using a trie datastructure, which
-    maps each element in the sequence of strings to a next trie.
+    Efficiently contains lists of strings (e.g. tokens), for lookup. This is done by
+    using a trie datastructure, which maps each element in the sequence of strings to a
+    next trie.
 
     Args:
-        matching_pipeline: An optional list of :class:`.StringModifier`, that will be used to match an item
-            against the Trie.
+        matching_pipeline: An optional list of :class:`.StringModifier`, that will be
+        used to match an item against the Trie.
     """
 
     def __init__(self, *args, **kwargs) -> None:
@@ -286,16 +303,23 @@ class LookupTrie(LookupStructure):
 
         return (head in self.children) and tail in self.children[head]
 
-    def longest_matching_prefix(self, item: list[str]) -> Union[list[str], None]:
+    def longest_matching_prefix(
+        self, item: list[str], start_i: int = 0
+    ) -> Union[list[str], None]:
         """
-        Finds the longest matching prefix of a list of strings. This is used to find the longest matching pattern at a
-        current position of a text. Respects the matching pipeline.
+        Finds the longest matching prefix of a list of strings. This is used to find the
+        longest matching pattern at a current position of a text. Respects the matching
+        pipeline.
 
         Args:
-            item: The input sequence of strings, of which to find the longest prefix that matches an item in this Trie.
+            item: The input sequence of strings, of which to find the longest prefix
+                that matches an item in this Trie.
+            start_i: The index of item at which to start the matching. This is useful
+                to avoid making copies of the items.
 
         Returns:
-            The longest matching prefix, if any, or ``None`` if no matching prefix is found.
+            The longest matching prefix, if any, or ``None`` if no matching prefix
+            is found.
         """
 
         longest_match = None
@@ -306,9 +330,21 @@ class LookupTrie(LookupStructure):
             if current_node.is_terminal:
                 longest_match = i
 
-            if i >= len(item) or (self._apply_matching_pipeline(item[i]) not in current_node.children):
+            if start_i + i >= len(item) or (
+                self._apply_matching_pipeline(item[start_i + i])
+                not in current_node.children
+            ):
                 break
 
-            current_node = current_node.children[self._apply_matching_pipeline(item[i])]
+            current_node = current_node.children[
+                self._apply_matching_pipeline(item[start_i + i])
+            ]
 
-        return [self._apply_matching_pipeline(item) for item in item[:longest_match]] if longest_match else None
+        return (
+            [
+                self._apply_matching_pipeline(item)
+                for item in item[start_i : start_i + longest_match]
+            ]
+            if longest_match
+            else None
+        )

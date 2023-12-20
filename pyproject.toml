@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "docdeid"
-version = "0.1.10"
+version = "1.0.0"
 description = "Create your own document de-identifier using docdeid, a simple framework independent of language or domain."
 license = "MIT"
 authors = [
@@ -29,6 +29,7 @@ author = "Vincent Menger"
 [tool.poetry.dependencies]
 python = "^3.9"
 numpy = "^1.23.1"
+frozendict = "^2.3.10"
 
 [tool.poetry.group.dev]
 optional = false
@@ -43,6 +44,7 @@ isort = "^5.10.1"
 black = "^22.8.0"
 mypy = "^0.982"
 docformatter = "^1.5.0"
+flake8-pyproject = "^1.2.3"
 
 [tool.poetry.group.docs]
 optional = true
@@ -56,3 +58,31 @@ myst-parser = "^0.18.1"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[tool.docformatter]
+recursive = true
+in-place = true
+black = true
+pre-summary-newline = true
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ['E203', 'ANN101', 'ANN102', 'ANN002', 'ANN003', 'DC100']
+per-file-ignores = [
+    'tests/conftest.py:F401,F403',
+    '__init__.py:F401',
+    'tests/*:ANN,DC',
+]
+
+[tool.pylint]
+disable = ['C0114']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=docdeid --cov-fail-under=85"

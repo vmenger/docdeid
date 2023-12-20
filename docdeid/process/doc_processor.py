@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from typing import Iterator, Optional
+from typing import Iterator, Optional, Union
 
 from docdeid.document import Document
 
 
-class DocProcessor(ABC):
+class DocProcessor(ABC):  # pylint: disable=R0903
     """Something that processes a document."""
 
     @abstractmethod
@@ -19,7 +19,7 @@ class DocProcessor(ABC):
         """
 
 
-class DocProcessorGroup(DocProcessor):
+class DocProcessorGroup:
     """
     A group of :class:`.DocProcessor`, that executes the containing processors in order.
 
@@ -27,7 +27,9 @@ class DocProcessorGroup(DocProcessor):
     """
 
     def __init__(self) -> None:
-        self._processors: OrderedDict[str, DocProcessor] = OrderedDict()
+        self._processors: OrderedDict[
+            str, Union[DocProcessor | DocProcessorGroup]
+        ] = OrderedDict()
 
     def get_names(self, recursive: bool = True) -> list[str]:
         """
@@ -51,14 +53,20 @@ class DocProcessorGroup(DocProcessor):
 
         return names
 
-    def add_processor(self, name: str, processor: DocProcessor, position: Optional[int] = None) -> None:
+    def add_processor(
+        self,
+        name: str,
+        processor: Union[DocProcessor, "DocProcessorGroup"],
+        position: Optional[int] = None,
+    ) -> None:
         """
         Add a document processor to the group.
 
         Args:
             name: The name of the processor.
-            processor: The processor.
-            position: The position at which to insert it. Will append if left unspecified.
+            processor: The processor or processor group.
+            position: The position at which to insert it. Will append if left
+            unspecified.
         """
 
         if position is None:
@@ -67,7 +75,9 @@ class DocProcessorGroup(DocProcessor):
 
         new_processors = OrderedDict()
 
-        for i, (existing_name, existing_processor) in enumerate(self._processors.items()):
+        for i, (existing_name, existing_processor) in enumerate(
+            self._processors.items()
+        ):
 
             if i == position:
                 new_processors[name] = processor
@@ -85,7 +95,7 @@ class DocProcessorGroup(DocProcessor):
         """
         del self._processors[name]
 
-    def __getitem__(self, name: str) -> DocProcessor:
+    def __getitem__(self, name: str) -> Union[DocProcessor, "DocProcessorGroup"]:
         """
         Get a document processor by name.
 
@@ -98,21 +108,24 @@ class DocProcessorGroup(DocProcessor):
 
         return self._processors[name]
 
-    def process(self, doc: Document, **kwargs) -> None:
+    def process(
+        self,
+        doc: Document,
+        enabled: Optional[set[str]] = None,
+        disabled: Optional[set[str]] = None,
+    ) -> None:
         """
-        Process a document, by passing it to this groups processors.
+        Process a document, by passing it to this group's processors.
 
         Args:
             doc: The document to be processed.
-            enabled: A set of strings, indicating which document processors to run for this document. By
-                default all document processors are used. In case of nested, it's necessary to supply both the name of
-                the processor group, as well as all of its containing processors (or a subset thereof).
-            disabled: A set of strings, indicating which document processors not to run for this
-                document. Cannot be used together with `enabled`.
+            enabled: A set of strings, indicating which document processors to run for
+                this document. By default, all document processors are used. In case
+                of nested, it's necessary to supply both the name of the processor
+                group, and all of its containing processors (or a subset thereof).
+            disabled: A set of strings, indicating which document processors not to
+                run for this document. Cannot be used together with `enabled`.
         """
-
-        enabled = kwargs.get("enabled", None)
-        disabled = kwargs.get("disabled", None)
 
         if (enabled is not None) and (disabled is not None):
             raise RuntimeError("Cannot use enabled and disabled simultaneously")
@@ -125,13 +138,11 @@ class DocProcessorGroup(DocProcessor):
             if (disabled is not None) and (name in disabled):
                 continue
 
-            proc.process(doc, enabled=enabled, disabled=disabled)
+            if isinstance(proc, DocProcessor):
+                proc.process(doc)
+            elif isinstance(proc, DocProcessorGroup):
+                proc.process(doc, enabled=enabled, disabled=disabled)
 
     def __iter__(self) -> Iterator:
-        """
-        Iterator for its processors.
 
-        Returns:
-            Iterator for its processors.
-        """
         return iter(self._processors.items())

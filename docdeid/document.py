@@ -1,14 +1,15 @@
 from typing import Any, Optional
 
 from docdeid.annotation import AnnotationSet
-from docdeid.tokenize import Tokenizer, TokenList
+from docdeid.tokenizer import Tokenizer, TokenList
 
 
 class MetaData:
     """
-    Contains additional information on a text that is provided by the user on input. A :class:`.MetaData` object is kept
-    with the text in a :class:`.Document`, where it can be accessed by document processors. Note that a
-    :class:`.MetaData` object does not allow overwriting keys. This is done to prevent document processors accidentally
+    Contains additional information on a text that is provided by the user on input. A
+    :class:`.MetaData` object is kept with the text in a :class:`.Document`, where it
+    can be accessed by document processors. Note that a :class:`.MetaData` object does
+    not allow overwriting keys. This is done to prevent document processors accidentally
     interfering with each other.
 
     Args:
@@ -43,21 +44,26 @@ class MetaData:
         """
 
         if key in self._items:
-            raise RuntimeError(f"Key {key} already present in {self.__class__}, cannot overwrite (read only)")
+            raise RuntimeError(
+                f"Key {key} already present in {self.__class__}, cannot overwrite "
+                f"(read only)"
+            )
 
         self._items[key] = value
 
 
 class Document:
     """
-    Contains the text, its tokens, and other derived info after document processors have been applied to it.
+    Contains the text, its tokens, and other derived info after document processors have
+    been applied to it.
 
     Args:
         text: The input text
-        tokenizers: A mapping of tokenizer names to :class:`.Tokenizer`. If only one tokenizer is used,
-            ``default`` may be used as name to allow :meth:`Document.get_tokens` to be called without a tokenizer name.
-        metadata: A dict with items, that can be accessed by document processors. Will be stored in a
-            :class:`.MetaData` object.
+        tokenizers: A mapping of tokenizer names to :class:`.Tokenizer`. If only one
+            tokenizer is used, ``default`` may be used as name to allow
+            :meth:`Document.get_tokens` to be called without a tokenizer name.
+        metadata: A dict with items, that can be accessed by document processors.
+            Will be stored in a :class:`.MetaData` object.
     """
 
     def __init__(
@@ -71,7 +77,8 @@ class Document:
         self._tokenizers = tokenizers
 
         self.metadata = MetaData(metadata)
-        """The :class:`.MetaData` of this :class:`.Document`, that can be interacted with directly."""
+        """The :class:`.MetaData` of this :class:`.Document`, that can be interacted
+        with directly."""
 
         self._token_lists: dict[str, TokenList] = {}
         self._annotations = AnnotationSet()
@@ -92,8 +99,8 @@ class Document:
         Get the tokens corresponding to the input text, for a specific tokenizer.
 
         Args:
-            tokenizer_name: The name of the tokenizer, that should be one of the tokenizers passed when initializing
-                the :class:`.Document`.
+            tokenizer_name: The name of the tokenizer, that should be one of the
+            tokenizers passed when initializing the :class:`.Document`.
 
         Returns:
             A :class:`.TokenList` containing the requested tokens.
@@ -107,10 +114,14 @@ class Document:
             raise RuntimeError("No tokenizers initialized.")
 
         if tokenizer_name not in self._tokenizers:
-            raise ValueError(f"Cannot get tokens from unknown tokenizer {tokenizer_name}.")
+            raise ValueError(
+                f"Cannot get tokens from unknown tokenizer {tokenizer_name}."
+            )
 
         if tokenizer_name not in self._token_lists:
-            self._token_lists[tokenizer_name] = self._tokenizers[tokenizer_name].tokenize(self._text)
+            self._token_lists[tokenizer_name] = self._tokenizers[
+                tokenizer_name
+            ].tokenize(self._text)
 
         return self._token_lists[tokenizer_name]
 
@@ -120,7 +131,8 @@ class Document:
         Get the annotations.
 
         Returns:
-            An :class:`.AnnotationSet` containing the annotations belonging to this document.
+            An :class:`.AnnotationSet` containing the annotations belonging to
+            this document.
         """
         return self._annotations
 

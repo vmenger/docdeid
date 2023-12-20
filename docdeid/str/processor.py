@@ -19,6 +19,14 @@ class StringProcessor(ABC):
             The processed items.
         """
 
+    def __repr__(self) -> str:
+        return (
+            self.__class__.__name__
+            + "("
+            + ", ".join(f"{k}={v}" for k, v in self.__dict__.items())
+            + ")"
+        )
+
 
 class StringModifier(StringProcessor, ABC):
     """Modifies strings."""
@@ -51,7 +59,8 @@ class StringFilter(StringProcessor, ABC):
             item: The input string.
 
         Returns:
-            ``True`` to keep the item, ``False`` to remove it (same as ``filter`` builtin).
+            ``True`` to keep the item, ``False`` to remove it (same as
+            ``filter`` builtin).
         """
 
     def process_items(self, items: Iterable[str]) -> list[str]:
@@ -62,7 +71,7 @@ class LowercaseString(StringModifier):
     """Lowercase a string."""
 
     def process(self, item: str) -> str:
-        return item.lower()
+        return item.casefold()
 
 
 class StripString(StringModifier):
@@ -97,8 +106,8 @@ class ReplaceNonAsciiCharacters(StringModifier):
     """
     Maps non-ascii characters to ascii characters.
 
-    E.g.: Renée -> Renee. It's advised to test this before using as mapping can be tricky in practice for some
-    characters.
+    E.g.: Renée -> Renee. It's advised to test this before using as mapping can be
+    tricky in practice for some characters.
     """
 
     @staticmethod
