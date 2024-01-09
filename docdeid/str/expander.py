@@ -1,9 +1,9 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
-from docdeid.str.processor import ReplaceValue, StringModifier
+from docdeid.str.processor import StringModifier
 
 
-class Expander(str):
+class Expander(ABC):
     """Abstract class for string expansion."""
 
     @abstractmethod
@@ -38,16 +38,8 @@ class MinimumLengthExpander(Expander):
         Returns:
             The expanded items.
         """
-        initial = {item}
+        result = {item}
         if len(item) < self.min_length:
-            return initial
-        return {item} + {m.process(item) for m in self.str_modifiers}
-
-
-if __name__ == "__main__":
-    str_modifier = ReplaceValue("a", "b")
-    expander = MinimumLengthExpander(5, [str_modifier])
-
-    assert expander.expand_item("a") == {"a"}
-    assert expander.expand_item("aaaa") == {"aaaaa"}
-    assert expander.expand_item("aaaaa") == {"bbbbb"}
+            return result
+        result.update(m.process(item) for m in self.str_modifiers)
+        return result

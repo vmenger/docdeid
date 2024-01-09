@@ -1,3 +1,4 @@
+from docdeid.str.expander import MinimumLengthExpander
 from docdeid.str.processor import (
     FilterByLength,
     LowercaseString,
@@ -64,3 +65,13 @@ class TestStringFilter:
         assert not proc.filter("test")
         assert proc.filter("12345")
         assert proc.filter("longer phrase")
+
+
+class TestStringExpander:
+    def test_expand_string(self):
+        str_processor = ReplaceValue(find_value="a", replace_value="b")
+        expander = MinimumLengthExpander([str_processor], min_length=5)
+
+        assert expander.expand_item("a") == {"a"}
+        assert expander.expand_item("aaaa") == {"aaaa"}
+        assert expander.expand_item("aaaaa") == {"aaaaa", "bbbbb"}
