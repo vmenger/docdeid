@@ -45,7 +45,6 @@ class DocProcessorGroup:
         names = []
 
         for name, processor in self._processors.items():
-
             names.append(name)
 
             if recursive and isinstance(processor, DocProcessorGroup):
@@ -78,7 +77,6 @@ class DocProcessorGroup:
         for i, (existing_name, existing_processor) in enumerate(
             self._processors.items()
         ):
-
             if i == position:
                 new_processors[name] = processor
 
@@ -131,7 +129,6 @@ class DocProcessorGroup:
             raise RuntimeError("Cannot use enabled and disabled simultaneously")
 
         for name, proc in self._processors.items():
-
             if (enabled is not None) and (name not in enabled):
                 continue
 
@@ -144,5 +141,19 @@ class DocProcessorGroup:
                 proc.process(doc, enabled=enabled, disabled=disabled)
 
     def __iter__(self) -> Iterator:
-
         return iter(self._processors.items())
+
+    def iter_doc_processors(self) -> Iterator[DocProcessor]:
+        """
+        Iterate over all document processors in this group.
+        Uses recursion for encountered :class:`.DocProcessorGroup`.
+
+        Yields:
+            The document processors.
+        """
+
+        for _, processor in self._processors.items():
+            if isinstance(processor, DocProcessor):
+                yield processor
+            elif isinstance(processor, DocProcessorGroup):
+                yield from processor.iter_doc_processors()
