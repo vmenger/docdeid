@@ -239,9 +239,8 @@ class TokenList:
             matched_words = words.intersection(lookup_values)
 
         else:
-            # make expansions if expander is provided
             expansion_dict = expander.get_expansion_to_original_dict(words)
-            # get the original words of which the expansion or original matched the lookup values
+            # get the original words of which the expansion matched the lookup values
             matched_words = [
                 expansion_dict[m]
                 for m in set(expansion_dict.keys()).intersection(lookup_values)
