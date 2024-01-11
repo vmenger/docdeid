@@ -152,8 +152,8 @@ class DocProcessorGroup:
             The document processors.
         """
 
-        for _, processor in self._processors.items():
+        for name, processor in self._processors.items():
             if isinstance(processor, DocProcessor):
-                yield processor
+                yield name, processor
             elif isinstance(processor, DocProcessorGroup):
                 yield from processor.iter_doc_processors()
