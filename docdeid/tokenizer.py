@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from typing import Iterator, Literal, Optional
 
 from docdeid.str import StringModifier
+from docdeid.str.expander import Expander
 
 
 @dataclass(frozen=True)
@@ -149,7 +150,6 @@ class TokenList:
         self._text_to_tokens: dict[str, defaultdict[str, list[Token]]] = {}
 
     def _link_tokens(self) -> None:
-
         for i in range(len(self._tokens) - 1):
             self._tokens[i].set_next_token(self._tokens[i + 1])
             self._tokens[i + 1].set_previous_token(self._tokens[i])
@@ -168,7 +168,6 @@ class TokenList:
     def _init_token_lookup(
         self, matching_pipeline: Optional[list[StringModifier]] = None
     ) -> None:
-
         matching_pipeline = matching_pipeline or []
         pipe_key = str(matching_pipeline)
 
@@ -176,7 +175,6 @@ class TokenList:
         text_to_tokens = defaultdict(list)
 
         for token in self._tokens:
-
             text = token.text
 
             for string_modifier in matching_pipeline:
@@ -213,6 +211,7 @@ class TokenList:
         self,
         lookup_values: set[str],
         matching_pipeline: Optional[list[StringModifier]] = None,
+        expander: Optional[Expander] = None,
     ) -> set[Token]:
         """
         Lookup all tokens of which the text matches a certain set of lookup values.
@@ -229,27 +228,37 @@ class TokenList:
         matching_pipeline = matching_pipeline or []
         pipe_key = str(matching_pipeline)
 
+        # this is already part of get_words func -> remove?
         if pipe_key not in self._text_to_tokens:
             self._init_token_lookup(matching_pipeline)
 
         tokens = set()
         words = self.get_words(matching_pipeline)
 
-        for word in words.intersection(lookup_values):
+        if expander is None:
+            matched_words = words.intersection(lookup_values)
+
+        else:
+            # make expansions if expander is provided
+            expansion_dict = expander.get_expansion_to_original_dict(words)
+            # get the original words of which the expansion or original matched the lookup values
+            matched_words = [
+                expansion_dict[m]
+                for m in set(expansion_dict.keys()).intersection(lookup_values)
+            ]
+
+        for word in matched_words:
             tokens.update(self._text_to_tokens[pipe_key][word])
 
         return tokens
 
     def __iter__(self) -> Iterator[Token]:
-
         return iter(self._tokens)
 
     def __len__(self) -> int:
-
         return len(self._tokens)
 
     def __getitem__(self, index: int) -> Token:
-
         return self._tokens[index]
 
     def __eq__(self, other: object) -> bool:
@@ -343,7 +352,6 @@ class WordBoundaryTokenizer(Tokenizer):  # pylint: disable=R0903
         matches = [*re.finditer(r"\b", text)]
 
         for start_match, end_match in zip(matches, matches[1:]):
-
             start_char = start_match.span(0)[0]
             end_char = end_match.span(0)[0]
 

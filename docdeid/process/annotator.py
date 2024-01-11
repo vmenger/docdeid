@@ -8,6 +8,7 @@ from docdeid.document import Document
 from docdeid.ds.lookup import LookupSet, LookupTrie
 from docdeid.pattern import TokenPattern
 from docdeid.process.doc_processor import DocProcessor
+from docdeid.str.expander import Expander
 from docdeid.str.processor import StringModifier
 from docdeid.tokenizer import Token, Tokenizer
 
@@ -68,14 +69,12 @@ class SingleTokenLookupAnnotator(Annotator):
         tokenizer_name: str = "default",
         **kwargs,
     ) -> None:
-
         self.lookup_set = LookupSet(matching_pipeline=matching_pipeline)
         self.lookup_set.add_items_from_iterable(items=lookup_values)
         self._tokenizer_name = tokenizer_name
         super().__init__(*args, **kwargs)
 
     def _tokens_to_annotations(self, tokens: Iterable[Token]) -> list[Annotation]:
-
         return [
             Annotation(
                 text=token.text,
@@ -90,7 +89,6 @@ class SingleTokenLookupAnnotator(Annotator):
         ]
 
     def annotate(self, doc: Document) -> list[Annotation]:
-
         tokens = doc.get_tokens(tokenizer_name=self._tokenizer_name)
 
         annotate_tokens = tokens.token_lookup(
@@ -131,13 +129,12 @@ class MultiTokenLookupAnnotator(Annotator):
         tokenizer: Optional[Tokenizer] = None,
         trie: Optional[LookupTrie] = None,
         overlapping: bool = False,
+        expander: Optional[list[Expander]] = None,
         **kwargs,
     ) -> None:
-
         self._start_words: set[str] = set()
 
         if (trie is not None) and (lookup_values is None) and (tokenizer is None):
-
             self._trie = trie
             self._matching_pipeline = trie.matching_pipeline or []
             self._start_words = set(trie.children.keys())
@@ -153,15 +150,14 @@ class MultiTokenLookupAnnotator(Annotator):
             )
 
         self.overlapping = overlapping
+        self.expander = expander
 
         super().__init__(*args, **kwargs)
 
     def _init_lookup_structures(
         self, lookup_values: Iterable[str], tokenizer: Tokenizer
     ) -> None:
-
         for val in lookup_values:
-
             texts = [token.text for token in tokenizer.tokenize(val)]
 
             if len(texts) > 0:
@@ -175,12 +171,13 @@ class MultiTokenLookupAnnotator(Annotator):
                 self._start_words.add(start_token)
 
     def annotate(self, doc: Document) -> list[Annotation]:
-
         tokens = doc.get_tokens()
 
         start_tokens = sorted(
             tokens.token_lookup(
-                self._start_words, matching_pipeline=self._matching_pipeline
+                self._start_words,
+                matching_pipeline=self._matching_pipeline,
+                expander=self.expander,
             ),
             key=lambda token: token.start_char,
         )
@@ -192,12 +189,11 @@ class MultiTokenLookupAnnotator(Annotator):
         min_i = 0
 
         for i in start_indices:
-
             if i < min_i:
                 continue
 
             longest_matching_prefix = self._trie.longest_matching_prefix(
-                tokens_text, start_i=i
+                tokens_text, start_i=i, expander=self.expander
             )
 
             if longest_matching_prefix is None:
@@ -247,7 +243,6 @@ class RegexpAnnotator(Annotator):
         pre_match_words: Optional[list[str]] = None,
         **kwargs,
     ) -> None:
-
         if isinstance(regexp_pattern, str):
             regexp_pattern = re.compile(regexp_pattern)
 
@@ -264,12 +259,13 @@ class RegexpAnnotator(Annotator):
         super().__init__(*args, **kwargs)
 
     def _validate_match(
-        self, match: re.Match, doc: Document  # pylint: disable=W0613
+        self,
+        match: re.Match,
+        doc: Document,  # pylint: disable=W0613
     ) -> bool:
         return True
 
     def annotate(self, doc: Document) -> list[Annotation]:
-
         if self.pre_match_words is not None:
             try:
                 if (
@@ -284,7 +280,6 @@ class RegexpAnnotator(Annotator):
         annotations = []
 
         for match in self.regexp_pattern.finditer(doc.text):
-
             if not self._validate_match(match, doc):
                 continue
 
@@ -324,7 +319,6 @@ class TokenPatternAnnotator(Annotator):
             return annotations
 
         for token in doc.get_tokens():
-
             if not self.pattern.token_precondition(token):
                 continue
 
