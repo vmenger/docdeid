@@ -323,7 +323,6 @@ class LookupTrie(LookupStructure):
 
         longest_match = None
         current_node = self
-        # create match on the fly to maintain the property that the match that fit the trie is returned
         match = []
 
         for i in itertools.count():
@@ -340,7 +339,8 @@ class LookupTrie(LookupStructure):
                     self._apply_matching_pipeline(item[start_i + i])
                 )
 
-            # get the value that matches the trie if any. Same as an any() call but returns the value that matched
+            # Get the value that matches the trie if any.
+            # This is lazy like an any() call but returns the value that matched
             matched = next((t for t in cur_items if t in current_node.children), None)
             if matched is None:
                 break

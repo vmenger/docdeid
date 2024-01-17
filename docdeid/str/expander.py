@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from typing import Iterable
 
 from docdeid.str.processor import StringModifier
@@ -35,13 +36,14 @@ class Expander(ABC):
 
     def get_expansion_to_original_dict(self, items: Iterable[str]) -> dict[str, str]:
         """Expand a set of strings into a dictionary where the keys are results from
-        expand_item and values the original text."""
+        expand_item and values a set of original text(s)."""
 
-        # This can get overwritten if different original texts map to the same expansion due to multiple operations...
-        result_dict = {}
+        # Need a set because otherwise value might be overwritten
+        # when multiple items expand to the same value
+        result_dict = defaultdict(set)
         for item in items:
             for expansion in self.expand_item(item):
-                result_dict[expansion] = item
+                result_dict[expansion].add(item)
         return result_dict
 
 

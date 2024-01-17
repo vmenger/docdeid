@@ -241,10 +241,11 @@ class TokenList:
         else:
             expansion_dict = expander.get_expansion_to_original_dict(words)
             # get the original words of which the expansion matched the lookup values
-            matched_words = [
-                expansion_dict[m]
+            matched_words = set(
+                expansion_dict[elem]
                 for m in set(expansion_dict.keys()).intersection(lookup_values)
-            ]
+                for elem in m
+            )
 
         for word in matched_words:
             tokens.update(self._text_to_tokens[pipe_key][word])

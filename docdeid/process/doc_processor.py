@@ -28,7 +28,7 @@ class DocProcessorGroup:
 
     def __init__(self) -> None:
         self._processors: OrderedDict[
-            str, Union[DocProcessor | DocProcessorGroup]
+            str, Union[DocProcessor, DocProcessorGroup]
         ] = OrderedDict()
 
     def get_names(self, recursive: bool = True) -> list[str]:
