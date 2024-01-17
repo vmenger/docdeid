@@ -242,7 +242,8 @@ class TokenList:
         else:
             # make expansions if expander is provided
             expansion_dict = expander.get_expansion_to_original_dict(words)
-            # get the original words of which the expansion or original matched the lookup values
+            # get the original words of which the expansion/original
+            # matched the lookup values
             matched_words = set(
                 chain.from_iterable(
                     expansion_dict[m]
