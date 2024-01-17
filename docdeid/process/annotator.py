@@ -260,7 +260,7 @@ class RegexpAnnotator(Annotator):
 
     def _validate_match(
         self,
-        match: re.Match,
+        match: re.Match,  # pylint: disable=W0613
         doc: Document,  # pylint: disable=W0613
     ) -> bool:
         return True
