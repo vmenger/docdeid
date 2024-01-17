@@ -333,7 +333,7 @@ class LookupTrie(LookupStructure):
                 break
 
             if expander is None:
-                cur_items = [self._apply_matching_pipeline(item[start_i + i])]
+                cur_items = {self._apply_matching_pipeline(item[start_i + i])}
             else:
                 cur_items = expander.expand_item(
                     self._apply_matching_pipeline(item[start_i + i])

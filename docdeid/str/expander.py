@@ -34,7 +34,9 @@ class Expander(ABC):
         """
         return set.union(*(self.expand_item(item) for item in items))
 
-    def get_expansion_to_original_dict(self, items: Iterable[str]) -> dict[str, str]:
+    def get_expansion_to_original_dict(
+        self, items: Iterable[str]
+    ) -> dict[str, set[str]]:
         """Expand a set of strings into a dictionary where the keys are results from
         expand_item and values a set of original text(s)."""
 

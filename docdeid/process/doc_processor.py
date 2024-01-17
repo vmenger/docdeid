@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from typing import Iterator, Optional, Union
+from typing import Iterator, Optional, Tuple, Union
 
 from docdeid.document import Document
 
@@ -143,7 +143,7 @@ class DocProcessorGroup:
     def __iter__(self) -> Iterator:
         return iter(self._processors.items())
 
-    def iter_doc_processors(self) -> Iterator[DocProcessor]:
+    def iter_doc_processors(self) -> Iterator[Tuple[str, DocProcessor]]:
         """
         Iterate over all document processors in this group. Uses recursion for
         encountered :class:`.DocProcessorGroup`.

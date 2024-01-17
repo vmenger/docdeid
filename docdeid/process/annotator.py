@@ -129,7 +129,7 @@ class MultiTokenLookupAnnotator(Annotator):
         tokenizer: Optional[Tokenizer] = None,
         trie: Optional[LookupTrie] = None,
         overlapping: bool = False,
-        expander: Optional[list[Expander]] = None,
+        expander: Optional[Expander] = None,
         **kwargs,
     ) -> None:
         self._start_words: set[str] = set()

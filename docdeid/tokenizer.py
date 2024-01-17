@@ -4,6 +4,7 @@ import re
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass, field
+from itertools import chain
 from typing import Iterator, Literal, Optional
 
 from docdeid.str import StringModifier
@@ -239,12 +240,14 @@ class TokenList:
             matched_words = words.intersection(lookup_values)
 
         else:
+            # make expansions if expander is provided
             expansion_dict = expander.get_expansion_to_original_dict(words)
-            # get the original words of which the expansion matched the lookup values
+            # get the original words of which the expansion or original matched the lookup values
             matched_words = set(
-                expansion_dict[elem]
-                for m in set(expansion_dict.keys()).intersection(lookup_values)
-                for elem in m
+                chain.from_iterable(
+                    expansion_dict[m]
+                    for m in set(expansion_dict.keys()).intersection(lookup_values)
+                )
             )
 
         for word in matched_words:
