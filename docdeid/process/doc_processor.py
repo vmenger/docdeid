@@ -145,8 +145,8 @@ class DocProcessorGroup:
 
     def iter_doc_processors(self) -> Iterator[DocProcessor]:
         """
-        Iterate over all document processors in this group.
-        Uses recursion for encountered :class:`.DocProcessorGroup`.
+        Iterate over all document processors in this group. Uses recursion for
+        encountered :class:`.DocProcessorGroup`.
 
         Yields:
             The document processors.
