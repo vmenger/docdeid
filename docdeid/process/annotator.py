@@ -252,6 +252,7 @@ class RegexpAnnotator(Annotator):
         self.pre_match_words: Optional[set[str]] = None
         self.matching_pipeline: Optional[list[StringModifier]] = None
 
+        # in case of a provided matching pipeline this goes wrong because it simply gets overwritten no warning nada
         if pre_match_words is not None:
             self.pre_match_words = set(pre_match_words)
             self.matching_pipeline = [docdeid.str.LowercaseString()]
