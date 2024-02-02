@@ -5,6 +5,7 @@ import itertools
 from typing import Iterable, Iterator, Optional, Union
 
 from docdeid.ds.ds import Datastructure
+from docdeid.str.expander import Expander
 from docdeid.str.processor import StringModifier, StringProcessor, StripString
 
 
@@ -302,7 +303,7 @@ class LookupTrie(LookupStructure):
         return (head in self.children) and tail in self.children[head]
 
     def longest_matching_prefix(
-        self, item: list[str], start_i: int = 0
+        self, item: list[str], start_i: int = 0, expander: Optional[Expander] = None
     ) -> Union[list[str], None]:
         """
         Finds the longest matching prefix of a list of strings. This is used to find the
@@ -322,26 +323,29 @@ class LookupTrie(LookupStructure):
 
         longest_match = None
         current_node = self
+        match = []
 
         for i in itertools.count():
             if current_node.is_terminal:
                 longest_match = i
 
-            if start_i + i >= len(item) or (
-                self._apply_matching_pipeline(item[start_i + i])
-                not in current_node.children
-            ):
+            if start_i + i >= len(item):
                 break
 
-            current_node = current_node.children[
-                self._apply_matching_pipeline(item[start_i + i])
-            ]
+            if expander is None:
+                cur_items = {self._apply_matching_pipeline(item[start_i + i])}
+            else:
+                cur_items = expander.expand_item(
+                    self._apply_matching_pipeline(item[start_i + i])
+                )
 
-        return (
-            [
-                self._apply_matching_pipeline(item)
-                for item in item[start_i : start_i + longest_match]
-            ]
-            if longest_match
-            else None
-        )
+            # Get the value that matches the trie if any.
+            # This is lazy like an any() call but returns the value that matched
+            matched = next((t for t in cur_items if t in current_node.children), None)
+            if matched is None:
+                break
+
+            match.append(matched)
+            current_node = current_node.children[matched]
+
+        return match[:longest_match] if longest_match else None

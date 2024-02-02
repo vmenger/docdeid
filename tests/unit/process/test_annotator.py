@@ -1,9 +1,9 @@
 import re
 from unittest.mock import patch
 
-import docdeid.ds
 from docdeid.annotation import Annotation
 from docdeid.document import Document
+from docdeid.ds.lookup import LookupTrie
 from docdeid.pattern import TokenPattern
 from docdeid.process.annotator import (
     MultiTokenLookupAnnotator,
@@ -11,7 +11,8 @@ from docdeid.process.annotator import (
     SingleTokenLookupAnnotator,
     TokenPatternAnnotator,
 )
-from docdeid.str.processor import LowercaseString
+from docdeid.str.expander import MinimumLengthExpander
+from docdeid.str.processor import LowercaseString, TitleCase
 from docdeid.tokenizer import WordBoundaryTokenizer
 
 
@@ -27,7 +28,6 @@ class TestSingleTokenLookupAnnotator:
         ]
 
         with patch.object(doc, "get_tokens", return_value=long_tokenlist):
-
             annotations = annotator.annotate(doc)
 
         assert set(annotations) == set(expected_annotations)
@@ -46,7 +46,6 @@ class TestSingleTokenLookupAnnotator:
         }
 
         with patch.object(doc, "get_tokens", return_value=long_tokenlist):
-
             annotations = set(annotator.annotate(doc))
 
         assert annotations == expected_annotations
@@ -65,7 +64,6 @@ class TestMultiTokenLookupAnnotator:
         ]
 
         with patch.object(doc, "get_tokens", return_value=long_tokenlist):
-
             annotations = annotator.annotate(doc)
 
         assert annotations == expected_annotations
@@ -90,7 +88,6 @@ class TestMultiTokenLookupAnnotator:
         assert annotations == expected_annotations
 
     def test_multi_token_lookup_with_overlap(self, long_text, long_tokenlist):
-
         doc = Document(long_text)
 
         annotator = MultiTokenLookupAnnotator(
@@ -104,14 +101,12 @@ class TestMultiTokenLookupAnnotator:
             Annotation(text="dr. John", start_char=11, end_char=19, tag="prefix"),
             Annotation(text="John Smith", start_char=15, end_char=25, tag="prefix"),
         ]
-
         with patch.object(doc, "get_tokens", return_value=long_tokenlist):
             annotations = annotator.annotate(doc)
 
         assert annotations == expected_annotations
 
     def test_multi_token_lookup_no_overlap(self, long_text, long_tokenlist):
-
         doc = Document(long_text)
 
         annotator = MultiTokenLookupAnnotator(
@@ -131,10 +126,9 @@ class TestMultiTokenLookupAnnotator:
         assert annotations == expected_annotations
 
     def test_multi_token_lookup_with_trie(self, long_text, long_tokenlist):
-
         doc = Document(long_text)
 
-        trie = docdeid.ds.LookupTrie(matching_pipeline=[LowercaseString()])
+        trie = LookupTrie(matching_pipeline=[LowercaseString()])
         trie.add_item(["my", " ", "name"])
         trie.add_item(["my", " ", "wife"])
 
@@ -146,6 +140,28 @@ class TestMultiTokenLookupAnnotator:
         expected_annotations = [
             Annotation(text="My name", start_char=0, end_char=7, tag="prefix"),
             Annotation(text="my wife", start_char=39, end_char=46, tag="prefix"),
+        ]
+
+        with patch.object(doc, "get_tokens", return_value=long_tokenlist):
+            annotations = annotator.annotate(doc)
+
+        assert annotations == expected_annotations
+
+    def test_multi_token_with_expander(self, long_text, long_tokenlist):
+        doc = Document(long_text)
+
+        str_modifiers = [TitleCase()]
+        expander = MinimumLengthExpander(str_modifiers=str_modifiers, min_length=4)
+
+        annotator = MultiTokenLookupAnnotator(
+            lookup_values=["Keith", "Jane"],
+            tokenizer=WordBoundaryTokenizer(),
+            tag="name",
+            expander=expander,
+        )
+        expected_annotations = [
+            Annotation(text="jane", start_char=47, end_char=51, tag="name"),
+            Annotation(text="Keith", start_char=52, end_char=57, tag="name"),
         ]
 
         with patch.object(doc, "get_tokens", return_value=long_tokenlist):
@@ -173,7 +189,6 @@ class TestRegexpAnnotator:
         assert annotations == expected_annotations
 
     def test_regexp_annotator_with_string(self, short_text):
-
         doc = Document(short_text)
 
         annotator = RegexpAnnotator(regexp_pattern=r"[A-Z][a-z]+", tag="capitalized")
@@ -207,7 +222,6 @@ class TestRegexpAnnotator:
         assert annotations == expected_annotations
 
     def test_regexp_with_validate(self, long_text):
-
         doc = Document(long_text)
         annotator = RegexpAnnotator(
             regexp_pattern=re.compile(r"([A-Z])[a-z]+"),

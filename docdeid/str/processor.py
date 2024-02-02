@@ -168,3 +168,10 @@ class FilterByLength(StringFilter):
 
     def filter(self, item: str) -> bool:
         return len(item) >= self.min_len
+
+
+class TitleCase(StringModifier):
+    """Titlecase string."""
+
+    def process(self, item: str) -> str:
+        return item.title()

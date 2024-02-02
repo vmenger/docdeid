@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
-import docdeid.str
+from docdeid.str.expander import MinimumLengthExpander
+from docdeid.str.processor import LowercaseString, ReplaceValue
 from docdeid.tokenizer import (
     SpaceSplitTokenizer,
     Token,
@@ -70,7 +71,6 @@ class TestTokenList:
             assert token == token_list[i]
 
     def test_index(self, short_tokens):
-
         token_list = TokenList(short_tokens)
 
         for i, token in enumerate(short_tokens):
@@ -98,20 +98,17 @@ class TestTokenList:
         assert token_list_1 == token_list_2
 
     def test_get_words(self, short_tokens):
-
         token_list = TokenList(short_tokens)
 
         assert token_list.get_words() == {"Hello", "I'm", "Bob"}
 
     def test_get_words_with_matching_pipeline(self, short_tokens):
-
         token_list = TokenList(short_tokens)
-        matching_pipeline = [docdeid.str.LowercaseString()]
+        matching_pipeline = [LowercaseString()]
 
         assert token_list.get_words(matching_pipeline) == {"hello", "i'm", "bob"}
 
     def test_token_lookup(self, long_tokens):
-
         token_list = TokenList(long_tokens)
 
         assert token_list.token_lookup(lookup_values=set()) == set()
@@ -136,9 +133,8 @@ class TestTokenList:
         }
 
     def test_token_lookup_with_matching_pipeline(self, long_tokens):
-
         token_list = TokenList(long_tokens)
-        matching_pipeline = [docdeid.str.LowercaseString()]
+        matching_pipeline = [LowercaseString()]
 
         assert (
             token_list.token_lookup(
@@ -158,6 +154,25 @@ class TestTokenList:
             )
             == set()
         )
+
+    def test_token_lookup_with_expander(self, long_tokens):
+        token_list = TokenList(long_tokens)
+        matching_pipeline = [LowercaseString()]
+
+        str_modifiers = [ReplaceValue("a", "b")]
+        expander = MinimumLengthExpander(str_modifiers=str_modifiers, min_length=4)
+        lookup_set = {"jbne", "lucas"}
+
+        assert token_list.token_lookup(lookup_values=lookup_set) == set()
+
+        assert token_list.token_lookup(lookup_values=lookup_set, expander=expander) == {
+            long_tokens[20]
+        }
+        assert token_list.token_lookup(
+            lookup_values=lookup_set,
+            expander=expander,
+            matching_pipeline=matching_pipeline,
+        ) == {long_tokens[20], long_tokens[24]}
 
 
 class TestBaseTokenizer:
