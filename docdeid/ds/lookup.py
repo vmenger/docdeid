@@ -10,7 +10,7 @@ from docdeid.str.processor import StringModifier, StringProcessor, StripString
 
 class LookupStructure(Datastructure):  # pylint: disable=R0903
     """
-    Structure that contains strings, and allow efficiently checking whether a string is
+    Structure that contains strings, and allows efficient checking whether a string is
     contained in it.
 
     Args:
@@ -100,7 +100,6 @@ class LookupSet(LookupStructure):
         """
 
         for item in items:
-
             item = self._apply_matching_pipeline(item)
 
             if item in self._items:
@@ -277,7 +276,6 @@ class LookupTrie(LookupStructure):
             self.is_terminal = True
 
         else:
-
             head, tail = self._apply_matching_pipeline(item[0]), item[1:]
 
             if head not in self.children:
@@ -326,7 +324,6 @@ class LookupTrie(LookupStructure):
         current_node = self
 
         for i in itertools.count():
-
             if current_node.is_terminal:
                 longest_match = i
 
