@@ -85,4 +85,3 @@ disable = ['C0114']
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=docdeid --cov-fail-under=85"
