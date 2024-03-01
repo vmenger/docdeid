@@ -168,11 +168,23 @@ class MultiTokenLookupAnnotator(Annotator):
                 self._trie.add_item(texts)
 
                 start_token = texts[0]
-
+                # Apply the "matching pipeline" to the start token -- the same
+                # normalization that was applied to the tokens inside
+                # `add_item` already, or when building the trie in the (trie is
+                # not None) case, too.
                 for string_modifier in self._matching_pipeline:
                     start_token = string_modifier.process(start_token)
 
                 self._start_words.add(start_token)
+
+    @property
+    def start_words(self):
+        # If the trie has been modified (added to) since we computed
+        # _start_words,
+        if len(self._start_words) != len(self._trie.children):
+            # Recompute _start_words.
+            self._start_words = set(self._trie.children)
+        return self._start_words
 
     def annotate(self, doc: Document) -> list[Annotation]:
 
@@ -180,7 +192,7 @@ class MultiTokenLookupAnnotator(Annotator):
 
         start_tokens = sorted(
             tokens.token_lookup(
-                self._start_words, matching_pipeline=self._matching_pipeline
+                self.start_words, matching_pipeline=self._matching_pipeline
             ),
             key=lambda token: token.start_char,
         )
