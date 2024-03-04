@@ -80,18 +80,19 @@ _WORD_RX = re.compile('\\w+', re.U)
 class LowercaseTail(StringModifier):
     """Lowercases the tail of words."""
 
-    @staticmethod
-    def _process_word_match(m: re.Match) -> str:
+    def __init__(self, lang='nl'):
+        self._lang = lang
+
+    def _process_word_match(self, m: re.Match) -> str:
         word = m.group(0)
         if word.isupper():
-            # FIXME Is there a language-independent way to properly titlecase?
-            if word.startswith('IJ'):
+            if self._lang == 'nl' and word.startswith('IJ'):
                 return word[0:2] + word[2:].lower()
             return word[0] + word[1:].lower()
         return word
 
     def process(self, item: str) -> str:
-        return _WORD_RX.sub(LowercaseTail._process_word_match, item)
+        return _WORD_RX.sub(self._process_word_match, item)
 
 
 class StripString(StringModifier):
