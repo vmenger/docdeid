@@ -1,8 +1,10 @@
+import logging
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from typing import Iterator, Optional, Union
 
 from docdeid.document import Document
+from docdeid.utils import annotate_doc
 
 
 class DocProcessor(ABC):  # pylint: disable=R0903
@@ -142,6 +144,8 @@ class DocProcessorGroup:
                 proc.process(doc)
             elif isinstance(proc, DocProcessorGroup):
                 proc.process(doc, enabled=enabled, disabled=disabled)
+
+            logging.debug("after %s: %s", name, annotate_doc(doc))
 
     def __iter__(self) -> Iterator:
 

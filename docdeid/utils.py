@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from frozendict import frozendict
 
 from docdeid.document import Document
@@ -32,3 +34,32 @@ def annotate_intext(doc: Document) -> str:
         )
 
     return text
+
+
+def annotate_doc(doc: Document) -> str:
+    """\
+    Adds XML-like markup for annotations into the text of a document.
+
+    Handles also nested mentions and in a way also overlapping mentions, even
+    though this kind of markup cannot really represent them.
+    """
+    annos_from_shortest = sorted(
+        doc.annotations,
+        key=lambda anno: anno.end_char - anno.start_char)
+    idx_to_anno_starts = defaultdict(list)
+    idx_to_anno_ends = defaultdict(list)
+    for anno in annos_from_shortest:
+        idx_to_anno_starts[anno.start_char].append(anno)
+        idx_to_anno_ends[anno.end_char].append(anno)
+    markup_indices = sorted(set(idx_to_anno_starts).union(idx_to_anno_ends))
+    chunks = list()
+    last_idx = 0
+    for idx in markup_indices:
+        chunks.append(doc.text[last_idx:idx])
+        for ending_anno in idx_to_anno_ends[idx]:
+            chunks.append(f'</{ending_anno.tag.upper()}>')
+        for starting_anno in reversed(idx_to_anno_starts[idx]):
+            chunks.append(f'<{starting_anno.tag.upper()}>')
+        last_idx = idx
+    chunks.append(doc.text[last_idx:])
+    return ''.join(chunks)
