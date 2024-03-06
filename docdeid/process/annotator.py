@@ -15,7 +15,7 @@ from docdeid.tokenizer import Token, Tokenizer
 class Annotator(DocProcessor, ABC):
     """
     Abstract class for annotators, which are responsible for generating annotations from
-    a given document. Instatiations should implement the annotate method.
+    a given document. Instantiations should implement the annotate method.
 
     Args:
         tag: The tag to use in the annotations.
@@ -119,7 +119,7 @@ class MultiTokenLookupAnnotator(Annotator):
             or should process from left to right.
 
     Raises:
-        RunTimeError, when an incorrect combination of `lookup_values`,
+        RuntimeError, when an incorrect combination of `lookup_values`,
         `matching_pipeline` and `trie` is supplied.
     """
 
@@ -149,7 +149,7 @@ class MultiTokenLookupAnnotator(Annotator):
 
         else:
             raise RuntimeError(
-                "Please provide either looup_values and a tokenizer, or a trie."
+                "Please provide either lookup_values and a tokenizer, or a trie."
             )
 
         self.overlapping = overlapping

@@ -140,7 +140,7 @@ class LookupSet(LookupStructure):
     ) -> None:
         """
         Add items from self (this items of this :class:`.LookupSet`). This can be used
-        to do a transformation or replacment of the items.
+        to do a transformation or replacement of the items.
 
         Args:
             cleaning_pipeline: A cleaning pipeline applied to the items of this set.
