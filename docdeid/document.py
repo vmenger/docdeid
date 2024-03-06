@@ -1,4 +1,7 @@
+from collections.abc import Mapping
 from typing import Any, Optional
+
+from frozendict import frozendict
 
 from docdeid.annotation import AnnotationSet
 from docdeid.tokenizer import Tokenizer, TokenList
@@ -74,7 +77,8 @@ class Document:
     ) -> None:
 
         self._text = text
-        self._tokenizers = tokenizers
+        self._tokenizers = (None if tokenizers is None else
+                            frozendict(tokenizers))
 
         self.metadata = MetaData(metadata)
         """The :class:`.MetaData` of this :class:`.Document`, that can be interacted
@@ -93,6 +97,14 @@ class Document:
             The original and unmodified text.
         """
         return self._text
+
+    @property
+    def tokenizers(self) -> Optional[Mapping[str, Tokenizer]]:
+        return self._tokenizers
+
+    @property
+    def token_lists(self) -> Mapping[str, TokenList]:
+        return self._token_lists
 
     def get_tokens(self, tokenizer_name: str = "default") -> TokenList:
         """
