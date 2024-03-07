@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import re
+import sys
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Iterator, Literal, Optional
+from typing import Iterator, Literal, Optional, SupportsIndex, overload
 
 from docdeid.str import StringModifier
 
@@ -130,7 +132,7 @@ class Token:
         return len(self.text)
 
 
-class TokenList:
+class TokenList(Sequence[Token]):
     """
     Contains a sequence of tokens, along with some lookup logic.
 
@@ -248,9 +250,29 @@ class TokenList:
 
         return len(self._tokens)
 
+    @overload
     def __getitem__(self, index: int) -> Token:
+        ...
 
-        return self._tokens[index]
+    @overload
+    def __getitem__(self, indexes: slice) -> Sequence[Token]:
+        ...
+
+    def __getitem__(self, item):
+        return self._tokens[item]
+
+    def index(
+        self,
+        __token: Token,
+        __start: SupportsIndex = 0,
+        __stop: SupportsIndex = sys.maxsize,
+    ) -> int:
+        try:
+            return self._token_index[__token]
+        except KeyError:
+            # Raise a plain ValueError, just like list.index.
+            # pylint: disable=W0707
+            raise ValueError(f"'{__token}' is not in TokenList")
 
     def __eq__(self, other: object) -> bool:
         """

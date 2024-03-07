@@ -9,7 +9,7 @@ from docdeid.ds.lookup import LookupSet, LookupTrie
 from docdeid.pattern import TokenPattern
 from docdeid.process.doc_processor import DocProcessor
 from docdeid.str.processor import StringModifier
-from docdeid.tokenizer import Token, Tokenizer
+from docdeid.tokenizer import Token
 
 
 class Annotator(DocProcessor, ABC):
@@ -126,59 +126,20 @@ class MultiTokenLookupAnnotator(Annotator):
     def __init__(
         self,
         *args,
-        lookup_values: Optional[Iterable[str]] = None,
-        matching_pipeline: Optional[list[StringModifier]] = None,
-        tokenizer: Optional[Tokenizer] = None,
-        trie: Optional[LookupTrie] = None,
+        trie: LookupTrie,
         overlapping: bool = False,
         **kwargs,
     ) -> None:
 
-        self._start_words: set[str] = set()
-
-        if (trie is not None) and (lookup_values is None) and (tokenizer is None):
-
-            self._trie = trie
-            self._matching_pipeline = trie.matching_pipeline or []
-            self._start_words = set(trie.children.keys())
-
-        elif (trie is None) and (lookup_values is not None) and (tokenizer is not None):
-            self._matching_pipeline = matching_pipeline or []
-            self._trie = LookupTrie(matching_pipeline=matching_pipeline)
-            self._init_lookup_structures(lookup_values, tokenizer)
-
-        else:
-            raise RuntimeError(
-                "Please provide either lookup_values and a tokenizer, or a trie."
-            )
-
-        self.overlapping = overlapping
+        self._trie = trie
+        self._overlapping = overlapping
+        self._start_words = set(trie.children)
 
         super().__init__(*args, **kwargs)
 
-    def _init_lookup_structures(
-        self, lookup_values: Iterable[str], tokenizer: Tokenizer
-    ) -> None:
-
-        for val in lookup_values:
-
-            texts = [token.text for token in tokenizer.tokenize(val)]
-
-            if len(texts) > 0:
-                self._trie.add_item(texts)
-
-                start_token = texts[0]
-                # Apply the "matching pipeline" to the start token -- the same
-                # normalization that was applied to the tokens inside
-                # `add_item` already, or when building the trie in the (trie is
-                # not None) case, too.
-                for string_modifier in self._matching_pipeline:
-                    start_token = string_modifier.process(start_token)
-
-                self._start_words.add(start_token)
-
     @property
-    def start_words(self):
+    def start_words(self) -> set[str]:
+        """First words of phrases detected by this annotator."""
         # If the trie has been modified (added to) since we computed
         # _start_words,
         if len(self._start_words) != len(self._trie.children):
@@ -192,7 +153,7 @@ class MultiTokenLookupAnnotator(Annotator):
 
         start_tokens = sorted(
             tokens.token_lookup(
-                self.start_words, matching_pipeline=self._matching_pipeline
+                self.start_words, matching_pipeline=self._trie.matching_pipeline
             ),
             key=lambda token: token.start_char,
         )
@@ -230,7 +191,7 @@ class MultiTokenLookupAnnotator(Annotator):
                 )
             )
 
-            if not self.overlapping:
+            if not self._overlapping:
                 min_i = i + len(longest_matching_prefix)  # skip ahead
 
         return annotations

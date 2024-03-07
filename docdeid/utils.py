@@ -52,7 +52,7 @@ def annotate_doc(doc: Document) -> str:
         idx_to_anno_starts[anno.start_char].append(anno)
         idx_to_anno_ends[anno.end_char].append(anno)
     markup_indices = sorted(set(idx_to_anno_starts).union(idx_to_anno_ends))
-    chunks = list()
+    chunks = []
     last_idx = 0
     for idx in markup_indices:
         chunks.append(doc.text[last_idx:idx])

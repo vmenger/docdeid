@@ -4,6 +4,7 @@ from unittest.mock import patch
 import docdeid.ds
 from docdeid.annotation import Annotation
 from docdeid.document import Document
+from docdeid.ds import LookupTrie
 from docdeid.pattern import TokenPattern
 from docdeid.process.annotator import (
     MultiTokenLookupAnnotator,
@@ -12,7 +13,6 @@ from docdeid.process.annotator import (
     TokenPatternAnnotator,
 )
 from docdeid.str.processor import LowercaseString
-from docdeid.tokenizer import WordBoundaryTokenizer
 
 
 class TestSingleTokenLookupAnnotator:
@@ -55,11 +55,10 @@ class TestSingleTokenLookupAnnotator:
 class TestMultiTokenLookupAnnotator:
     def test_multi_token(self, long_text, long_tokenlist):
         doc = Document(long_text)
-        annotator = MultiTokenLookupAnnotator(
-            lookup_values=["my name", "my wife"],
-            tokenizer=WordBoundaryTokenizer(),
-            tag="prefix",
-        )
+        my_trie = LookupTrie()
+        my_trie.add_item(("my", " ", "name"))
+        my_trie.add_item(("my", " ", "wife"))
+        annotator = MultiTokenLookupAnnotator(trie=my_trie, tag="prefix")
         expected_annotations = [
             Annotation(text="my wife", start_char=39, end_char=46, tag="prefix"),
         ]
@@ -73,12 +72,10 @@ class TestMultiTokenLookupAnnotator:
     def test_multi_token_with_matching_pipeline(self, long_text, long_tokenlist):
         doc = Document(long_text)
 
-        annotator = MultiTokenLookupAnnotator(
-            lookup_values=["my name", "my wife"],
-            tokenizer=WordBoundaryTokenizer(),
-            matching_pipeline=[LowercaseString()],
-            tag="prefix",
-        )
+        my_trie = LookupTrie(matching_pipeline=[LowercaseString()])
+        my_trie.add_item(("my", " ", "name"))
+        my_trie.add_item(("my", " ", "wife"))
+        annotator = MultiTokenLookupAnnotator(trie=my_trie, tag="prefix")
         expected_annotations = [
             Annotation(text="My name", start_char=0, end_char=7, tag="prefix"),
             Annotation(text="my wife", start_char=39, end_char=46, tag="prefix"),
@@ -93,9 +90,11 @@ class TestMultiTokenLookupAnnotator:
 
         doc = Document(long_text)
 
+        dr_trie = LookupTrie()
+        dr_trie.add_item(("dr", ". ", "John"))
+        dr_trie.add_item(("John", " ", "Smith"))
         annotator = MultiTokenLookupAnnotator(
-            lookup_values=["dr. John", "John Smith"],
-            tokenizer=WordBoundaryTokenizer(),
+            trie=dr_trie,
             tag="prefix",
             overlapping=True,
         )
@@ -114,9 +113,11 @@ class TestMultiTokenLookupAnnotator:
 
         doc = Document(long_text)
 
+        dr_trie = LookupTrie()
+        dr_trie.add_item(("dr", ". ", "John"))
+        dr_trie.add_item(("John", " ", "Smith"))
         annotator = MultiTokenLookupAnnotator(
-            lookup_values=["dr. John", "John Smith"],
-            tokenizer=WordBoundaryTokenizer(),
+            trie=dr_trie,
             tag="prefix",
             overlapping=False,
         )
@@ -137,7 +138,6 @@ class TestMultiTokenLookupAnnotator:
         trie = docdeid.ds.LookupTrie(matching_pipeline=[LowercaseString()])
         trie.add_item(["my", " ", "name"])
         trie.add_item(["my", " ", "wife"])
-
         annotator = MultiTokenLookupAnnotator(
             trie=trie,
             tag="prefix",

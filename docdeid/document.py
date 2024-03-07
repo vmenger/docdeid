@@ -99,10 +99,13 @@ class Document:
 
     @property
     def tokenizers(self) -> Optional[Mapping[str, Tokenizer]]:
+        """Available tokenizers indexed by their name."""
         return self._tokenizers
 
     @property
     def token_lists(self) -> Mapping[str, TokenList]:
+        """Lists of tokens of the document, indexed by the name of the corresponding
+        tokenizer."""
         return self._token_lists
 
     def get_tokens(self, tokenizer_name: str = "default") -> TokenList:

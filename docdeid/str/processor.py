@@ -80,11 +80,11 @@ _WORD_RX = re.compile("\\w+", re.U)
 class LowercaseTail(StringModifier):
     """Lowercases the tail of words."""
 
-    def __init__(self, lang="nl"):
+    def __init__(self, lang: str = "nl") -> None:
         self._lang = lang
 
-    def _process_word_match(self, m: re.Match) -> str:
-        word = m.group(0)
+    def _process_word_match(self, match: re.Match) -> str:
+        word = match.group(0)
         if word.isupper():
             if self._lang == "nl" and word.startswith("IJ"):
                 return word[0:2] + word[2:].lower()
