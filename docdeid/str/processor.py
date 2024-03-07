@@ -74,19 +74,19 @@ class LowercaseString(StringModifier):
         return item.casefold()
 
 
-_WORD_RX = re.compile('\\w+', re.U)
+_WORD_RX = re.compile("\\w+", re.U)
 
 
 class LowercaseTail(StringModifier):
     """Lowercases the tail of words."""
 
-    def __init__(self, lang='nl'):
+    def __init__(self, lang="nl"):
         self._lang = lang
 
     def _process_word_match(self, m: re.Match) -> str:
         word = m.group(0)
         if word.isupper():
-            if self._lang == 'nl' and word.startswith('IJ'):
+            if self._lang == "nl" and word.startswith("IJ"):
                 return word[0:2] + word[2:].lower()
             return word[0] + word[1:].lower()
         return word

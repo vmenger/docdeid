@@ -77,8 +77,7 @@ class Document:
     ) -> None:
 
         self._text = text
-        self._tokenizers = (None if tokenizers is None else
-                            frozendict(tokenizers))
+        self._tokenizers = None if tokenizers is None else frozendict(tokenizers)
 
         self.metadata = MetaData(metadata)
         """The :class:`.MetaData` of this :class:`.Document`, that can be interacted
