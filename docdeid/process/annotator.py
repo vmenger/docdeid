@@ -102,25 +102,13 @@ class SingleTokenLookupAnnotator(Annotator):
 
 class MultiTokenLookupAnnotator(Annotator):
     """
-    Matches lookup values against tokens, where the ``lookup_values`` may themselves be
-    sequences.
+    Annotates entity mentions by looking them up in a `LookupTrie`.
 
     Args:
-        lookup_values: An iterable of strings, that should be matched. These are
-            tokenized internally.
-        matching_pipeline: An optional pipeline that can be used for matching
-            (e.g. lowercasing). This has no specific impact on matching performance,
-            other than overhead for applying the pipeline to each string.
-        tokenizer: A tokenizer that is used to create the sequence patterns from
-            ``lookup_values``.
-        trie: A trie that is used for matching, rather than a combination of
-            `lookup_values` and a `matching_pipeline` (cannot be used simultaneously).
-        overlapping: Whether the annotator should match overlapping sequences,
-            or should process from left to right.
-
-    Raises:
-        RuntimeError, when an incorrect combination of `lookup_values`,
-        `matching_pipeline` and `trie` is supplied.
+        trie: The `LookupTrie` containing all entity mentions that should be annotated.
+        overlapping: Whether overlapping phrases are to be returned.
+        *args, **kwargs: Passed through to the `Annotator` constructor (which accepts
+            the arguments `tag` and `priority`).
     """
 
     def __init__(
