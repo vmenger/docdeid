@@ -60,7 +60,7 @@ class OverlapResolver(AnnotationProcessor):
     @staticmethod
     def _zero_runs(arr: npt.NDArray) -> npt.NDArray:
         """
-        Finds al zero runs in a numpy array.
+        Finds all zero runs in a numpy array.
         Source: https://stackoverflow.com/questions/24885092/
         finding-the-consecutive-zeros-in-a-numpy-array
 
@@ -68,7 +68,7 @@ class OverlapResolver(AnnotationProcessor):
             arr: The input array.
 
         Returns:
-            A (num_zero_runs, 2)-dim array, containing the start and end indeces
+            A (num_zero_runs, 2)-dim array, containing the start and end indices
             of the zero runs.
 
         Examples:

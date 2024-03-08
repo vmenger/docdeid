@@ -160,7 +160,7 @@ class TestMultiTokenLookupAnnotator:
         # annotators according to the configuration.
 
         # Run the interesting portions of Deduce initialization.
-        doc = Document(long_text,tokenizers={"default": SpaceSplitTokenizer()})
+        doc = Document(long_text, tokenizers={"default": SpaceSplitTokenizer()})
         trie = docdeid.ds.LookupTrie()
         # Yeah, the comma in "Smith," seems off... but then again, WordBoundaryTokenizer
         # considers whitespace to be tokens. There is no good choice.

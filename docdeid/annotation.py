@@ -100,7 +100,7 @@ class Annotation:  # pylint: disable=R0902
 
             val = getattr(self, attr, UNKNOWN_ATTR_DEFAULT)
 
-            if callbacks is not None and (attr in callbacks):
+            if callbacks is not None and attr in callbacks:
                 val = callbacks[attr](val)
 
             sort_key.append(val)
@@ -150,14 +150,20 @@ class AnnotationSet(set[Annotation]):
             A RunTimeError, if the callbacks are not provided as a frozen dict.
         """
 
-        if callbacks is not None and not isinstance(callbacks, frozendict):
+        # Not liked by Mypy, even though
+        # https://docs.python.org/3/library/stdtypes.html#types-union
+        # says the "X | Y" notation is equivalent to `typing.Union[X, Y]` and the
+        # docstring of `typing.Optional` says it's equivalent to
+        # `typing.Union[None, _]`:
+        #     if not isinstance(callbacks, Optional[frozendict]):
+        if not isinstance(callbacks, frozendict | None):
             raise RuntimeError(
                 "Please provide the callbacks as a frozen dict, e.g. "
                 "frozendict.frozendict(end_char=lambda x: -x)"
             )
 
         return sorted(
-            list(self),
+            self,
             key=lambda x: x.get_sort_key(
                 by=by, callbacks=callbacks, deterministic=deterministic
             ),
