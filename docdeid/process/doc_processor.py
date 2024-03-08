@@ -6,6 +6,8 @@ from typing import Iterator, Optional, Union
 from docdeid.document import Document
 from docdeid.utils import annotate_doc
 
+_ROOT_LOGGER = logging.getLogger()
+
 
 class DocProcessor(ABC):  # pylint: disable=R0903
     """Something that processes a document."""
@@ -145,7 +147,8 @@ class DocProcessorGroup:
             elif isinstance(proc, DocProcessorGroup):
                 proc.process(doc, enabled=enabled, disabled=disabled)
 
-            logging.debug("after %s: %s", name, annotate_doc(doc))
+            if _ROOT_LOGGER.isEnabledFor(logging.DEBUG):
+                logging.debug("after %s: %s", name, annotate_doc(doc))
 
     def __iter__(self) -> Iterator:
 
