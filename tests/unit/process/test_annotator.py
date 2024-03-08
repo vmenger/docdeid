@@ -13,6 +13,7 @@ from docdeid.process.annotator import (
     TokenPatternAnnotator,
 )
 from docdeid.str.processor import LowercaseString
+from docdeid.tokenizer import SpaceSplitTokenizer
 
 
 class TestSingleTokenLookupAnnotator:
@@ -152,6 +153,34 @@ class TestMultiTokenLookupAnnotator:
             annotations = annotator.annotate(doc)
 
         assert annotations == expected_annotations
+
+    def test_trie_modified(self, long_text):
+        # The user of Deduce may want to amend the resources shipped with Deduce.
+        # Loading those happens in the Deduce initializer, which also constructs
+        # annotators according to the configuration.
+
+        # Run the interesting portions of Deduce initialization.
+        doc = Document(long_text,tokenizers={"default": SpaceSplitTokenizer()})
+        trie = docdeid.ds.LookupTrie()
+        # Yeah, the comma in "Smith," seems off... but then again, WordBoundaryTokenizer
+        # considers whitespace to be tokens. There is no good choice.
+        trie.add_item(("John", "Smith,"))
+        annotator = MultiTokenLookupAnnotator(trie=trie, tag="name")
+
+        # Let's add our own resources.
+        trie.add_item(("jane", "Keith-Lucas"))
+        # ...including phrases with a potential to confuse the algorithm.
+        trie.add_item(("jane", "joplane"))
+        trie.add_item(("dr.", "John", "Hopkin"))
+        trie.add_item(("Smith,", "please"))
+
+        # Expect also our phrases to be detected.
+        want = [
+            Annotation(text="John Smith,", start_char=15, end_char=26, tag="name"),
+            Annotation(text="jane Keith-Lucas", start_char=47, end_char=63, tag="name"),
+        ]
+        got = annotator.annotate(doc)
+        assert got == want
 
 
 class TestRegexpAnnotator:
