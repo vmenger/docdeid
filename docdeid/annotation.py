@@ -46,7 +46,7 @@ class Annotation:  # pylint: disable=R0902
     Should only be used when the annotation ends on a token boundary.
     """
 
-    length: int = field(init=False)
+    length: int = field(init=False, compare=False)
     """The number of characters of the annotation text."""
 
     _key_cache: dict = field(default_factory=dict, repr=False, compare=False)

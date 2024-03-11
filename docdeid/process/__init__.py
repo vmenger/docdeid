@@ -4,11 +4,12 @@ from .annotation_processor import (
     OverlapResolver,
 )
 from .annotator import (
+    _DIRECTION_MAP, # FIXME Stop using this.
     Annotator,
     MultiTokenLookupAnnotator,
     RegexpAnnotator,
+    SequenceAnnotator,
     SingleTokenLookupAnnotator,
-    TokenPatternAnnotator,
 )
 from .doc_processor import DocProcessor, DocProcessorGroup
 from .redactor import RedactAllText, Redactor, SimpleRedactor
