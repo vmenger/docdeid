@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 import warnings
 from abc import ABC, abstractmethod
@@ -7,6 +9,7 @@ from typing import Iterable, Literal, Mapping, Optional, Union
 
 import docdeid.str
 from docdeid.annotation import Annotation
+from docdeid.direction import Direction
 from docdeid.document import Document
 from docdeid.ds import DsCollection
 from docdeid.ds.lookup import LookupSet, LookupTrie
@@ -14,19 +17,6 @@ from docdeid.pattern import TokenPattern
 from docdeid.process.doc_processor import DocProcessor
 from docdeid.str.processor import StringModifier
 from docdeid.tokenizer import Token, TokenList
-
-_DIRECTION_MAP = {
-    "left": {
-        "attr": "previous",
-        "order": reversed,
-        "start_token": lambda annotation: annotation.start_token,
-    },
-    "right": {
-        "attr": "next",
-        "order": lambda pattern: pattern,
-        "start_token": lambda annotation: annotation.end_token,
-    },
-}
 
 
 @dataclass
@@ -61,7 +51,7 @@ TokenPattern = Union[SimpleTokenPattern, NestedTokenPattern]
 class SequencePattern:
     """Pattern for matching a sequence of tokens."""
 
-    direction: Literal["left", "right"]
+    direction: Direction
     skip: set[str]
     pattern: list[TokenPattern]
 
@@ -100,17 +90,6 @@ class Annotator(DocProcessor, ABC):
             A list of annotations.
         """
 
-    # FIXME This doesn't really belong here. Maybe to TokenList, rather.
-    @staticmethod
-    def _get_chained_token(token: Token, attr: str, skip: set[str]) -> Optional[Token]:
-        while True:
-            token = getattr(token, attr)()
-
-            if token is None or token.text not in skip:
-                break
-
-        return token
-
     def _match_sequence(
         self,
         doc: Document,
@@ -133,42 +112,41 @@ class Annotator(DocProcessor, ABC):
               An Annotation if matching is possible, None otherwise.
         """
 
-        direction = seq_pattern.direction
-        # FIXME Avoid the dependency loop.
-        attr = _DIRECTION_MAP[direction]["attr"]
-        pattern = _DIRECTION_MAP[direction]["order"](seq_pattern.pattern)
+        dir_ = seq_pattern.direction
 
-        current_token = start_token
+        tokens = (token for token in start_token.iter_to(dir_)
+                  if token.text not in seq_pattern.skip)
+        # Iterate the token patterns in the direction corresponding to the surface
+        # order it's supposed to match (i.e. "left" means "iterate patterns from the
+        # end").
+        tok_patterns = dir_.iter(seq_pattern.pattern)
+
+        num_matched = 0
         end_token = start_token
-
-        for pattern_position in pattern:
-            if current_token is None or not _PatternPositionMatcher.match(
-                token_pattern=pattern_position,
-                token=current_token,
-                annos=annos_by_token[current_token],
-                ds=ds,
-                metadata=doc.metadata,
+        for tok_pattern, end_token in zip(tok_patterns, tokens):
+            if _PatternPositionMatcher.match(
+                    token_pattern=tok_pattern,
+                    token=end_token,
+                    annos=annos_by_token[end_token],
+                    ds=ds,
+                    metadata=doc.metadata,
             ):
-                return None
+                num_matched += 1
+            else:
+                break
 
-            end_token = current_token
-            current_token = SequenceAnnotator._get_chained_token(
-                current_token, attr, seq_pattern.skip
+        if num_matched == len(seq_pattern.pattern):
+            left_token, right_token = dir_.iter((start_token, end_token))
+
+            return Annotation(
+                text=doc.text[left_token.start_char : right_token.end_char],
+                start_char=left_token.start_char,
+                end_char=right_token.end_char,
+                tag=self.tag,
+                priority=self.priority,
+                start_token=left_token,
+                end_token=right_token,
             )
-
-        start_token, end_token = _DIRECTION_MAP[direction]["order"](
-            (start_token, end_token)
-        )
-
-        return Annotation(
-            text=doc.text[start_token.start_char : end_token.end_char],
-            start_char=start_token.start_char,
-            end_char=end_token.end_char,
-            tag=self.tag,
-            priority=self.priority,
-            start_token=start_token,
-            end_token=end_token,
-        )
 
 
 class SingleTokenLookupAnnotator(Annotator):
@@ -595,7 +573,9 @@ class SequenceAnnotator(Annotator):
             self._matching_pipeline = lookup_list.matching_pipeline
 
         self._seq_pattern = SequencePattern(
-            "right", set(skip or ()), list(map(as_token_pattern, pattern))
+            Direction.RIGHT,
+            set(skip or ()),
+            list(map(as_token_pattern, pattern))
         )
 
         super().__init__(*args, **kwargs)

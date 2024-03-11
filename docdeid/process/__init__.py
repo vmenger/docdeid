@@ -3,7 +3,6 @@ from .annotation_processor import (
     MergeAdjacentAnnotations,
     OverlapResolver,
 )
-from .annotator import _DIRECTION_MAP  # FIXME Stop using this.
 from .annotator import (
     Annotator,
     MultiTokenLookupAnnotator,
