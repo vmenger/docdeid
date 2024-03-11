@@ -355,10 +355,16 @@ class SpaceSplitTokenizer(Tokenizer):  # pylint: disable=R0903
 
 class WordBoundaryTokenizer(Tokenizer):  # pylint: disable=R0903
     """
-    Tokenizes based on word boundary.
+    Tokenizes based on word boundary. Sequences of non-alphanumeric characters are
+    also represented as tokens.
 
-    Whitespaces and similar characters are included as tokens.
+    Args:
+        keep_blanks: Keep whitespace in tokens, and whitespace-only tokens?
     """
+
+    def __init__(self, keep_blanks=True):
+        super().__init__()
+        self._trim = not keep_blanks
 
     def _split_text(self, text: str) -> list[Token]:
         tokens = []
@@ -369,9 +375,21 @@ class WordBoundaryTokenizer(Tokenizer):  # pylint: disable=R0903
             start_char = start_match.span(0)[0]
             end_char = end_match.span(0)[0]
 
+            if self._trim:
+                word = text[start_char:end_char]
+                orig_length = len(word)
+                word = word.rstrip()
+                end_char -= orig_length - len(word)
+                word = word.lstrip()
+                start_char = end_char - len(word)
+                if not word:
+                    continue
+            else:
+                word = text[start_char:end_char]
+
             tokens.append(
                 Token(
-                    text=text[start_char:end_char],
+                    text=word,
                     start_char=start_char,
                     end_char=end_char,
                 )
