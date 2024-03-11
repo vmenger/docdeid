@@ -601,9 +601,7 @@ class SequenceAnnotator(Annotator):
                 matching_pipeline=self._matching_pipeline,
             )
 
-        annos_by_token = SequenceAnnotator._index_by_token(
-            doc.annotations, doc.token_lists
-        )
+        annos_by_token = doc.annotations.annos_by_token(doc)
 
         for token in tokens:
 
@@ -615,25 +613,3 @@ class SequenceAnnotator(Annotator):
                 annotations.append(annotation)
 
         return annotations
-
-    # TODO Test.
-    @classmethod
-    def _index_by_token(
-        cls,
-        annotations: Iterable[Annotation],
-        token_lists: Mapping[str, TokenList],
-    ) -> defaultdict[Token, set[Annotation]]:
-        """Assigns existing annotations to tokens."""
-        annos_by_token = defaultdict(set)
-        for token_list in token_lists.values():
-            # TODO Improve efficiency, simplify.
-            for anno in annotations:
-                found_first = False
-                for token in token_list:
-                    if anno.start_char < token.end_char:
-                        found_first = True
-                    if token.start_char >= anno.end_char:
-                        break
-                    if found_first:
-                        annos_by_token[token].add(anno)
-        return annos_by_token

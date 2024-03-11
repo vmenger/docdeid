@@ -1,8 +1,11 @@
+import re
+
 import pytest
 from frozendict import frozendict
 
+from docdeid import Document
 from docdeid.annotation import Annotation, AnnotationSet
-from docdeid.tokenizer import Token
+from docdeid.tokenizer import Token, WordBoundaryTokenizer, Tokenizer
 
 
 class TestAnnotation:
@@ -157,3 +160,63 @@ class TestAnnotationSet:
             _ = annotation_set.sorted(
                 by=("priority", "length"), callbacks=dict(length=lambda x: -x)
             )
+
+    def test_annos_by_token(self, annotations):
+        doc = Document("1 2 3 1 2 3 hum Hello hum I'm Bob - said Cindy",
+                       tokenizers={"default": WordBoundaryTokenizer(False)})
+        aset = AnnotationSet([
+            a1 := Annotation("Hello", 16, 21, "word"),
+            a2 := Annotation("I", 26, 27, "ltr"),
+            a3 := Annotation("I'm", 26, 29, "words"),
+            a4 := Annotation("Bob", 30, 33, "name"),
+            a5 := Annotation("I'm Bob", 26, 33, "stmt"),
+        ])
+
+        # import pydevd_pycharm
+        # pydevd_pycharm.settrace()
+
+        got = aset.annos_by_token(doc)
+
+        want = {
+            Token("Hello", 16, 21): {a1},
+            Token("I", 26, 27): {a2, a3, a5},
+            Token("'", 27, 28): {a3, a5},
+            Token("m", 28, 29): {a3, a5},
+            Token("Bob", 30, 33): {a4, a5},
+        }
+
+        assert got == want
+
+    def test_annos_by_token_2(self, annotations):
+        class HumTokenizer(Tokenizer):
+            """Extracts each "hum" word and the following word as a token."""
+            def _split_text(self, text: str) -> list[Token]:
+                return [
+                    Token(match.group(0), match.start(), match.end())
+                    for match in re.finditer("\\bhum\\s+\\w+", text)
+                ]
+
+        doc = Document("1 2 3 1 2 3 hum Hello hum I'm Bob - said Cindy",
+                       tokenizers={"default": WordBoundaryTokenizer(False),
+                                   "for_fun": HumTokenizer()})
+        aset = AnnotationSet([
+            a1 := Annotation("Hello", 16, 21, "word"),
+            a2 := Annotation("I", 26, 27, "ltr"),
+            a3 := Annotation("I'm", 26, 29, "words"),
+            a4 := Annotation("Bob", 30, 33, "name"),
+            a5 := Annotation("I'm Bob", 26, 33, "stmt"),
+        ])
+
+        got = aset.annos_by_token(doc)
+
+        want = {
+            Token("Hello", 16, 21): {a1},
+            Token("I", 26, 27): {a2, a3, a5},
+            Token("'", 27, 28): {a3, a5},
+            Token("m", 28, 29): {a3, a5},
+            Token("Bob", 30, 33): {a4, a5},
+            Token("hum Hello", 12, 21): {a1},
+            Token("hum I", 22, 27): {a2, a3, a5},
+        }
+
+        assert got == want
