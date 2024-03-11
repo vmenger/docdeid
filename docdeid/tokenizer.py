@@ -355,14 +355,14 @@ class SpaceSplitTokenizer(Tokenizer):  # pylint: disable=R0903
 
 class WordBoundaryTokenizer(Tokenizer):  # pylint: disable=R0903
     """
-    Tokenizes based on word boundary. Sequences of non-alphanumeric characters are
-    also represented as tokens.
+    Tokenizes based on word boundary. Sequences of non-alphanumeric characters are also
+    represented as tokens.
 
     Args:
         keep_blanks: Keep whitespace in tokens, and whitespace-only tokens?
     """
 
-    def __init__(self, keep_blanks=True):
+    def __init__(self, keep_blanks: bool = True) -> None:
         super().__init__()
         self._trim = not keep_blanks
 

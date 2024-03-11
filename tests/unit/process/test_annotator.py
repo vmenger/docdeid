@@ -7,16 +7,16 @@ import pytest
 import docdeid.ds
 from docdeid.annotation import Annotation
 from docdeid.document import Document
-from docdeid.ds import LookupTrie, DsCollection, LookupSet
+from docdeid.ds import DsCollection, LookupSet, LookupTrie
 from docdeid.pattern import TokenPattern
 from docdeid.process.annotator import (
-    as_token_pattern,
     MultiTokenLookupAnnotator,
     RegexpAnnotator,
     SequenceAnnotator,
     SequencePattern,
     SingleTokenLookupAnnotator,
     TokenPatternAnnotator,
+    as_token_pattern,
 )
 from docdeid.str.processor import LowercaseString
 from docdeid.tokenizer import SpaceSplitTokenizer, WordBoundaryTokenizer
@@ -320,7 +320,7 @@ class TestSequenceAnnotator:
     def pattern_doc(self):
         return Document(
             text="De man heet Andries Meijer-Heerma, voornaam Andries.",
-            tokenizers={"default": WordBoundaryTokenizer(False)}
+            tokenizers={"default": WordBoundaryTokenizer(False)},
         )
 
     def test_match_sequence(self, pattern_doc, ds):
@@ -336,14 +336,14 @@ class TestSequenceAnnotator:
             ds=ds,
         ) == Annotation(text="Andries Meijer", start_char=12, end_char=26, tag="_")
         assert (
-                tpa._match_sequence(
-                    pattern_doc,
-                    SequencePattern("right", set(), list(map(as_token_pattern, pattern))),
-                    start_token=pattern_doc.get_tokens()[7],
-                    annos_by_token=defaultdict(list),
-                    ds=ds,
-                )
-                is None
+            tpa._match_sequence(
+                pattern_doc,
+                SequencePattern("right", set(), list(map(as_token_pattern, pattern))),
+                start_token=pattern_doc.get_tokens()[7],
+                annos_by_token=defaultdict(list),
+                ds=ds,
+            )
+            is None
         )
 
     def test_match_sequence_left(self, pattern_doc, ds):
@@ -360,14 +360,14 @@ class TestSequenceAnnotator:
         ) == Annotation(text="Andries Meijer", start_char=12, end_char=26, tag="_")
 
         assert (
-                tpa._match_sequence(
-                    pattern_doc,
-                    SequencePattern("left", set(), list(map(as_token_pattern, pattern))),
-                    start_token=pattern_doc.get_tokens()[8],
-                    annos_by_token=defaultdict(list),
-                    ds=ds,
-                )
-                is None
+            tpa._match_sequence(
+                pattern_doc,
+                SequencePattern("left", set(), list(map(as_token_pattern, pattern))),
+                start_token=pattern_doc.get_tokens()[8],
+                annos_by_token=defaultdict(list),
+                ds=ds,
+            )
+            is None
         )
 
     def test_match_sequence_skip(self, pattern_doc, ds):
@@ -383,14 +383,14 @@ class TestSequenceAnnotator:
             ds=ds,
         ) == Annotation(text="Meijer-Heerma", start_char=20, end_char=33, tag="_")
         assert (
-                tpa._match_sequence(
-                    pattern_doc,
-                    SequencePattern("right", set(), list(map(as_token_pattern, pattern))),
-                    start_token=pattern_doc.get_tokens()[4],
-                    annos_by_token=defaultdict(list),
-                    ds=ds,
-                )
-                is None
+            tpa._match_sequence(
+                pattern_doc,
+                SequencePattern("right", set(), list(map(as_token_pattern, pattern))),
+                start_token=pattern_doc.get_tokens()[4],
+                annos_by_token=defaultdict(list),
+                ds=ds,
+            )
+            is None
         )
 
     def test_annotate(self, pattern_doc, ds):

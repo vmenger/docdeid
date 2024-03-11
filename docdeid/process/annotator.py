@@ -3,18 +3,17 @@ import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Iterable, Optional, Union, Literal, Mapping
+from typing import Iterable, Literal, Mapping, Optional, Union
 
 import docdeid.str
 from docdeid.annotation import Annotation
 from docdeid.document import Document
-from docdeid.tokenizer import Token, TokenList
 from docdeid.ds import DsCollection
 from docdeid.ds.lookup import LookupSet, LookupTrie
 from docdeid.pattern import TokenPattern
 from docdeid.process.doc_processor import DocProcessor
 from docdeid.str.processor import StringModifier
-
+from docdeid.tokenizer import Token, TokenList
 
 _DIRECTION_MAP = {
     "left": {
@@ -33,14 +32,24 @@ _DIRECTION_MAP = {
 @dataclass
 class SimpleTokenPattern:
     """A pattern for a token (and possibly its annotation, too)."""
-    func: Literal["equal", "re_match", "is_initial", "is_initials", "like_name",
-    "lookup", "neg_lookup", "tag"]
+
+    func: Literal[
+        "equal",
+        "re_match",
+        "is_initial",
+        "is_initials",
+        "like_name",
+        "lookup",
+        "neg_lookup",
+        "tag",
+    ]
     pattern: str
 
 
 @dataclass
 class NestedTokenPattern:
     """Coordination of token patterns."""
+
     func: Literal["and", "or"]
     pattern: list[TokenPattern]
 
@@ -50,9 +59,8 @@ TokenPattern = Union[SimpleTokenPattern, NestedTokenPattern]
 
 @dataclass
 class SequencePattern:
-    """
-    Pattern for matching a sequence of tokens.
-    """
+    """Pattern for matching a sequence of tokens."""
+
     direction: Literal["left", "right"]
     skip: set[str]
     pattern: list[TokenPattern]
@@ -109,7 +117,7 @@ class Annotator(DocProcessor, ABC):
         seq_pattern: SequencePattern,
         start_token: Token,
         annos_by_token: defaultdict[Token, Iterable[Annotation]],
-        ds: Optional[DsCollection]
+        ds: Optional[DsCollection],
     ) -> Optional[Annotation]:
         """
         Matches a token sequence pattern at `start_token`.
@@ -515,6 +523,13 @@ class _PatternPositionMatcher:  # pylint: disable=R0903
 
 
 def as_token_pattern(pat_dict: dict) -> TokenPattern:
+    """
+    Converts the JSON dictionary representation of token patterns into a
+    `TokenPattern` instance.
+
+    Args:
+        pat_dict: the JSON representation of the pattern
+    """
     if len(pat_dict) != 1:
         raise ValueError(
             f"Cannot parse a token pattern which doesn't have exactly 1 key: "
@@ -535,8 +550,8 @@ class SequenceAnnotator(Annotator):
 
     Arguments:
         pattern: The pattern
-        ds: Lookup dictionaries. Those referenced by the pattern should be
-            LookupSets. (Don't ask why.)
+        ds: Lookup dictionaries. Those referenced by the pattern should be LookupSets.
+            (Don't ask why.)
         skip: Any string values that should be skipped in matching (e.g. periods)
     """
 
@@ -557,13 +572,13 @@ class SequenceAnnotator(Annotator):
 
         if len(self.pattern) > 0 and "lookup" in self.pattern[0]:
 
-            if self.ds is None:
+            if self.dicts is None:
                 raise RuntimeError(
                     "Created pattern with lookup in TokenPatternAnnotator, but "
                     "no lookup structures provided."
                 )
 
-            lookup_list = self.ds[self.pattern[0]["lookup"]]
+            lookup_list = self.dicts[self.pattern[0]["lookup"]]
 
             # FIXME This doesn't work correctly for multiple ([{"lookup":"prefix"},
             #  {"lookup":"interfix"}]) and nested patterns ("or", "and").
@@ -579,9 +594,9 @@ class SequenceAnnotator(Annotator):
             #  {"lookup":"interfix"}]) and nested patterns ("or", "and").
             self._matching_pipeline = lookup_list.matching_pipeline
 
-        self._seq_pattern = SequencePattern("right",
-                                            set(skip or ()),
-                                            list(map(as_token_pattern, pattern)))
+        self._seq_pattern = SequencePattern(
+            "right", set(skip or ()), list(map(as_token_pattern, pattern))
+        )
 
         super().__init__(*args, **kwargs)
 
@@ -612,11 +627,9 @@ class SequenceAnnotator(Annotator):
 
         for token in tokens:
 
-            annotation = self._match_sequence(doc,
-                                              self._seq_pattern,
-                                              token,
-                                              annos_by_token,
-                                              self.ds)
+            annotation = self._match_sequence(
+                doc, self._seq_pattern, token, annos_by_token, self.dicts
+            )
 
             if annotation is not None:
                 annotations.append(annotation)
