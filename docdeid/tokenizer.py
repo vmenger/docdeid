@@ -123,24 +123,8 @@ class Token:
         """
         return self._get_linked_token(num=num, attr="_next_token")
 
-    def get_nth(self,
-                num: int = 1,
-                dir_: Direction = Direction.RIGHT,
-                ) -> Optional[Token]:
-        """
-        Finds the _n_-th token to the left or right.
-
-        Args:
-            num: number of tokens to move
-            dir_: direction to go
-        """
-        if num < 0:
-            return self.get_nth(-num, dir_.opposite)
-        return self.next(num) if dir_ is Direction.RIGHT else self.previous(num)
-
-    def iter_to(self,
-                dir_: Direction = Direction.RIGHT,
-            ) -> Generator[Token, None, None]:
+    def iter_to(self, dir_: Direction = Direction.RIGHT,
+                ) -> Generator[Token, None, None]:
         """
         Iterates linked tokens in the specified direction.
 
@@ -150,7 +134,8 @@ class Token:
         token = self
         while token is not None:
             yield token
-            token = token.next() if dir_ is Direction.RIGHT else token.previous()
+            token = (token._next_token if dir_ is Direction.RIGHT else
+                     token._previous_token)
 
     def __len__(self) -> int:
         """
