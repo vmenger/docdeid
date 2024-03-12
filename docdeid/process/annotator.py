@@ -5,7 +5,7 @@ import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Iterable, Literal, Mapping, Optional, Union
+from typing import Iterable, Literal, Optional, Union
 
 import docdeid.str
 from docdeid.annotation import Annotation
@@ -16,7 +16,7 @@ from docdeid.ds.lookup import LookupSet, LookupTrie
 from docdeid.pattern import TokenPattern
 from docdeid.process.doc_processor import DocProcessor
 from docdeid.str.processor import StringModifier
-from docdeid.tokenizer import Token, TokenList
+from docdeid.tokenizer import Token
 
 
 @dataclass
@@ -41,10 +41,10 @@ class NestedTokenPattern:
     """Coordination of token patterns."""
 
     func: Literal["and", "or"]
-    pattern: list[TokenPattern]
+    pattern: list[TokenPatternFromCfg]
 
 
-TokenPattern = Union[SimpleTokenPattern, NestedTokenPattern]
+TokenPatternFromCfg = Union[SimpleTokenPattern, NestedTokenPattern]
 
 
 @dataclass
@@ -53,7 +53,7 @@ class SequencePattern:
 
     direction: Direction
     skip: set[str]
-    pattern: list[TokenPattern]
+    pattern: list[TokenPatternFromCfg]
 
 
 class Annotator(DocProcessor, ABC):
@@ -420,8 +420,8 @@ class _PatternPositionMatcher:  # pylint: disable=R0903
     """Checks if a token matches against a single pattern."""
 
     @classmethod
-    def match(cls, token_pattern: dict | TokenPattern, **kwargs) -> bool:  # pylint:
-        # disable=R0911
+    def match(cls, token_pattern: dict | TokenPatternFromCfg, **kwargs) -> bool:
+        # pylint: disable=R0911
         """
         Matches a pattern position (a dict with one key). Other information should be
         presented as kwargs.
@@ -503,10 +503,10 @@ class _PatternPositionMatcher:  # pylint: disable=R0903
             return token in kwargs.get("ds")[ent_type]
 
 
-def as_token_pattern(pat_dict: dict) -> TokenPattern:
+def as_token_pattern(pat_dict: dict) -> TokenPatternFromCfg:
     """
-    Converts the JSON dictionary representation of token patterns into a `TokenPattern`
-    instance.
+    Converts the JSON dictionary representation of token patterns into a
+    `TokenPatternFromCfg` instance.
 
     Args:
         pat_dict: the JSON representation of the pattern

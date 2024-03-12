@@ -4,6 +4,7 @@ from typing import Any, Callable, Optional
 
 from frozendict import frozendict
 
+import docdeid
 from docdeid.tokenizer import Token
 
 UNKNOWN_ATTR_DEFAULT: Any = 0
@@ -127,7 +128,7 @@ class AnnotationSet(set[Annotation]):
     It extends the builtin ``set``.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._annos_by_tokenizers_by_token = {}
 
@@ -191,7 +192,10 @@ class AnnotationSet(set[Annotation]):
 
         return False
 
-    def annos_by_token(self, doc: "Document") -> defaultdict[Token, set[Annotation]]:
+    def annos_by_token(
+        self,
+        doc: "docdeid.document.Document",
+    ) -> defaultdict[Token, set[Annotation]]:
         """
         Returns a mapping from document tokens to annotations.
 
