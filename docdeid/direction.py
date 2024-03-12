@@ -26,7 +26,7 @@ class Direction(IntEnum):
             return Direction.LEFT
         if norm == "right":
             return Direction.RIGHT
-        raise ValueError("Invalid direction: '%s'".format(val))
+        raise ValueError("Invalid direction: '{}'".format(val))
 
     def iter(self, seq: Sequence[T]) -> Iterable[T]:
         """
