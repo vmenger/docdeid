@@ -4,7 +4,6 @@ from typing import Any, Callable, Optional
 
 from frozendict import frozendict
 
-import docdeid
 from docdeid.tokenizer import Token
 
 UNKNOWN_ATTR_DEFAULT: Any = 0
@@ -192,6 +191,8 @@ class AnnotationSet(set[Annotation]):
 
         return False
 
+    import docdeid  # needed to type-annotate the `doc` argument below
+
     def annos_by_token(
         self,
         doc: "docdeid.document.Document",
@@ -221,16 +222,15 @@ class AnnotationSet(set[Annotation]):
                             tok = token_list[cur_tok_idx]
                     except IndexError:
                         break
-                    else:
-                        # Iterate over tokens in the annotation till we reach the end
-                        # of it or the end of the tokens.
-                        anno_tok_idx = cur_tok_idx
-                        anno_tok = tok
-                        while anno_tok.start_char < anno.end_char:
-                            annos_by_token[anno_tok].add(anno)
-                            if anno_tok_idx == len(token_list) - 1:
-                                break
-                            anno_tok_idx += 1
-                            anno_tok = token_list[anno_tok_idx]
+                    # Iterate over tokens in the annotation till we reach the end
+                    # of it or the end of the tokens.
+                    anno_tok_idx = cur_tok_idx
+                    anno_tok = tok
+                    while anno_tok.start_char < anno.end_char:
+                        annos_by_token[anno_tok].add(anno)
+                        if anno_tok_idx == len(token_list) - 1:
+                            break
+                        anno_tok_idx += 1
+                        anno_tok = token_list[anno_tok_idx]
             self._annos_by_tokenizers_by_token[tokenizers] = annos_by_token
         return self._annos_by_tokenizers_by_token[tokenizers]

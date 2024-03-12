@@ -136,9 +136,7 @@ class Token:
         token = self
         while token is not None:
             yield token
-            token = (
-                token._next_token if dir_ is Direction.RIGHT else token._previous_token
-            )
+            token = token.next() if dir_ is Direction.RIGHT else token.previous()
 
     def __len__(self) -> int:
         """

@@ -336,7 +336,7 @@ class TestSequenceAnnotator:
             ),
             start_token=pattern_doc.get_tokens()[3],
             annos_by_token=defaultdict(list),
-            ds=ds,
+            dicts=ds,
         ) == Annotation(text="Andries Meijer", start_char=12, end_char=26, tag="_")
         assert (
             tpa._match_sequence(
@@ -346,7 +346,7 @@ class TestSequenceAnnotator:
                 ),
                 start_token=pattern_doc.get_tokens()[7],
                 annos_by_token=defaultdict(list),
-                ds=ds,
+                dicts=ds,
             )
             is None
         )
@@ -363,7 +363,7 @@ class TestSequenceAnnotator:
             ),
             start_token=pattern_doc.get_tokens()[4],
             annos_by_token=defaultdict(list),
-            ds=ds,
+            dicts=ds,
         ) == Annotation(text="Andries Meijer", start_char=12, end_char=26, tag="_")
 
         assert (
@@ -374,7 +374,7 @@ class TestSequenceAnnotator:
                 ),
                 start_token=pattern_doc.get_tokens()[8],
                 annos_by_token=defaultdict(list),
-                ds=ds,
+                dicts=ds,
             )
             is None
         )
@@ -391,7 +391,7 @@ class TestSequenceAnnotator:
             ),
             start_token=pattern_doc.get_tokens()[4],
             annos_by_token=defaultdict(list),
-            ds=ds,
+            dicts=ds,
         ) == Annotation(text="Meijer-Heerma", start_char=20, end_char=33, tag="_")
         assert (
             tpa._match_sequence(
@@ -401,7 +401,7 @@ class TestSequenceAnnotator:
                 ),
                 start_token=pattern_doc.get_tokens()[4],
                 annos_by_token=defaultdict(list),
-                ds=ds,
+                dicts=ds,
             )
             is None
         )

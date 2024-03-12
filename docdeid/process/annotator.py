@@ -96,7 +96,7 @@ class Annotator(DocProcessor, ABC):
         seq_pattern: SequencePattern,
         start_token: Token,
         annos_by_token: defaultdict[Token, Iterable[Annotation]],
-        ds: Optional[DsCollection],
+        dicts: Optional[DsCollection],
     ) -> Optional[Annotation]:
         """
         Matches a token sequence pattern at `start_token`.
@@ -106,7 +106,7 @@ class Annotator(DocProcessor, ABC):
             seq_pattern: The pattern to match.
             start_token: The start token to match.
             annos_by_token: Map from tokens to annotations covering it.
-            ds: Lookup dictionaries available.
+            dicts: Lookup dictionaries available.
 
         Returns:
               An Annotation if matching is possible, None otherwise.
@@ -131,25 +131,27 @@ class Annotator(DocProcessor, ABC):
                 token_pattern=tok_pattern,
                 token=end_token,
                 annos=annos_by_token[end_token],
-                ds=ds,
+                ds=dicts,
                 metadata=doc.metadata,
             ):
                 num_matched += 1
             else:
                 break
 
-        if num_matched == len(seq_pattern.pattern):
-            left_token, right_token = dir_.iter((start_token, end_token))
+        if num_matched != len(seq_pattern.pattern):
+            return None
 
-            return Annotation(
-                text=doc.text[left_token.start_char : right_token.end_char],
-                start_char=left_token.start_char,
-                end_char=right_token.end_char,
-                tag=self.tag,
-                priority=self.priority,
-                start_token=left_token,
-                end_token=right_token,
-            )
+        left_token, right_token = dir_.iter((start_token, end_token))
+
+        return Annotation(
+            text=doc.text[left_token.start_char : right_token.end_char],
+            start_char=left_token.start_char,
+            end_char=right_token.end_char,
+            tag=self.tag,
+            priority=self.priority,
+            start_token=left_token,
+            end_token=right_token,
+        )
 
 
 class SingleTokenLookupAnnotator(Annotator):
@@ -493,12 +495,7 @@ class _PatternPositionMatcher:  # pylint: disable=R0903
                 meta_val = getattr(kwargs["metadata"][meta_key], meta_attr)
             except (TypeError, KeyError, AttributeError):
                 return False
-            else:
-                return (
-                    token == meta_val
-                    if isinstance(meta_val, str)
-                    else token in meta_val
-                )
+            return token == meta_val if isinstance(meta_val, str) else token in meta_val
         else:  # pylint: disable=R1705
             return token in kwargs.get("ds")[ent_type]
 
