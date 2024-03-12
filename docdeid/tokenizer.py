@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Iterator, Literal, Optional, SupportsIndex, overload, Generator
+from typing import Generator, Iterator, Literal, Optional, SupportsIndex, overload
 
 from docdeid.direction import Direction
 from docdeid.str import StringModifier
@@ -123,8 +123,10 @@ class Token:
         """
         return self._get_linked_token(num=num, attr="_next_token")
 
-    def iter_to(self, dir_: Direction = Direction.RIGHT,
-                ) -> Generator[Token, None, None]:
+    def iter_to(
+        self,
+        dir_: Direction = Direction.RIGHT,
+    ) -> Generator[Token, None, None]:
         """
         Iterates linked tokens in the specified direction.
 
@@ -134,8 +136,9 @@ class Token:
         token = self
         while token is not None:
             yield token
-            token = (token._next_token if dir_ is Direction.RIGHT else
-                     token._previous_token)
+            token = (
+                token._next_token if dir_ is Direction.RIGHT else token._previous_token
+            )
 
     def __len__(self) -> int:
         """

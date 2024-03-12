@@ -114,8 +114,11 @@ class Annotator(DocProcessor, ABC):
 
         dir_ = seq_pattern.direction
 
-        tokens = (token for token in start_token.iter_to(dir_)
-                  if token.text not in seq_pattern.skip)
+        tokens = (
+            token
+            for token in start_token.iter_to(dir_)
+            if token.text not in seq_pattern.skip
+        )
         # Iterate the token patterns in the direction corresponding to the surface
         # order it's supposed to match (i.e. "left" means "iterate patterns from the
         # end").
@@ -125,11 +128,11 @@ class Annotator(DocProcessor, ABC):
         end_token = start_token
         for tok_pattern, end_token in zip(tok_patterns, tokens):
             if _PatternPositionMatcher.match(
-                    token_pattern=tok_pattern,
-                    token=end_token,
-                    annos=annos_by_token[end_token],
-                    ds=ds,
-                    metadata=doc.metadata,
+                token_pattern=tok_pattern,
+                token=end_token,
+                annos=annos_by_token[end_token],
+                ds=ds,
+                metadata=doc.metadata,
             ):
                 num_matched += 1
             else:
@@ -502,8 +505,8 @@ class _PatternPositionMatcher:  # pylint: disable=R0903
 
 def as_token_pattern(pat_dict: dict) -> TokenPattern:
     """
-    Converts the JSON dictionary representation of token patterns into a
-    `TokenPattern` instance.
+    Converts the JSON dictionary representation of token patterns into a `TokenPattern`
+    instance.
 
     Args:
         pat_dict: the JSON representation of the pattern
@@ -573,9 +576,7 @@ class SequenceAnnotator(Annotator):
             self._matching_pipeline = lookup_list.matching_pipeline
 
         self._seq_pattern = SequencePattern(
-            Direction.RIGHT,
-            set(skip or ()),
-            list(map(as_token_pattern, pattern))
+            Direction.RIGHT, set(skip or ()), list(map(as_token_pattern, pattern))
         )
 
         super().__init__(*args, **kwargs)

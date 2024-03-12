@@ -209,7 +209,7 @@ class AnnotationSet(set[Annotation]):
                     continue
                 cur_tok_idx = 0
                 tok = token_list[cur_tok_idx]
-                for anno in self.sorted(by=("start_char", )):
+                for anno in self.sorted(by=("start_char",)):
                     try:
                         # Iterate over tokens till we reach the annotation.
                         while tok.end_char < anno.start_char:

@@ -5,7 +5,7 @@ from frozendict import frozendict
 
 from docdeid import Document
 from docdeid.annotation import Annotation, AnnotationSet
-from docdeid.tokenizer import Token, WordBoundaryTokenizer, Tokenizer
+from docdeid.tokenizer import Token, Tokenizer, WordBoundaryTokenizer
 
 
 class TestAnnotation:
@@ -162,15 +162,19 @@ class TestAnnotationSet:
             )
 
     def test_annos_by_token(self, annotations):
-        doc = Document("1 2 3 1 2 3 hum Hello hum I'm Bob - said Cindy",
-                       tokenizers={"default": WordBoundaryTokenizer(False)})
-        aset = AnnotationSet([
-            a1 := Annotation("Hello", 16, 21, "word"),
-            a2 := Annotation("I", 26, 27, "ltr"),
-            a3 := Annotation("I'm", 26, 29, "words"),
-            a4 := Annotation("Bob", 30, 33, "name"),
-            a5 := Annotation("I'm Bob", 26, 33, "stmt"),
-        ])
+        doc = Document(
+            "1 2 3 1 2 3 hum Hello hum I'm Bob - said Cindy",
+            tokenizers={"default": WordBoundaryTokenizer(False)},
+        )
+        aset = AnnotationSet(
+            [
+                a1 := Annotation("Hello", 16, 21, "word"),
+                a2 := Annotation("I", 26, 27, "ltr"),
+                a3 := Annotation("I'm", 26, 29, "words"),
+                a4 := Annotation("Bob", 30, 33, "name"),
+                a5 := Annotation("I'm Bob", 26, 33, "stmt"),
+            ]
+        )
 
         # import pydevd_pycharm
         # pydevd_pycharm.settrace()
@@ -190,22 +194,29 @@ class TestAnnotationSet:
     def test_annos_by_token_2(self, annotations):
         class HumTokenizer(Tokenizer):
             """Extracts each "hum" word and the following word as a token."""
+
             def _split_text(self, text: str) -> list[Token]:
                 return [
                     Token(match.group(0), match.start(), match.end())
                     for match in re.finditer("\\bhum\\s+\\w+", text)
                 ]
 
-        doc = Document("1 2 3 1 2 3 hum Hello hum I'm Bob - said Cindy",
-                       tokenizers={"default": WordBoundaryTokenizer(False),
-                                   "for_fun": HumTokenizer()})
-        aset = AnnotationSet([
-            a1 := Annotation("Hello", 16, 21, "word"),
-            a2 := Annotation("I", 26, 27, "ltr"),
-            a3 := Annotation("I'm", 26, 29, "words"),
-            a4 := Annotation("Bob", 30, 33, "name"),
-            a5 := Annotation("I'm Bob", 26, 33, "stmt"),
-        ])
+        doc = Document(
+            "1 2 3 1 2 3 hum Hello hum I'm Bob - said Cindy",
+            tokenizers={
+                "default": WordBoundaryTokenizer(False),
+                "for_fun": HumTokenizer(),
+            },
+        )
+        aset = AnnotationSet(
+            [
+                a1 := Annotation("Hello", 16, 21, "word"),
+                a2 := Annotation("I", 26, 27, "ltr"),
+                a3 := Annotation("I'm", 26, 29, "words"),
+                a4 := Annotation("Bob", 30, 33, "name"),
+                a5 := Annotation("I'm Bob", 26, 33, "stmt"),
+            ]
+        )
 
         got = aset.annos_by_token(doc)
 

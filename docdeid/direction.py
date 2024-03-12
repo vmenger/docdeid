@@ -3,11 +3,12 @@ from __future__ import annotations
 from enum import IntEnum
 from typing import Iterable, Sequence, TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class Direction(IntEnum):
     """Direction in text -- either left or right."""
+
     LEFT = -1
     RIGHT = 1
 
@@ -18,10 +19,8 @@ class Direction(IntEnum):
 
     @staticmethod
     def from_string(val: str) -> Direction:
-        """
-        Parses a Direction from a string, which must be either 'left' or 'right' after
-        lowercasing.
-        """
+        """Parses a Direction from a string, which must be either 'left' or 'right'
+        after lowercasing."""
         norm = val.lower()
         if norm == "left":
             return Direction.LEFT
