@@ -133,7 +133,7 @@ class Token:
         Args:
             dir_: direction to go
         """
-        token = self
+        token: Optional[Token] = self
         while token is not None:
             yield token
             token = token.next() if dir_ is Direction.RIGHT else token.previous()

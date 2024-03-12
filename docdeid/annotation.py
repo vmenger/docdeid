@@ -129,7 +129,10 @@ class AnnotationSet(set[Annotation]):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._annos_by_tokenizers_by_token = {}
+        # Ugh, this feels like Java 9. (For sake of Mypy:)
+        self._annos_by_tokenizers_by_token: dict[
+            frozenset[str], defaultdict[Token, set[Annotation]]
+        ] = {}
 
     def sorted(
         self,

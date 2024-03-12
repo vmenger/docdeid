@@ -443,9 +443,9 @@ class _PatternPositionMatcher:  # pylint: disable=R0903
         value = token_pattern.pattern
 
         if func == "equal":
-            return kwargs.get("token").text == value
+            return kwargs["token"].text == value
         if func == "re_match":
-            return re.match(value, kwargs.get("token").text) is not None
+            return re.match(value, kwargs["token"].text) is not None
         if func == "is_initial":
 
             warnings.warn(
@@ -455,22 +455,18 @@ class _PatternPositionMatcher:  # pylint: disable=R0903
             )
 
             return (
-                (
-                    len(kwargs.get("token").text) == 1
-                    and kwargs.get("token").text[0].isupper()
-                )
-                or kwargs.get("token").text in {"Ch", "Chr", "Ph", "Th"}
+                (len(kwargs["token"].text) == 1 and kwargs["token"].text[0].isupper())
+                or kwargs["token"].text in {"Ch", "Chr", "Ph", "Th"}
             ) == value
         if func == "is_initials":
             return (
-                len(kwargs.get("token").text) <= 4
-                and kwargs.get("token").text.isupper()
+                len(kwargs["token"].text) <= 4 and kwargs["token"].text.isupper()
             ) == value
         if func == "like_name":
             return (
-                len(kwargs.get("token").text) >= 3
-                and kwargs.get("token").text.istitle()
-                and not any(ch.isdigit() for ch in kwargs.get("token").text)
+                len(kwargs["token"].text) >= 3
+                and kwargs["token"].text.istitle()
+                and not any(ch.isdigit() for ch in kwargs["token"].text)
             ) == value
         if func == "lookup":
             return cls._lookup(value, **kwargs)
@@ -488,7 +484,7 @@ class _PatternPositionMatcher:  # pylint: disable=R0903
 
     @classmethod
     def _lookup(cls, ent_type: str, **kwargs) -> bool:
-        token = kwargs.get("token").text
+        token = kwargs["token"].text
         if "." in ent_type:
             meta_key, meta_attr = ent_type.split(".", 1)
             try:
@@ -497,7 +493,7 @@ class _PatternPositionMatcher:  # pylint: disable=R0903
                 return False
             return token == meta_val if isinstance(meta_val, str) else token in meta_val
         else:  # pylint: disable=R1705
-            return token in kwargs.get("ds")[ent_type]
+            return token in kwargs["ds"][ent_type]
 
 
 def as_token_pattern(pat_dict: dict) -> TokenPatternFromCfg:
@@ -591,13 +587,15 @@ class SequenceAnnotator(Annotator):
 
         annotations = []
 
-        tokens = doc.get_tokens()
+        token_list = doc.get_tokens()
 
         if self._start_words is not None:
-            tokens = tokens.token_lookup(
+            tokens: Iterable[Token] = token_list.token_lookup(
                 lookup_values=self._start_words,
                 matching_pipeline=self._matching_pipeline,
             )
+        else:
+            tokens = token_list  # ...to make Mypy happy.
 
         annos_by_token = doc.annotations.annos_by_token(doc)
 

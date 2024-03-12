@@ -98,7 +98,7 @@ class Document:
         return self._text
 
     @property
-    def tokenizers(self) -> Optional[Mapping[str, Tokenizer]]:
+    def tokenizers(self) -> Mapping[str, Tokenizer]:
         """Available tokenizers indexed by their name."""
         if self._tokenizers is None:
             raise RuntimeError("No tokenizers initialized.")
@@ -109,7 +109,7 @@ class Document:
         """Lists of tokens of the document, indexed by the name of the corresponding
         tokenizer."""
         for tokker_name in set(self.tokenizers) - set(self._token_lists):
-            tokker = self._tokenizers[tokker_name]
+            tokker = self.tokenizers[tokker_name]
             self._token_lists[tokker_name] = tokker.tokenize(self._text)
         return self._token_lists
 
