@@ -68,14 +68,12 @@ class SingleTokenLookupAnnotator(Annotator):
         tokenizer_name: str = "default",
         **kwargs,
     ) -> None:
-
         self.lookup_set = LookupSet(matching_pipeline=matching_pipeline)
         self.lookup_set.add_items_from_iterable(items=lookup_values)
         self._tokenizer_name = tokenizer_name
         super().__init__(*args, **kwargs)
 
     def _tokens_to_annotations(self, tokens: Iterable[Token]) -> list[Annotation]:
-
         return [
             Annotation(
                 text=token.text,
@@ -90,7 +88,6 @@ class SingleTokenLookupAnnotator(Annotator):
         ]
 
     def annotate(self, doc: Document) -> list[Annotation]:
-
         tokens = doc.get_tokens(tokenizer_name=self._tokenizer_name)
 
         annotate_tokens = tokens.token_lookup(
@@ -133,11 +130,9 @@ class MultiTokenLookupAnnotator(Annotator):
         overlapping: bool = False,
         **kwargs,
     ) -> None:
-
         self._start_words: set[str] = set()
 
         if (trie is not None) and (lookup_values is None) and (tokenizer is None):
-
             self._trie = trie
             self._matching_pipeline = trie.matching_pipeline or []
             self._start_words = set(trie.children.keys())
@@ -159,9 +154,7 @@ class MultiTokenLookupAnnotator(Annotator):
     def _init_lookup_structures(
         self, lookup_values: Iterable[str], tokenizer: Tokenizer
     ) -> None:
-
         for val in lookup_values:
-
             texts = [token.text for token in tokenizer.tokenize(val)]
 
             if len(texts) > 0:
@@ -174,8 +167,12 @@ class MultiTokenLookupAnnotator(Annotator):
 
                 self._start_words.add(start_token)
 
-    def annotate(self, doc: Document) -> list[Annotation]:
+    def _apply_matching_pipeline(self, token_text: str) -> str:
+        for string_modifier in self._matching_pipeline:
+            token_text = string_modifier.process(token_text)
+        return token_text
 
+    def annotate(self, doc: Document) -> list[Annotation]:
         tokens = doc.get_tokens()
 
         start_tokens = sorted(
@@ -187,12 +184,11 @@ class MultiTokenLookupAnnotator(Annotator):
 
         start_indices = [tokens.token_index(token) for token in start_tokens]
 
-        tokens_text = [token.text for token in tokens]
+        tokens_text = [self._apply_matching_pipeline(token.text) for token in tokens]
         annotations = []
-        min_i = 0
+        min_i = 0  # if this is always 0 this is useless?
 
         for i in start_indices:
-
             if i < min_i:
                 continue
 
@@ -247,7 +243,6 @@ class RegexpAnnotator(Annotator):
         pre_match_words: Optional[list[str]] = None,
         **kwargs,
     ) -> None:
-
         if isinstance(regexp_pattern, str):
             regexp_pattern = re.compile(regexp_pattern)
 
@@ -264,12 +259,13 @@ class RegexpAnnotator(Annotator):
         super().__init__(*args, **kwargs)
 
     def _validate_match(
-        self, match: re.Match, doc: Document  # pylint: disable=W0613
+        self,
+        match: re.Match,
+        doc: Document,  # pylint: disable=W0613
     ) -> bool:
         return True
 
     def annotate(self, doc: Document) -> list[Annotation]:
-
         if self.pre_match_words is not None:
             try:
                 if (
@@ -284,7 +280,6 @@ class RegexpAnnotator(Annotator):
         annotations = []
 
         for match in self.regexp_pattern.finditer(doc.text):
-
             if not self._validate_match(match, doc):
                 continue
 
@@ -324,7 +319,6 @@ class TokenPatternAnnotator(Annotator):
             return annotations
 
         for token in doc.get_tokens():
-
             if not self.pattern.token_precondition(token):
                 continue
 
