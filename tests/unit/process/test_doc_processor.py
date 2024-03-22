@@ -1,6 +1,8 @@
 from unittest.mock import patch
 
 from docdeid import Document
+from docdeid.annotation import Annotation
+from docdeid.process.annotator import RegexpAnnotator
 from docdeid.process.doc_processor import DocProcessor, DocProcessorGroup
 
 
@@ -17,7 +19,6 @@ class TestDocProcessorGroup:
         with patch.object(proc_1, "process") as proc_1_process, patch.object(
             proc_2, "process"
         ) as proc_2_process:
-
             dpg.process(Document(text="test"))
 
             proc_1_process.assert_called_once()
@@ -45,7 +46,6 @@ class TestDocProcessorGroup:
         with patch.object(proc_1, "process") as proc_1_process, patch.object(
             proc_2, "process"
         ) as proc_2_process:
-
             dpg.process(Document(text="test"), enabled={"proc_2"})
 
             proc_1_process.assert_not_called()
@@ -63,7 +63,6 @@ class TestDocProcessorGroup:
         with patch.object(proc_1, "process") as proc_1_process, patch.object(
             proc_2, "process"
         ) as proc_2_process:
-
             dpg.process(Document(text="test"), disabled={"proc_1"})
 
             proc_1_process.assert_not_called()
@@ -106,3 +105,37 @@ class TestDocProcessorGroup:
         dpg.add_processor("proc_1", proc_1)
 
         assert dpg["proc_1"] is proc_1
+
+
+class TestSourceAddition:
+    def test_source_addition(self, short_text):
+        doc = Document(short_text)
+        expected_annotations = [
+            Annotation(text="Hello", start_char=0, end_char=5, tag="capitalized"),
+            Annotation(text="I'm", start_char=6, end_char=9, tag="middle"),
+            Annotation(text="Bob", start_char=10, end_char=13, tag="capitalized"),
+        ]
+
+        # create annotators
+        annotator1 = RegexpAnnotator(
+            regexp_pattern="([A-Z][a-z]+)", tag="capitalized", name="rexexp1"
+        )
+        annotator2 = RegexpAnnotator(
+            regexp_pattern="([A-Z]+'[a-z]+)", tag="middle", name="rexexp2"
+        )
+
+        # add to processor group
+        group = DocProcessorGroup()
+        group.add_processor(annotator1.name, annotator1)
+        group.add_processor(annotator2.name, annotator2)
+
+        group.process(doc)
+        annotations = doc.annotations.sorted(by=("start_char",))
+
+        assert len(annotations) == 3
+        assert annotations == expected_annotations
+        assert [a.source for a in annotations] == [
+            ["rexexp1"],
+            ["rexexp2"],
+            ["rexexp1"],
+        ]

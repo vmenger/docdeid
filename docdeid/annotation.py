@@ -46,6 +46,9 @@ class Annotation:  # pylint: disable=R0902
     Should only be used when the annotation ends on a token boundary.
     """
 
+    source: list = field(default_factory=list, repr=False, compare=False)
+    """A list to store the source that created the annotation"""
+
     length: int = field(init=False)
     """The number of characters of the annotation text."""
 
@@ -97,7 +100,6 @@ class Annotation:  # pylint: disable=R0902
         sort_key = []
 
         for attr in by:
-
             val = getattr(self, attr, UNKNOWN_ATTR_DEFAULT)
 
             if callbacks is not None and (attr in callbacks):
@@ -106,7 +108,6 @@ class Annotation:  # pylint: disable=R0902
             sort_key.append(val)
 
         if deterministic:
-
             extra_attrs = sorted(set(self.__dict__.keys()) - set(by) - _OPTIONAL_FIELDS)
 
             for attr in extra_attrs:
@@ -174,7 +175,6 @@ class AnnotationSet(set[Annotation]):
         annotations = self.sorted(by=("start_char",))
 
         for annotation, next_annotation in zip(annotations, annotations[1:]):
-
             if annotation.end_char > next_annotation.start_char:
                 return True
 

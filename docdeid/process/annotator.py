@@ -21,9 +21,10 @@ class Annotator(DocProcessor, ABC):
         tag: The tag to use in the annotations.
     """
 
-    def __init__(self, tag: str, priority: int = 0) -> None:
+    def __init__(self, tag: str, priority: int = 0, name="no_name") -> None:
         self.tag = tag
         self.priority = priority
+        self.name = name
 
     def process(self, doc: Document, **kwargs) -> None:
         """
@@ -32,7 +33,9 @@ class Annotator(DocProcessor, ABC):
         Args:
             doc: The document to be processed.
         """
-        doc.annotations.update(self.annotate(doc))
+        annotations = self.annotate(doc)
+        [a.source.append(self.name) for a in annotations]
+        doc.annotations.update(annotations)
 
     @abstractmethod
     def annotate(self, doc: Document) -> list[Annotation]:

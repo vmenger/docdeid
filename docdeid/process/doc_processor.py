@@ -27,9 +27,9 @@ class DocProcessorGroup:
     """
 
     def __init__(self) -> None:
-        self._processors: OrderedDict[
-            str, Union[DocProcessor | DocProcessorGroup]
-        ] = OrderedDict()
+        self._processors: OrderedDict[str, Union[DocProcessor | DocProcessorGroup]] = (
+            OrderedDict()
+        )
 
     def get_names(self, recursive: bool = True) -> list[str]:
         """
@@ -45,7 +45,6 @@ class DocProcessorGroup:
         names = []
 
         for name, processor in self._processors.items():
-
             names.append(name)
 
             if recursive and isinstance(processor, DocProcessorGroup):
@@ -78,7 +77,6 @@ class DocProcessorGroup:
         for i, (existing_name, existing_processor) in enumerate(
             self._processors.items()
         ):
-
             if i == position:
                 new_processors[name] = processor
 
@@ -131,7 +129,6 @@ class DocProcessorGroup:
             raise RuntimeError("Cannot use enabled and disabled simultaneously")
 
         for name, proc in self._processors.items():
-
             if (enabled is not None) and (name not in enabled):
                 continue
 
@@ -139,10 +136,10 @@ class DocProcessorGroup:
                 continue
 
             if isinstance(proc, DocProcessor):
+                current_ann = len(doc.annotations)
                 proc.process(doc)
             elif isinstance(proc, DocProcessorGroup):
                 proc.process(doc, enabled=enabled, disabled=disabled)
 
     def __iter__(self) -> Iterator:
-
         return iter(self._processors.items())
