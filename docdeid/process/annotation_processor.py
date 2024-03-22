@@ -93,22 +93,20 @@ class OverlapResolver(AnnotationProcessor):
         )
 
         for annotation in annotations_sorted:
-
             mask_annotation = mask[annotation.start_char : annotation.end_char]
 
             if all(val == 0 for val in mask_annotation):  # no overlap
                 processed_annotations.append(annotation)
 
             else:  # overlap
-
                 for start_char_run, end_char_run in self._zero_runs(mask_annotation):
-
                     processed_annotations.append(
                         Annotation(
                             text=annotation.text[start_char_run:end_char_run],
                             start_char=annotation.start_char + start_char_run,
                             end_char=annotation.start_char + end_char_run,
                             tag=annotation.tag,
+                            source=annotation.source,
                         )
                     )
 
@@ -154,7 +152,9 @@ class MergeAdjacentAnnotations(AnnotationProcessor):
         return left_tag == right_tag
 
     def _tag_replacement(
-        self, left_tag: str, right_tag: str  # pylint: disable=W0613
+        self,
+        left_tag: str,
+        right_tag: str,  # pylint: disable=W0613
     ) -> str:
         """
         Determine what to replace the tag of two merged annotations with. By default,
@@ -214,12 +214,13 @@ class MergeAdjacentAnnotations(AnnotationProcessor):
             ValueError, when input contains overlapping annotations and `check_overlap`
             is set to True.
         """
-
+        source = list(set(left_annotation.source + right_annotation.source))
         return Annotation(
             text=text[left_annotation.start_char : right_annotation.end_char],
             start_char=left_annotation.start_char,
             end_char=right_annotation.end_char,
             tag=self._tag_replacement(left_annotation.tag, right_annotation.tag),
+            source=source,
         )
 
     def process_annotations(
@@ -235,7 +236,6 @@ class MergeAdjacentAnnotations(AnnotationProcessor):
         annotations_sorted = annotations.sorted(by=("start_char",))
 
         for index in range(len(annotations_sorted) - 1):
-
             annotation, next_annotation = (
                 annotations_sorted[index],
                 annotations_sorted[index + 1],
