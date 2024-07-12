@@ -393,9 +393,8 @@ class WordBoundaryTokenizer(Tokenizer):  # pylint: disable=R0903
 
             if self._trim:
                 word = text[start_char:end_char]
-                orig_length = len(word)
                 word = word.rstrip()
-                end_char -= orig_length - len(word)
+                end_char = start_char + len(word)
                 word = word.lstrip()
                 start_char = end_char - len(word)
                 if not word:
