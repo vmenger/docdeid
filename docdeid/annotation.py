@@ -209,10 +209,11 @@ class AnnotationSet(set[Annotation]):
         # We key the token->annotations cache only by the set of tokenizers where it
         # actually (obviously) depends also on the document. However, it's assumed
         # that an AnnotationSet is always bound only to one document.
-        tokenizers = frozenset(doc.token_lists)
+        tokenizers = frozenset(doc.tokenizers)
         if tokenizers not in self._annos_by_tokenizers_by_token:
             annos_by_token = defaultdict(set)
-            for token_list in doc.token_lists.values():
+            for tokenizer in tokenizers:
+                token_list = doc.get_tokens(tokenizer)
                 if not token_list:
                     continue
                 cur_tok_idx = 0
