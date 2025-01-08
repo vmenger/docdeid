@@ -179,7 +179,7 @@ class TestAnnotationSet:
         # import pydevd_pycharm
         # pydevd_pycharm.settrace()
 
-        got = aset.annos_by_token(doc)
+        got = doc.annos_by_token(aset)
 
         want = {
             Token("Hello", 16, 21): {a1},
@@ -218,7 +218,7 @@ class TestAnnotationSet:
             ]
         )
 
-        got = aset.annos_by_token(doc)
+        got = doc.annos_by_token(aset)
 
         want = {
             Token("Hello", 16, 21): {a1},

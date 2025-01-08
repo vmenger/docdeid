@@ -1,4 +1,3 @@
-from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
@@ -129,10 +128,6 @@ class AnnotationSet(set[Annotation]):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        # Ugh, this feels like Java 9. (For sake of Mypy:)
-        self._annos_by_tokenizers_by_token: dict[
-            frozenset[str], defaultdict[Token, set[Annotation]]
-        ] = {}
 
     def sorted(
         self,
@@ -187,48 +182,3 @@ class AnnotationSet(set[Annotation]):
                 return True
 
         return False
-
-    import docdeid  # needed to type-annotate the `doc` argument below
-
-    def annos_by_token(
-        self,
-        doc: "docdeid.document.Document",
-    ) -> defaultdict[Token, set[Annotation]]:
-        """
-        Returns a mapping from document tokens to annotations.
-
-        Args:
-            doc: document whose tokens are to be linked
-        """
-        # We key the token->annotations cache only by the set of tokenizers where it
-        # actually (obviously) depends also on the document. However, it's assumed
-        # that an AnnotationSet is always bound only to one document.
-        tokenizers = frozenset(doc.tokenizers)
-        if tokenizers not in self._annos_by_tokenizers_by_token:
-            annos_by_token = defaultdict(set)
-            for tokenizer in tokenizers:
-                token_list = doc.get_tokens(tokenizer)
-                if not token_list:
-                    continue
-                cur_tok_idx = 0
-                tok = token_list[cur_tok_idx]
-                for anno in self.sorted(by=("start_char",)):
-                    try:
-                        # Iterate over tokens till we reach the annotation.
-                        while tok.end_char < anno.start_char:
-                            cur_tok_idx += 1
-                            tok = token_list[cur_tok_idx]
-                    except IndexError:
-                        break
-                    # Iterate over tokens in the annotation till we reach the end
-                    # of it or the end of the tokens.
-                    anno_tok_idx = cur_tok_idx
-                    anno_tok = tok
-                    while anno_tok.start_char < anno.end_char:
-                        annos_by_token[anno_tok].add(anno)
-                        if anno_tok_idx == len(token_list) - 1:
-                            break
-                        anno_tok_idx += 1
-                        anno_tok = token_list[anno_tok_idx]
-            self._annos_by_tokenizers_by_token[tokenizers] = annos_by_token
-        return self._annos_by_tokenizers_by_token[tokenizers]

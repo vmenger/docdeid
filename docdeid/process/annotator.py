@@ -597,7 +597,7 @@ class SequenceAnnotator(Annotator):
         else:
             tokens = token_list  # ...to make Mypy happy.
 
-        annos_by_token = doc.annotations.annos_by_token(doc)
+        annos_by_token = doc.annos_by_token()
 
         for token in tokens:
 
