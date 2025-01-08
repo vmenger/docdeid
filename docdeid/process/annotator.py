@@ -511,7 +511,7 @@ def as_token_pattern(pat_dict: dict) -> TokenPatternFromCfg:
         )
     func, value = next(iter(pat_dict.items()))
     if func in ("and", "or"):
-        return NestedTokenPattern(func, list(map(as_token_pattern, value)))
+        return NestedTokenPattern(func, [as_token_pattern(it) for it in value])
     return SimpleTokenPattern(func, value)
 
 
@@ -539,7 +539,6 @@ class SequenceAnnotator(Annotator):
     ) -> None:
         self.pattern = pattern
         self.ds = ds
-        self.skip = set(skip or [])
 
         self._start_words = None
         self._matching_pipeline = None
@@ -558,7 +557,7 @@ class SequenceAnnotator(Annotator):
             #  {"lookup":"interfix"}]) and nested patterns ("or", "and").
             if not isinstance(lookup_list, LookupSet):
                 raise ValueError(
-                    f"Expected a LookupSet, but got a " f"{type(lookup_list)}."
+                    f"Expected a LookupSet, but got a {type(lookup_list)}."
                 )
 
             # FIXME This doesn't work correctly for multiple ([{"lookup":"prefix"},
@@ -569,7 +568,7 @@ class SequenceAnnotator(Annotator):
             self._matching_pipeline = lookup_list.matching_pipeline
 
         self._seq_pattern = SequencePattern(
-            Direction.RIGHT, set(skip or ()), list(map(as_token_pattern, pattern))
+            Direction.RIGHT, set(skip or ()), [as_token_pattern(it) for it in pattern]
         )
 
         super().__init__(*args, **kwargs)

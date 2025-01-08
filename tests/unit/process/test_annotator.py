@@ -332,7 +332,7 @@ class TestSequenceAnnotator:
         assert tpa._match_sequence(
             pattern_doc,
             SequencePattern(
-                Direction.RIGHT, set(), list(map(as_token_pattern, pattern))
+                Direction.RIGHT, set(), [as_token_pattern(it) for it in pattern]
             ),
             start_token=pattern_doc.get_tokens()[3],
             annos_by_token=defaultdict(list),
@@ -342,7 +342,7 @@ class TestSequenceAnnotator:
             tpa._match_sequence(
                 pattern_doc,
                 SequencePattern(
-                    Direction.RIGHT, set(), list(map(as_token_pattern, pattern))
+                    Direction.RIGHT, set(), [as_token_pattern(it) for it in pattern]
                 ),
                 start_token=pattern_doc.get_tokens()[7],
                 annos_by_token=defaultdict(list),
@@ -359,7 +359,7 @@ class TestSequenceAnnotator:
         assert tpa._match_sequence(
             pattern_doc,
             SequencePattern(
-                Direction.LEFT, set(), list(map(as_token_pattern, pattern))
+                Direction.LEFT, set(), [as_token_pattern(it) for it in pattern]
             ),
             start_token=pattern_doc.get_tokens()[4],
             annos_by_token=defaultdict(list),
@@ -370,7 +370,7 @@ class TestSequenceAnnotator:
             tpa._match_sequence(
                 pattern_doc,
                 SequencePattern(
-                    Direction.LEFT, set(), list(map(as_token_pattern, pattern))
+                    Direction.LEFT, set(), [as_token_pattern(it) for it in pattern]
                 ),
                 start_token=pattern_doc.get_tokens()[8],
                 annos_by_token=defaultdict(list),
@@ -387,7 +387,7 @@ class TestSequenceAnnotator:
         assert tpa._match_sequence(
             pattern_doc,
             SequencePattern(
-                Direction.RIGHT, {"-"}, list(map(as_token_pattern, pattern))
+                Direction.RIGHT, {"-"}, [as_token_pattern(it) for it in pattern]
             ),
             start_token=pattern_doc.get_tokens()[4],
             annos_by_token=defaultdict(list),
@@ -397,7 +397,7 @@ class TestSequenceAnnotator:
             tpa._match_sequence(
                 pattern_doc,
                 SequencePattern(
-                    Direction.RIGHT, set(), list(map(as_token_pattern, pattern))
+                    Direction.RIGHT, set(), [as_token_pattern(it) for it in pattern]
                 ),
                 start_token=pattern_doc.get_tokens()[4],
                 annos_by_token=defaultdict(list),
