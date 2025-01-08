@@ -19,14 +19,11 @@ class Direction(IntEnum):
 
     @staticmethod
     def from_string(val: str) -> Direction:
-        """Parses a Direction from a string, which must be either 'left' or 'right'
-        after lowercasing."""
-        norm = val.lower()
-        if norm == "left":
-            return Direction.LEFT
-        if norm == "right":
-            return Direction.RIGHT
-        raise ValueError(f"Invalid direction: '{val}'")
+        """Parses a Direction from a string (case insensitive)."""
+        try:
+            return Direction[val.upper()]
+        except KeyError as key_error:
+            raise ValueError(f"Invalid direction: '{val}'") from key_error
 
     def iter(self, seq: Sequence[T]) -> Iterable[T]:
         """
