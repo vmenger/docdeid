@@ -6,6 +6,7 @@ from .annotation_processor import (
 from .annotator import (
     Annotator,
     MultiTokenLookupAnnotator,
+    MultiTokenTrieAnnotator,
     RegexpAnnotator,
     SequenceAnnotator,
     SingleTokenLookupAnnotator,

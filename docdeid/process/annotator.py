@@ -16,7 +16,7 @@ from docdeid.ds.lookup import LookupSet, LookupTrie
 from docdeid.pattern import TokenPattern
 from docdeid.process.doc_processor import DocProcessor
 from docdeid.str.processor import StringModifier
-from docdeid.tokenizer import Token
+from docdeid.tokenizer import Token, Tokenizer
 
 
 @dataclass
@@ -207,7 +207,7 @@ class SingleTokenLookupAnnotator(Annotator):
         return self._tokens_to_annotations(annotate_tokens)
 
 
-class MultiTokenLookupAnnotator(Annotator):
+class MultiTokenTrieAnnotator(Annotator):
     """
     Annotates entity mentions by looking them up in a `LookupTrie`.
 
@@ -219,11 +219,11 @@ class MultiTokenLookupAnnotator(Annotator):
     """
 
     def __init__(
-        self,
-        *args,
-        trie: LookupTrie,
-        overlapping: bool = False,
-        **kwargs,
+            self,
+            *args,
+            trie: LookupTrie,
+            overlapping: bool = False,
+            **kwargs,
     ) -> None:
 
         self._trie = trie
@@ -235,8 +235,7 @@ class MultiTokenLookupAnnotator(Annotator):
     @property
     def start_words(self) -> set[str]:
         """First words of phrases detected by this annotator."""
-        # If the trie has been modified (added to) since we computed
-        # _start_words,
+        # If the trie has been modified (added to) since we computed _start_words,
         if len(self._start_words) != len(self._trie.children):
             # Recompute _start_words.
             self._start_words = set(self._trie.children)
@@ -290,6 +289,60 @@ class MultiTokenLookupAnnotator(Annotator):
                 min_i = i + len(longest_matching_prefix)  # skip ahead
 
         return annotations
+
+
+class MultiTokenLookupAnnotator(MultiTokenTrieAnnotator):
+    """
+    Annotates entity mentions by looking them up in a `LookupTrie` or
+    a collection of phrases. This is a thin wrapper for
+    class:`MultiTokenTrieAnnotator` that additionally handles non-trie lookup
+    structures by building tries out of them and delegating to the parent class.
+
+    Args:
+        lookup_values: An iterable of phrases that should be matched. These are
+            tokenized using ``tokenizer``.
+        matching_pipeline: An optional pipeline that can be used for matching
+            (e.g. lowercasing). This has no specific impact on matching performance,
+            other than overhead for applying the pipeline to each string.
+        tokenizer: A tokenizer that is used to create the sequence patterns from
+            ``lookup_values``.
+        trie: A `LookupTrie` containing all entity mentions that should be
+            annotated. Specifying this is mutually exclusive with specifying
+            ``lookup_values`` and ``tokenizer``.
+        overlapping: Whether overlapping phrases are to be returned.
+        *args, **kwargs: Passed through to the `Annotator` constructor (which accepts
+            the arguments `tag` and `priority`).
+
+    Raises:
+        RunTimeError, when an incorrect combination of `lookup_values`,
+        `matching_pipeline` and `trie` is supplied.
+    """
+
+    def __init__(
+            self,
+            *args,
+            lookup_values: Optional[Iterable[str]] = None,
+            matching_pipeline: Optional[list[StringModifier]] = None,
+            tokenizer: Optional[Tokenizer] = None,
+            trie: Optional[LookupTrie] = None,
+            overlapping: bool = False,
+            **kwargs,
+    ) -> None:
+
+        if (trie is not None) and (lookup_values is None) and (tokenizer is None):
+            eff_trie = trie
+
+        elif (trie is None) and (lookup_values is not None) and (tokenizer is not None):
+            eff_trie = LookupTrie(matching_pipeline=matching_pipeline)
+            for phrase in filter(None, map(tokenizer.tokenize, lookup_values)):
+                eff_trie.add_item([token.text for token in phrase])
+
+        else:
+            raise RuntimeError(
+                "Please provide either looup_values and a tokenizer, or a trie."
+            )
+
+        super().__init__(*args, trie=eff_trie, overlapping=overlapping, **kwargs)
 
 
 class RegexpAnnotator(Annotator):
