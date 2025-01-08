@@ -538,7 +538,7 @@ class SequenceAnnotator(Annotator):
         **kwargs,
     ) -> None:
         self.pattern = pattern
-        self.dicts = ds
+        self.ds = ds
         self.skip = set(skip or [])
 
         self._start_words = None
@@ -546,13 +546,13 @@ class SequenceAnnotator(Annotator):
 
         if len(self.pattern) > 0 and "lookup" in self.pattern[0]:
 
-            if self.dicts is None:
+            if self.ds is None:
                 raise RuntimeError(
                     "Created pattern with lookup in TokenPatternAnnotator, but "
                     "no lookup structures provided."
                 )
 
-            lookup_list = self.dicts[self.pattern[0]["lookup"]]
+            lookup_list = self.ds[self.pattern[0]["lookup"]]
 
             # FIXME This doesn't work correctly for multiple ([{"lookup":"prefix"},
             #  {"lookup":"interfix"}]) and nested patterns ("or", "and").
@@ -602,7 +602,7 @@ class SequenceAnnotator(Annotator):
         for token in tokens:
 
             annotation = self._match_sequence(
-                doc, self._seq_pattern, token, annos_by_token, self.dicts
+                doc, self._seq_pattern, token, annos_by_token, self.ds
             )
 
             if annotation is not None:
