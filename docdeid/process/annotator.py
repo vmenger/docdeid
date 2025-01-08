@@ -422,7 +422,7 @@ class _PatternPositionMatcher:  # pylint: disable=R0903
     """Checks if a token matches against a single pattern."""
 
     @classmethod
-    def match(cls, token_pattern: dict | TokenPatternFromCfg, **kwargs) -> bool:
+    def match(cls, token_pattern: Union[dict, TokenPatternFromCfg], **kwargs) -> bool:
         # pylint: disable=R0911
         """
         Matches a pattern position (a dict with one key). Other information should be

@@ -158,13 +158,7 @@ class AnnotationSet(set[Annotation]):
             A RunTimeError, if the callbacks are not provided as a frozen dict.
         """
 
-        # Not liked by Mypy, even though
-        # https://docs.python.org/3/library/stdtypes.html#types-union
-        # says the "X | Y" notation is equivalent to `typing.Union[X, Y]` and the
-        # docstring of `typing.Optional` says it's equivalent to
-        # `typing.Union[None, _]`:
-        #     if not isinstance(callbacks, Optional[frozendict]):
-        if not isinstance(callbacks, frozendict | None):
+        if not isinstance(callbacks, (type(None), frozendict)):
             raise RuntimeError(
                 "Please provide the callbacks as a frozen dict, e.g. "
                 "frozendict.frozendict(end_char=lambda x: -x)"
