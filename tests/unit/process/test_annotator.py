@@ -320,8 +320,10 @@ class TestSequenceAnnotator:
         ds["interfixes"] = LookupSet()
         ds["interfixes"].add_items_from_iterable(items=interfixes)
 
-        ds["interfixed_surnames"] = LookupSet()
-        ds["interfixed_surnames"].add_items_from_iterable(items=interfixed_surnames)
+        trie = LookupTrie()
+        for phrase in interfixed_surnames:
+            trie.add_item(phrase.split())
+        ds["interfixed_surnames"] = trie
 
         return ds
 
@@ -346,16 +348,60 @@ class TestSequenceAnnotator:
             tokenizers={"default": WordBoundaryTokenizer(False)},
         )
 
+    def test_validation(self, ds):
+        with pytest.raises(ValueError) as exc_info:
+            tpa = SequenceAnnotator(pattern=[], ds=ds, tag="_")
+        assert "missing or empty" in str(exc_info)
+
+        # Lookup structures are not required if there are no lookup token patterns.
+        tpa = SequenceAnnotator(pattern=[{"like_name": True}], tag="_")
+        assert True
+
+        with pytest.raises(ValueError) as exc_info:
+            tpa = SequenceAnnotator(pattern=[{"lookup": "undefined_entity"}], tag="_")
+        assert "no lookup structures were provided" in str(exc_info)
+
+        with pytest.raises(ValueError) as exc_info:
+            tpa = SequenceAnnotator(pattern=[{"lookup": "undefined_entity"}],
+                                    ds=ds,
+                                    tag="_")
+        assert "Unknown lookup entity types: undefined_entity." in str(exc_info)
+
+        with pytest.raises(ValueError) as exc_info:
+            tpa = SequenceAnnotator(
+                pattern=[{"or": [{"lookup": "undefined_entity"},
+                                 {"lookup": "another_entity"}]}],
+                ds=ds,
+                tag="_")
+        assert ("Unknown lookup entity types: another_entity, undefined_entity."
+                in str(exc_info))
+
+        with pytest.raises(ValueError) as exc_info:
+            tpa = SequenceAnnotator(
+                pattern=[{"or": [{"lookup": "interfixes"},
+                                 {"and": [{"lookup": "first_names"},
+                                          {"lookup": "alien_entity"}]}]},
+                         {"lookup": "another_entity"}],
+                ds=ds,
+                tag="_")
+        assert ("Unknown lookup entity types: alien_entity, another_entity."
+                in str(exc_info))
+
+        with pytest.raises(ValueError) as exc_info:
+            tpa = SequenceAnnotator(
+                pattern=[{"lookup": "interfixed_surnames"}],
+                ds=ds,
+                tag="_")
+        assert ("is backed by a LookupTrie" in str(exc_info))
+
     def test_match_sequence(self, pattern_doc, ds):
         pattern = [{"lookup": "first_names"}, {"like_name": True}]
 
-        tpa = SequenceAnnotator(pattern=[], ds=ds, tag="_")
+        tpa = SequenceAnnotator(pattern=pattern, ds=ds, tag="_")
 
         assert tpa._match_sequence(
             pattern_doc,
-            SequencePattern(
-                Direction.RIGHT, set(), [as_token_pattern(it) for it in pattern]
-            ),
+            tpa._seq_pattern,
             start_token=pattern_doc.get_tokens()[3],
             annos_by_token=defaultdict(list),
             dicts=ds,
@@ -363,9 +409,7 @@ class TestSequenceAnnotator:
         assert (
             tpa._match_sequence(
                 pattern_doc,
-                SequencePattern(
-                    Direction.RIGHT, set(), [as_token_pattern(it) for it in pattern]
-                ),
+                tpa._seq_pattern,
                 start_token=pattern_doc.get_tokens()[7],
                 annos_by_token=defaultdict(list),
                 dicts=ds,
@@ -374,9 +418,14 @@ class TestSequenceAnnotator:
         )
 
     def test_match_sequence_left(self, pattern_doc, ds):
+        """
+        Matching is always performed in the direction left-to-right by
+        SequenceAnnotator proper but the same method is also called by
+        ContextAnnotator in Deduce, where matching may proceed also right-to-left.
+        """
         pattern = [{"lookup": "first_names"}, {"like_name": True}]
 
-        tpa = SequenceAnnotator(pattern=[], ds=ds, tag="_")
+        tpa = SequenceAnnotator(pattern=pattern, ds=ds, tag="_")
 
         assert tpa._match_sequence(
             pattern_doc,
@@ -404,13 +453,12 @@ class TestSequenceAnnotator:
     def test_match_sequence_skip(self, pattern_doc, ds):
         pattern = [{"lookup": "surnames"}, {"like_name": True}]
 
-        tpa = SequenceAnnotator(pattern=[], ds=ds, tag="_")
+        tpa = SequenceAnnotator(pattern=pattern, ds=ds, tag="_")
+        tpa_skipping = SequenceAnnotator(pattern=pattern, ds=ds, skip=["-"], tag="_")
 
-        assert tpa._match_sequence(
+        assert tpa_skipping._match_sequence(
             pattern_doc,
-            SequencePattern(
-                Direction.RIGHT, {"-"}, [as_token_pattern(it) for it in pattern]
-            ),
+            tpa_skipping._seq_pattern,
             start_token=pattern_doc.get_tokens()[4],
             annos_by_token=defaultdict(list),
             dicts=ds,

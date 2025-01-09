@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import warnings
+
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass
@@ -17,6 +18,7 @@ from docdeid.pattern import TokenPattern
 from docdeid.process.doc_processor import DocProcessor
 from docdeid.str.processor import StringModifier
 from docdeid.tokenizer import Token, Tokenizer
+from docdeid.utils import leaf_items
 
 
 @dataclass
@@ -54,6 +56,7 @@ class SequencePattern:
     direction: Direction
     skip: set[str]
     pattern: list[TokenPatternFromCfg]
+
 
 
 class Annotator(DocProcessor, ABC):
@@ -596,34 +599,45 @@ class SequenceAnnotator(Annotator):
         self._start_words = None
         self._start_matching_pipeline = None
 
+        SequenceAnnotator.validate_pattern(pattern, ds)
+
         # If the first token pattern is lookup, determine the possible starting words.
-        if self.pattern and "lookup" in self.pattern[0]:
-
-            if self.ds is None:
-                raise RuntimeError(
-                    "Created pattern with lookup in TokenPatternAnnotator, but "
-                    "no lookup structures provided."
-                )
-
-            lookup_list = self.ds[self.pattern[0]["lookup"]]
-
-            if not isinstance(lookup_list, LookupSet):
-                raise ValueError(
-                    f"Expected a LookupSet, but got a {type(lookup_list)}."
-                )
-
+        if start_ent_type := pattern[0].get("lookup"):
             # XXX We assume the items of the lookup list are all single words. This
             # is not always the case but just splitting the phrases wouldn't help
             # because the "lookup" token matcher assumes matching against a single
             # token.
-            self._start_words = lookup_list.items()
-            self._start_matching_pipeline = lookup_list.matching_pipeline
+            self._start_words = ds[start_ent_type].items()
+            self._start_matching_pipeline = ds[start_ent_type].matching_pipeline
 
         self._seq_pattern = SequencePattern(
             Direction.RIGHT, set(skip or ()), [as_token_pattern(it) for it in pattern]
         )
 
         super().__init__(*args, **kwargs)
+
+    @classmethod
+    def validate_pattern(cls, pattern, ds):
+        if not pattern:
+            raise ValueError(f"Sequence pattern is missing or empty: {pattern}.")
+
+        referenced_ents = {match_val
+                           for tok_pattern in pattern
+                           for func, match_val in leaf_items(tok_pattern)
+                           if func.endswith("lookup")}
+        if referenced_ents and ds is None:
+            raise ValueError("Pattern relies on entity lookups but no lookup "
+                             "structures were provided.")
+
+        if missing := referenced_ents - set(ds or ()):
+            raise ValueError("Unknown lookup entity types: {}."
+                             .format(", ".join(sorted(missing))))
+
+        if start_ent_type := pattern[0].get("lookup"):
+            if not isinstance(ds[start_ent_type], LookupSet):
+                raise ValueError('If the first token pattern is lookup, it must be '
+                                 f'backed by a LookupSet, but "{start_ent_type}" is '
+                                 f'backed by a {type(ds[start_ent_type]).__name__}.')
 
     def annotate(self, doc: Document) -> list[Annotation]:
         """
