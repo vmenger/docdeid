@@ -4,9 +4,9 @@ import re
 import sys
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from collections.abc import Sequence
+from collections.abc import Generator, Iterator, Sequence
 from dataclasses import dataclass, field
-from typing import Generator, Iterator, Literal, Optional, SupportsIndex, overload
+from typing import Literal, Optional, SupportsIndex, overload
 
 from docdeid.direction import Direction
 from docdeid.str import StringModifier

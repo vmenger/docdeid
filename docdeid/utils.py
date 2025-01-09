@@ -71,9 +71,7 @@ def annotate_doc(doc: Document) -> str:
     Handles also nested mentions and in a way also overlapping mentions, even though
     this kind of markup cannot really represent them.
     """
-    annos_from_shortest = sorted(
-        doc.annotations, key=lambda anno: anno.end_char - anno.start_char
-    )
+    annos_from_shortest = doc.annotations.sorted(by=("length", ))
     idx_to_anno_starts = defaultdict(list)
     idx_to_anno_ends = defaultdict(list)
     for anno in annos_from_shortest:
