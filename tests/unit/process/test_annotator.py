@@ -306,8 +306,10 @@ class TestSequenceAnnotator:
     def ds(self):
         ds = DsCollection()
 
-        first_names = ["Andries", "pieter", "Aziz", "Bernard"]
+        first_names = ["Andries", "pieter", "Aziz", "Bernard", "Won Jung"]
         surnames = ["Meijer", "Smit", "Bakker", "Heerma"]
+        interfixes = ["v/d"]
+        interfixed_surnames = ["Heck"]
 
         ds["first_names"] = LookupSet()
         ds["first_names"].add_items_from_iterable(items=first_names)
@@ -315,12 +317,32 @@ class TestSequenceAnnotator:
         ds["surnames"] = LookupSet()
         ds["surnames"].add_items_from_iterable(items=surnames)
 
+        ds["interfixes"] = LookupSet()
+        ds["interfixes"].add_items_from_iterable(items=interfixes)
+
+        ds["interfixed_surnames"] = LookupSet()
+        ds["interfixed_surnames"].add_items_from_iterable(items=interfixed_surnames)
+
         return ds
 
     @pytest.fixture
     def pattern_doc(self):
         return Document(
             text="De man heet Andries Meijer-Heerma, voornaam Andries.",
+            tokenizers={"default": WordBoundaryTokenizer(False)},
+        )
+
+    @pytest.fixture
+    def interfixed_doc(self):
+        return Document(
+            text="De man heet v/d Heck.",
+            tokenizers={"default": WordBoundaryTokenizer(False)},
+        )
+
+    @pytest.fixture
+    def korean_doc(self):
+        return Document(
+            text="De mevrouw heet Won Jung Meijer-Heerma.",
             tokenizers={"default": WordBoundaryTokenizer(False)},
         )
 
@@ -413,4 +435,22 @@ class TestSequenceAnnotator:
 
         assert tpa.annotate(pattern_doc) == [
             Annotation(text="Andries Meijer", start_char=12, end_char=26, tag="_")
+        ]
+
+    def test_annotate_multiword(self, interfixed_doc, korean_doc, ds):
+        # XXX This tests functionality (matching multiple tokens with one member of
+        # the "pattern" list) which is not supported as per the SequenceAnnotator
+        # docstring, nonetheless is exercised by the packaged base_config.json (most
+        # notably in the case of the interfix_with_name annotator).
+
+        inter_pattern = [{"lookup": "interfixes"}, {"lookup": "interfixed_surnames"}]
+        ipa = SequenceAnnotator(pattern=inter_pattern, ds=ds, tag="_")
+        assert ipa.annotate(interfixed_doc) == [
+            Annotation(text="v/d Heck", start_char=12, end_char=20, tag="_")
+        ]
+
+        pattern = [{"lookup": "first_names"}, {"like_name": True}]
+        kpa = SequenceAnnotator(pattern=pattern, ds=ds, tag="_")
+        assert kpa.annotate(korean_doc) == [
+            Annotation(text="Won Jung Meijer", start_char=16, end_char=31, tag="_")
         ]
