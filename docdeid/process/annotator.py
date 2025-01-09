@@ -16,7 +16,7 @@ from docdeid.ds.lookup import LookupSet, LookupTrie
 from docdeid.pattern import TokenPattern
 from docdeid.process.doc_processor import DocProcessor
 from docdeid.str.processor import StringModifier
-from docdeid.tokenizer import Token, Tokenizer
+from docdeid.tokenizer import Token, Tokenizer, DummyTokenizer
 
 
 @dataclass
@@ -571,15 +571,18 @@ def as_token_pattern(pat_dict: dict) -> TokenPatternFromCfg:
 class SequenceAnnotator(Annotator):
     """
     Annotates based on token patterns, which should be provided as a list of dicts. Each
-    position in the list denotes a token position, e.g.: [{'is_initial': True},
-    {'like_name': True}] matches sequences of two tokens, where the first one is an
-    initial, and the second one is like a name.
+    position in the list corresponds to a token or a token sequence. For example:
+    ``[{'is_initial': True}, {'like_name': True}]`` matches sequences of two tokens
+    where the first one is an initial and the second one looks like a name.
 
     Arguments:
         pattern: The pattern
         ds: Lookup dictionaries. Those referenced by the pattern should be LookupSets.
             (Don't ask why.)
         skip: Any string values that should be skipped in matching (e.g. periods)
+        tokenizer: A tokenizer called to determine the first word to look for each
+            phrase in ``lookup_values``. If none is provided, phrases in
+            ``lookup_values`` are all assumed to be a single word.
     """
 
     def __init__(
@@ -588,15 +591,17 @@ class SequenceAnnotator(Annotator):
         *args,
         ds: Optional[DsCollection] = None,
         skip: Optional[list[str]] = None,
+        tokenizer: Optional[Tokenizer] = None,
         **kwargs,
     ) -> None:
         self.pattern = pattern
         self.ds = ds
 
         self._start_words = None
-        self._matching_pipeline = None
+        self._start_matching_pipeline = None
 
-        if len(self.pattern) > 0 and "lookup" in self.pattern[0]:
+        # If the first token pattern is lookup, determine the possible starting words.
+        if self.pattern and "lookup" in self.pattern[0]:
 
             if self.ds is None:
                 raise RuntimeError(
@@ -606,19 +611,18 @@ class SequenceAnnotator(Annotator):
 
             lookup_list = self.ds[self.pattern[0]["lookup"]]
 
-            # FIXME This doesn't work correctly for multiple ([{"lookup":"prefix"},
-            #  {"lookup":"interfix"}]) and nested patterns ("or", "and").
             if not isinstance(lookup_list, LookupSet):
                 raise ValueError(
                     f"Expected a LookupSet, but got a {type(lookup_list)}."
                 )
 
-            # FIXME This doesn't work correctly for multiple ([{"lookup":"prefix"},
-            #  {"lookup":"interfix"}]) and nested patterns ("or", "and").
-            self._start_words = lookup_list.items()
-            # FIXME This doesn't work correctly for multiple ([{"lookup":"prefix"},
-            #  {"lookup":"interfix"}]) and nested patterns ("or", "and").
-            self._matching_pipeline = lookup_list.matching_pipeline
+            eff_tokenizer = tokenizer or DummyTokenizer()
+            self._start_words = {
+                phrase[0].text
+                for phrase in filter(None, map(eff_tokenizer.tokenize,
+                                               lookup_list.items()))
+            }
+            self._start_matching_pipeline = lookup_list.matching_pipeline
 
         self._seq_pattern = SequencePattern(
             Direction.RIGHT, set(skip or ()), [as_token_pattern(it) for it in pattern]
@@ -644,7 +648,7 @@ class SequenceAnnotator(Annotator):
         if self._start_words is not None:
             tokens: Iterable[Token] = token_list.token_lookup(
                 lookup_values=self._start_words,
-                matching_pipeline=self._matching_pipeline,
+                matching_pipeline=self._start_matching_pipeline,
             )
         else:
             tokens = token_list  # ...to make Mypy happy.

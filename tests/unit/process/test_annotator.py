@@ -444,13 +444,15 @@ class TestSequenceAnnotator:
         # notably in the case of the interfix_with_name annotator).
 
         inter_pattern = [{"lookup": "interfixes"}, {"lookup": "interfixed_surnames"}]
-        ipa = SequenceAnnotator(pattern=inter_pattern, ds=ds, tag="_")
+        ipa = SequenceAnnotator(pattern=inter_pattern, ds=ds,
+                                tokenizer=WordBoundaryTokenizer(False), tag="_")
         assert ipa.annotate(interfixed_doc) == [
             Annotation(text="v/d Heck", start_char=12, end_char=20, tag="_")
         ]
 
         pattern = [{"lookup": "first_names"}, {"like_name": True}]
-        kpa = SequenceAnnotator(pattern=pattern, ds=ds, tag="_")
+        kpa = SequenceAnnotator(pattern=pattern, ds=ds,
+                                tokenizer=WordBoundaryTokenizer(False), tag="_")
         assert kpa.annotate(korean_doc) == [
             Annotation(text="Won Jung Meijer", start_char=16, end_char=31, tag="_")
         ]

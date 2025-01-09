@@ -355,6 +355,15 @@ class Tokenizer(ABC):  # pylint: disable=R0903
         return TokenList(tokens, link_tokens=self.link_tokens)
 
 
+class DummyTokenizer(Tokenizer):  # pylint: disable=R0903
+    """
+    Treats any given string as a single token.
+    """
+
+    def _split_text(self, text: str) -> list[Token]:
+        return [Token(text=text, start_char=0, end_char=len(text))]
+
+
 class SpaceSplitTokenizer(Tokenizer):  # pylint: disable=R0903
     """
     Tokenizes based on splitting on whitespaces.
