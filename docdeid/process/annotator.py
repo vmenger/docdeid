@@ -16,7 +16,7 @@ from docdeid.ds.lookup import LookupSet, LookupTrie
 from docdeid.pattern import TokenPattern
 from docdeid.process.doc_processor import DocProcessor
 from docdeid.str.processor import StringModifier
-from docdeid.tokenizer import Token, Tokenizer, DummyTokenizer
+from docdeid.tokenizer import Token, Tokenizer
 
 
 @dataclass
@@ -571,7 +571,7 @@ def as_token_pattern(pat_dict: dict) -> TokenPatternFromCfg:
 class SequenceAnnotator(Annotator):
     """
     Annotates based on token patterns, which should be provided as a list of dicts. Each
-    position in the list corresponds to a token or a token sequence. For example:
+    position in the list corresponds to a token. For example:
     ``[{'is_initial': True}, {'like_name': True}]`` matches sequences of two tokens
     where the first one is an initial and the second one looks like a name.
 
@@ -580,9 +580,6 @@ class SequenceAnnotator(Annotator):
         ds: Lookup dictionaries. Those referenced by the pattern should be LookupSets.
             (Don't ask why.)
         skip: Any string values that should be skipped in matching (e.g. periods)
-        tokenizer: A tokenizer called to determine the first word to look for each
-            phrase in ``lookup_values``. If none is provided, phrases in
-            ``lookup_values`` are all assumed to be a single word.
     """
 
     def __init__(
@@ -591,7 +588,6 @@ class SequenceAnnotator(Annotator):
         *args,
         ds: Optional[DsCollection] = None,
         skip: Optional[list[str]] = None,
-        tokenizer: Optional[Tokenizer] = None,
         **kwargs,
     ) -> None:
         self.pattern = pattern
@@ -616,12 +612,11 @@ class SequenceAnnotator(Annotator):
                     f"Expected a LookupSet, but got a {type(lookup_list)}."
                 )
 
-            eff_tokenizer = tokenizer or DummyTokenizer()
-            self._start_words = {
-                phrase[0].text
-                for phrase in filter(None, map(eff_tokenizer.tokenize,
-                                               lookup_list.items()))
-            }
+            # XXX We assume the items of the lookup list are all single words. This
+            # is not always the case but just splitting the phrases wouldn't help
+            # because the "lookup" token matcher assumes matching against a single
+            # token.
+            self._start_words = lookup_list.items()
             self._start_matching_pipeline = lookup_list.matching_pipeline
 
         self._seq_pattern = SequencePattern(

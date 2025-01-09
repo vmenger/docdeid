@@ -437,22 +437,25 @@ class TestSequenceAnnotator:
             Annotation(text="Andries Meijer", start_char=12, end_char=26, tag="_")
         ]
 
+    @pytest.mark.xfail(reason="The lookup token pattern only ever matches a single "
+                              "token and the SequenceAnnotator docstring accordingly "
+                              "rules the case of multiple tokens per pattern out of "
+                              "scope. Yet, the packaged base_config.json seems to "
+                              "rely on such multi-word matches, most notably in the "
+                              "case of the interfix_with_name annotator.")
     def test_annotate_multiword(self, interfixed_doc, korean_doc, ds):
-        # XXX This tests functionality (matching multiple tokens with one member of
-        # the "pattern" list) which is not supported as per the SequenceAnnotator
-        # docstring, nonetheless is exercised by the packaged base_config.json (most
-        # notably in the case of the interfix_with_name annotator).
-
         inter_pattern = [{"lookup": "interfixes"}, {"lookup": "interfixed_surnames"}]
         ipa = SequenceAnnotator(pattern=inter_pattern, ds=ds,
-                                tokenizer=WordBoundaryTokenizer(False), tag="_")
+                                # tokenizer=WordBoundaryTokenizer(False),
+                                tag="_")
         assert ipa.annotate(interfixed_doc) == [
             Annotation(text="v/d Heck", start_char=12, end_char=20, tag="_")
         ]
 
         pattern = [{"lookup": "first_names"}, {"like_name": True}]
         kpa = SequenceAnnotator(pattern=pattern, ds=ds,
-                                tokenizer=WordBoundaryTokenizer(False), tag="_")
+                                # tokenizer=WordBoundaryTokenizer(False),
+                                tag="_")
         assert kpa.annotate(korean_doc) == [
             Annotation(text="Won Jung Meijer", start_char=16, end_char=31, tag="_")
         ]
