@@ -350,25 +350,25 @@ class TestSequenceAnnotator:
 
     def test_validation(self, ds):
         with pytest.raises(ValueError) as exc_info:
-            tpa = SequenceAnnotator(pattern=[], ds=ds, tag="_")
+            SequenceAnnotator(pattern=[], ds=ds, tag="_")
         assert "missing or empty" in str(exc_info)
 
         # Lookup structures are not required if there are no lookup token patterns.
-        tpa = SequenceAnnotator(pattern=[{"like_name": True}], tag="_")
+        SequenceAnnotator(pattern=[{"like_name": True}], tag="_")
         assert True
 
         with pytest.raises(ValueError) as exc_info:
-            tpa = SequenceAnnotator(pattern=[{"lookup": "undefined_entity"}], tag="_")
+            SequenceAnnotator(pattern=[{"lookup": "undefined_entity"}], tag="_")
         assert "no lookup structures were provided" in str(exc_info)
 
         with pytest.raises(ValueError) as exc_info:
-            tpa = SequenceAnnotator(pattern=[{"lookup": "undefined_entity"}],
-                                    ds=ds,
-                                    tag="_")
+            SequenceAnnotator(pattern=[{"lookup": "undefined_entity"}],
+                              ds=ds,
+                              tag="_")
         assert "Unknown lookup entity types: undefined_entity." in str(exc_info)
 
         with pytest.raises(ValueError) as exc_info:
-            tpa = SequenceAnnotator(
+            SequenceAnnotator(
                 pattern=[{"or": [{"lookup": "undefined_entity"},
                                  {"lookup": "another_entity"}]}],
                 ds=ds,
@@ -376,8 +376,18 @@ class TestSequenceAnnotator:
         assert ("Unknown lookup entity types: another_entity, undefined_entity."
                 in str(exc_info))
 
+        # References to entities from metadata must not cause validation errors.
+        SequenceAnnotator(pattern=[{"or": [{"lookup": "patient.name"},
+                                           {"lookup": "doctor.surname"}]}],
+                          tag="_")
+        SequenceAnnotator(pattern=[{"or": [{"lookup": "interfixes"},
+                                           {"lookup": "doctor.surname"}]}],
+                          ds=ds,
+                          tag="_")
+        assert True
+
         with pytest.raises(ValueError) as exc_info:
-            tpa = SequenceAnnotator(
+            SequenceAnnotator(
                 pattern=[{"or": [{"lookup": "interfixes"},
                                  {"and": [{"lookup": "first_names"},
                                           {"lookup": "alien_entity"}]}]},
@@ -388,7 +398,7 @@ class TestSequenceAnnotator:
                 in str(exc_info))
 
         with pytest.raises(ValueError) as exc_info:
-            tpa = SequenceAnnotator(
+            SequenceAnnotator(
                 pattern=[{"lookup": "interfixed_surnames"}],
                 ds=ds,
                 tag="_")

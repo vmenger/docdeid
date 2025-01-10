@@ -624,7 +624,7 @@ class SequenceAnnotator(Annotator):
         referenced_ents = {match_val
                            for tok_pattern in pattern
                            for func, match_val in leaf_items(tok_pattern)
-                           if func.endswith("lookup")}
+                           if func.endswith("lookup") and "." not in match_val}
         if referenced_ents and ds is None:
             raise ValueError("Pattern relies on entity lookups but no lookup "
                              "structures were provided.")
