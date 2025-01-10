@@ -215,3 +215,17 @@ class TestWordBoundaryTokenizer:
         tokens = tokenizer._split_text(text)
 
         assert tokens == expected_tokens
+
+    def test_trimming(self):
+        text = "Jane Keith-Lucas"
+        tokenizer = WordBoundaryTokenizer(keep_blanks=False)
+        expected_tokens = [
+            Token(text="Jane", start_char=0, end_char=4),
+            Token(text="Keith", start_char=5, end_char=10),
+            Token(text="-", start_char=10, end_char=11),
+            Token(text="Lucas", start_char=11, end_char=16),
+        ]
+
+        tokens = tokenizer._split_text(text)
+
+        assert tokens == expected_tokens

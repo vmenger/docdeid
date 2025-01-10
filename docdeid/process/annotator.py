@@ -1,21 +1,68 @@
+from __future__ import annotations
+
 import re
+import warnings
+
 from abc import ABC, abstractmethod
-from typing import Iterable, Optional, Union
+from collections import defaultdict
+from dataclasses import dataclass
+from typing import Iterable, Literal, Optional, Union
 
 import docdeid.str
 from docdeid.annotation import Annotation
+from docdeid.direction import Direction
 from docdeid.document import Document
+from docdeid.ds import DsCollection
 from docdeid.ds.lookup import LookupSet, LookupTrie
 from docdeid.pattern import TokenPattern
 from docdeid.process.doc_processor import DocProcessor
 from docdeid.str.processor import StringModifier
 from docdeid.tokenizer import Token, Tokenizer
+from docdeid.utils import leaf_items
+
+
+@dataclass
+class SimpleTokenPattern:
+    """A pattern for a token (and possibly its annotation, too)."""
+
+    func: Literal[
+        "equal",
+        "re_match",
+        "is_initial",
+        "is_initials",
+        "like_name",
+        "lookup",
+        "neg_lookup",
+        "tag",
+    ]
+    pattern: str
+
+
+@dataclass
+class NestedTokenPattern:
+    """Coordination of token patterns."""
+
+    func: Literal["and", "or"]
+    pattern: list[TokenPatternFromCfg]
+
+
+TokenPatternFromCfg = Union[SimpleTokenPattern, NestedTokenPattern]
+
+
+@dataclass
+class SequencePattern:
+    """Pattern for matching a sequence of tokens."""
+
+    direction: Direction
+    skip: set[str]
+    pattern: list[TokenPatternFromCfg]
+
 
 
 class Annotator(DocProcessor, ABC):
     """
     Abstract class for annotators, which are responsible for generating annotations from
-    a given document. Instatiations should implement the annotate method.
+    a given document. Instantiations should implement the annotate method.
 
     Args:
         tag: The tag to use in the annotations.
@@ -45,6 +92,69 @@ class Annotator(DocProcessor, ABC):
         Returns:
             A list of annotations.
         """
+
+    def _match_sequence(
+        self,
+        doc: Document,
+        seq_pattern: SequencePattern,
+        start_token: Token,
+        annos_by_token: defaultdict[Token, Iterable[Annotation]],
+        dicts: Optional[DsCollection],
+    ) -> Optional[Annotation]:
+        """
+        Matches a token sequence pattern at `start_token`.
+
+        Args:
+            doc: The document.
+            seq_pattern: The pattern to match.
+            start_token: The start token to match.
+            annos_by_token: Map from tokens to annotations covering it.
+            dicts: Lookup dictionaries available.
+
+        Returns:
+              An Annotation if matching is possible, None otherwise.
+        """
+
+        dir_ = seq_pattern.direction
+
+        tokens = (
+            token
+            for token in start_token.iter_to(dir_)
+            if token.text not in seq_pattern.skip
+        )
+        # Iterate the token patterns in the direction corresponding to the surface
+        # order it's supposed to match (i.e. "left" means "iterate patterns from the
+        # end").
+        tok_patterns = dir_.iter(seq_pattern.pattern)
+
+        num_matched = 0
+        end_token = start_token
+        for tok_pattern, end_token in zip(tok_patterns, tokens):
+            if _PatternPositionMatcher.match(
+                token_pattern=tok_pattern,
+                token=end_token,
+                annos=annos_by_token[end_token],
+                ds=dicts,
+                metadata=doc.metadata,
+            ):
+                num_matched += 1
+            else:
+                break
+
+        if num_matched != len(seq_pattern.pattern):
+            return None
+
+        left_token, right_token = dir_.iter((start_token, end_token))
+
+        return Annotation(
+            text=doc.text[left_token.start_char : right_token.end_char],
+            start_char=left_token.start_char,
+            end_char=right_token.end_char,
+            tag=self.tag,
+            priority=self.priority,
+            start_token=left_token,
+            end_token=right_token,
+        )
 
 
 class SingleTokenLookupAnnotator(Annotator):
@@ -100,79 +210,39 @@ class SingleTokenLookupAnnotator(Annotator):
         return self._tokens_to_annotations(annotate_tokens)
 
 
-class MultiTokenLookupAnnotator(Annotator):
+class MultiTokenTrieAnnotator(Annotator):
     """
-    Matches lookup values against tokens, where the ``lookup_values`` may themselves be
-    sequences.
+    Annotates entity mentions by looking them up in a `LookupTrie`.
 
     Args:
-        lookup_values: An iterable of strings, that should be matched. These are
-            tokenized internally.
-        matching_pipeline: An optional pipeline that can be used for matching
-            (e.g. lowercasing). This has no specific impact on matching performance,
-            other than overhead for applying the pipeline to each string.
-        tokenizer: A tokenizer that is used to create the sequence patterns from
-            ``lookup_values``.
-        trie: A trie that is used for matching, rather than a combination of
-            `lookup_values` and a `matching_pipeline` (cannot be used simultaneously).
-        overlapping: Whether the annotator should match overlapping sequences,
-            or should process from left to right.
-
-    Raises:
-        RunTimeError, when an incorrect combination of `lookup_values`,
-        `matching_pipeline` and `trie` is supplied.
+        trie: The `LookupTrie` containing all entity mentions that should be annotated.
+        overlapping: Whether overlapping phrases are to be returned.
+        *args, **kwargs: Passed through to the `Annotator` constructor (which accepts
+            the arguments `tag` and `priority`).
     """
 
     def __init__(
-        self,
-        *args,
-        lookup_values: Optional[Iterable[str]] = None,
-        matching_pipeline: Optional[list[StringModifier]] = None,
-        tokenizer: Optional[Tokenizer] = None,
-        trie: Optional[LookupTrie] = None,
-        overlapping: bool = False,
-        **kwargs,
+            self,
+            *args,
+            trie: LookupTrie,
+            overlapping: bool = False,
+            **kwargs,
     ) -> None:
 
-        self._start_words: set[str] = set()
-
-        if (trie is not None) and (lookup_values is None) and (tokenizer is None):
-
-            self._trie = trie
-            self._matching_pipeline = trie.matching_pipeline or []
-            self._start_words = set(trie.children.keys())
-
-        elif (trie is None) and (lookup_values is not None) and (tokenizer is not None):
-            self._matching_pipeline = matching_pipeline or []
-            self._trie = LookupTrie(matching_pipeline=matching_pipeline)
-            self._init_lookup_structures(lookup_values, tokenizer)
-
-        else:
-            raise RuntimeError(
-                "Please provide either looup_values and a tokenizer, or a trie."
-            )
-
-        self.overlapping = overlapping
+        self._trie = trie
+        self._overlapping = overlapping
+        self._start_words = set(trie.children)
 
         super().__init__(*args, **kwargs)
 
-    def _init_lookup_structures(
-        self, lookup_values: Iterable[str], tokenizer: Tokenizer
-    ) -> None:
-
-        for val in lookup_values:
-
-            texts = [token.text for token in tokenizer.tokenize(val)]
-
-            if len(texts) > 0:
-                self._trie.add_item(texts)
-
-                start_token = texts[0]
-
-                for string_modifier in self._matching_pipeline:
-                    start_token = string_modifier.process(start_token)
-
-                self._start_words.add(start_token)
+    @property
+    def start_words(self) -> set[str]:
+        """First words of phrases detected by this annotator."""
+        # If the trie has been modified (added to) since we computed _start_words,
+        if len(self._start_words) != len(self._trie.children):
+            # Recompute _start_words.
+            self._start_words = set(self._trie.children)
+        return self._start_words
 
     def annotate(self, doc: Document) -> list[Annotation]:
 
@@ -180,7 +250,7 @@ class MultiTokenLookupAnnotator(Annotator):
 
         start_tokens = sorted(
             tokens.token_lookup(
-                self._start_words, matching_pipeline=self._matching_pipeline
+                self.start_words, matching_pipeline=self._trie.matching_pipeline
             ),
             key=lambda token: token.start_char,
         )
@@ -218,10 +288,64 @@ class MultiTokenLookupAnnotator(Annotator):
                 )
             )
 
-            if not self.overlapping:
+            if not self._overlapping:
                 min_i = i + len(longest_matching_prefix)  # skip ahead
 
         return annotations
+
+
+class MultiTokenLookupAnnotator(MultiTokenTrieAnnotator):
+    """
+    Annotates entity mentions by looking them up in a `LookupTrie` or
+    a collection of phrases. This is a thin wrapper for
+    class:`MultiTokenTrieAnnotator` that additionally handles non-trie lookup
+    structures by building tries out of them and delegating to the parent class.
+
+    Args:
+        lookup_values: An iterable of phrases that should be matched. These are
+            tokenized using ``tokenizer``.
+        matching_pipeline: An optional pipeline that can be used for matching
+            (e.g. lowercasing). This has no specific impact on matching performance,
+            other than overhead for applying the pipeline to each string.
+        tokenizer: A tokenizer that is used to create the sequence patterns from
+            ``lookup_values``.
+        trie: A `LookupTrie` containing all entity mentions that should be
+            annotated. Specifying this is mutually exclusive with specifying
+            ``lookup_values`` and ``tokenizer``.
+        overlapping: Whether overlapping phrases are to be returned.
+        *args, **kwargs: Passed through to the `Annotator` constructor (which accepts
+            the arguments `tag` and `priority`).
+
+    Raises:
+        RunTimeError, when an incorrect combination of `lookup_values`,
+        `matching_pipeline` and `trie` is supplied.
+    """
+
+    def __init__(
+            self,
+            *args,
+            lookup_values: Optional[Iterable[str]] = None,
+            matching_pipeline: Optional[list[StringModifier]] = None,
+            tokenizer: Optional[Tokenizer] = None,
+            trie: Optional[LookupTrie] = None,
+            overlapping: bool = False,
+            **kwargs,
+    ) -> None:
+
+        if (trie is not None) and (lookup_values is None) and (tokenizer is None):
+            eff_trie = trie
+
+        elif (trie is None) and (lookup_values is not None) and (tokenizer is not None):
+            eff_trie = LookupTrie(matching_pipeline=matching_pipeline)
+            for phrase in filter(None, map(tokenizer.tokenize, lookup_values)):
+                eff_trie.add_item([token.text for token in phrase])
+
+        else:
+            raise RuntimeError(
+                "Please provide either looup_values and a tokenizer, or a trie."
+            )
+
+        super().__init__(*args, trie=eff_trie, overlapping=overlapping, **kwargs)
 
 
 class RegexpAnnotator(Annotator):
@@ -346,5 +470,207 @@ class TokenPatternAnnotator(Annotator):
                     end_token=end_token,
                 )
             )
+
+        return annotations
+
+
+class _PatternPositionMatcher:  # pylint: disable=R0903
+    """Checks if a token matches against a single pattern."""
+
+    @classmethod
+    def match(cls, token_pattern: Union[dict, TokenPatternFromCfg], **kwargs) -> bool:
+        # pylint: disable=R0911
+        """
+        Matches a pattern position (a dict with one key). Other information should be
+        presented as kwargs.
+
+        Args:
+            token_pattern: A dictionary with a single key, e.g. {'is_initial': True}
+            kwargs: Any other information, like the token or ds
+
+        Returns:
+            True if the pattern position matches, false otherwise.
+        """
+
+        if isinstance(token_pattern, dict):
+            return cls.match(as_token_pattern(token_pattern), **kwargs)
+
+        func = token_pattern.func
+        value = token_pattern.pattern
+
+        if func == "equal":
+            return kwargs["token"].text == value
+        if func == "re_match":
+            return re.match(value, kwargs["token"].text) is not None
+        if func == "is_initial":
+
+            warnings.warn(
+                "is_initial matcher pattern is deprecated and will be removed "
+                "in a future version",
+                DeprecationWarning,
+            )
+
+            return (
+                (len(kwargs["token"].text) == 1 and kwargs["token"].text[0].isupper())
+                or kwargs["token"].text in {"Ch", "Chr", "Ph", "Th"}
+            ) == value
+        if func == "is_initials":
+            return (
+                len(kwargs["token"].text) <= 4 and kwargs["token"].text.isupper()
+            ) == value
+        if func == "like_name":
+            return (
+                len(kwargs["token"].text) >= 3
+                and kwargs["token"].text.istitle()
+                and not any(ch.isdigit() for ch in kwargs["token"].text)
+            ) == value
+        if func == "lookup":
+            return cls._lookup(value, **kwargs)
+        if func == "neg_lookup":
+            return not cls._lookup(value, **kwargs)
+        if func == "tag":
+            annos = kwargs.get("annos", ())
+            return any(anno.tag == value for anno in annos)
+        if func == "and":
+            return all(cls.match(x, **kwargs) for x in value)
+        if func == "or":
+            return any(cls.match(x, **kwargs) for x in value)
+
+        raise NotImplementedError(f"No known logic for pattern {func}")
+
+    @classmethod
+    def _lookup(cls, ent_type: str, **kwargs) -> bool:
+        token = kwargs["token"].text
+        if "." in ent_type:
+            meta_key, meta_attr = ent_type.split(".", 1)
+            try:
+                meta_val = getattr(kwargs["metadata"][meta_key], meta_attr)
+            except (TypeError, KeyError, AttributeError):
+                return False
+            return token == meta_val if isinstance(meta_val, str) else token in meta_val
+        else:  # pylint: disable=R1705
+            return token in kwargs["ds"][ent_type]
+
+
+def as_token_pattern(pat_dict: dict) -> TokenPatternFromCfg:
+    """
+    Converts the JSON dictionary representation of token patterns into a
+    `TokenPatternFromCfg` instance.
+
+    Args:
+        pat_dict: the JSON representation of the pattern
+    """
+    if len(pat_dict) != 1:
+        raise ValueError(
+            f"Cannot parse a token pattern which doesn't have exactly 1 key: "
+            f"{pat_dict}."
+        )
+    func, value = next(iter(pat_dict.items()))
+    if func in ("and", "or"):
+        return NestedTokenPattern(func, [as_token_pattern(it) for it in value])
+    return SimpleTokenPattern(func, value)
+
+
+class SequenceAnnotator(Annotator):
+    """
+    Annotates based on token patterns, which should be provided as a list of dicts. Each
+    position in the list corresponds to a token. For example:
+    ``[{'is_initial': True}, {'like_name': True}]`` matches sequences of two tokens
+    where the first one is an initial and the second one looks like a name.
+
+    Arguments:
+        pattern: The pattern
+        ds: Lookup dictionaries. Those referenced by the pattern should be LookupSets.
+            (Don't ask why.)
+        skip: Any string values that should be skipped in matching (e.g. periods)
+    """
+
+    def __init__(
+        self,
+        pattern: list[dict],
+        *args,
+        ds: Optional[DsCollection] = None,
+        skip: Optional[list[str]] = None,
+        **kwargs,
+    ) -> None:
+        self.pattern = pattern
+        self.ds = ds
+
+        self._start_words = None
+        self._start_matching_pipeline = None
+
+        SequenceAnnotator.validate_pattern(pattern, ds)
+
+        # If the first token pattern is lookup, determine the possible starting words.
+        if start_ent_type := pattern[0].get("lookup"):
+            # XXX We assume the items of the lookup list are all single words. This
+            # is not always the case but just splitting the phrases wouldn't help
+            # because the "lookup" token matcher assumes matching against a single
+            # token.
+            self._start_words = ds[start_ent_type].items()
+            self._start_matching_pipeline = ds[start_ent_type].matching_pipeline
+
+        self._seq_pattern = SequencePattern(
+            Direction.RIGHT, set(skip or ()), [as_token_pattern(it) for it in pattern]
+        )
+
+        super().__init__(*args, **kwargs)
+
+    @classmethod
+    def validate_pattern(cls, pattern, ds):
+        if not pattern:
+            raise ValueError(f"Sequence pattern is missing or empty: {pattern}.")
+
+        referenced_ents = {match_val
+                           for tok_pattern in pattern
+                           for func, match_val in leaf_items(tok_pattern)
+                           if func.endswith("lookup") and "." not in match_val}
+        if referenced_ents and ds is None:
+            raise ValueError("Pattern relies on entity lookups but no lookup "
+                             "structures were provided.")
+
+        if missing := referenced_ents - set(ds or ()):
+            raise ValueError("Unknown lookup entity types: {}."
+                             .format(", ".join(sorted(missing))))
+
+        if start_ent_type := pattern[0].get("lookup"):
+            if not isinstance(ds[start_ent_type], LookupSet):
+                raise ValueError('If the first token pattern is lookup, it must be '
+                                 f'backed by a LookupSet, but "{start_ent_type}" is '
+                                 f'backed by a {type(ds[start_ent_type]).__name__}.')
+
+    def annotate(self, doc: Document) -> list[Annotation]:
+        """
+        Annotate the document, by matching the pattern against all tokens.
+
+        Args:
+            doc: The document being processed.
+
+        Returns:
+            A list of Annotation.
+        """
+
+        annotations = []
+
+        token_list = doc.get_tokens()
+
+        if self._start_words is not None:
+            tokens: Iterable[Token] = token_list.token_lookup(
+                lookup_values=self._start_words,
+                matching_pipeline=self._start_matching_pipeline,
+            )
+        else:
+            tokens = token_list  # ...to make Mypy happy.
+
+        annos_by_token = doc.annos_by_token()
+
+        for token in tokens:
+
+            annotation = self._match_sequence(
+                doc, self._seq_pattern, token, annos_by_token, self.ds
+            )
+
+            if annotation is not None:
+                annotations.append(annotation)
 
         return annotations

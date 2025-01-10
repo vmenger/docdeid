@@ -84,6 +84,7 @@ class TestDocument:
             tokenizer1, "tokenize", return_value=short_tokens
         ), patch.object(tokenizer2, "_split_text", return_value=[]):
 
+            assert set(doc.tokenizers.keys()) == {"tokenizer_1", "tokenizer_2"}
             assert doc.get_tokens(tokenizer_name="tokenizer_1") == short_tokens
             assert doc.get_tokens(tokenizer_name="tokenizer_2") == TokenList([])
 

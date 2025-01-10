@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import re
+import sys
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from collections.abc import Generator, Iterator, Sequence
 from dataclasses import dataclass, field
-from typing import Iterator, Literal, Optional
+from typing import Literal, Optional, SupportsIndex, overload
 
+from docdeid.direction import Direction
 from docdeid.str import StringModifier
 
 
@@ -120,6 +123,21 @@ class Token:
         """
         return self._get_linked_token(num=num, attr="_next_token")
 
+    def iter_to(
+        self,
+        dir_: Direction = Direction.RIGHT,
+    ) -> Generator[Token, None, None]:
+        """
+        Iterates linked tokens in the specified direction.
+
+        Args:
+            dir_: direction to go
+        """
+        token: Optional[Token] = self
+        while token is not None:
+            yield token
+            token = token.next() if dir_ is Direction.RIGHT else token.previous()
+
     def __len__(self) -> int:
         """
         The length of the text.
@@ -130,7 +148,7 @@ class Token:
         return len(self.text)
 
 
-class TokenList:
+class TokenList(Sequence[Token]):
     """
     Contains a sequence of tokens, along with some lookup logic.
 
@@ -248,9 +266,29 @@ class TokenList:
 
         return len(self._tokens)
 
+    @overload
     def __getitem__(self, index: int) -> Token:
+        ...
 
-        return self._tokens[index]
+    @overload
+    def __getitem__(self, indexes: slice) -> Sequence[Token]:
+        ...
+
+    def __getitem__(self, item):
+        return self._tokens[item]
+
+    def index(
+        self,
+        __token: Token,
+        __start: SupportsIndex = 0,
+        __stop: SupportsIndex = sys.maxsize,
+    ) -> int:
+        try:
+            return self._token_index[__token]
+        except KeyError:
+            # Raise a plain ValueError, just like list.index.
+            # pylint: disable=W0707
+            raise ValueError(f"'{__token}' is not in TokenList")
 
     def __eq__(self, other: object) -> bool:
         """
@@ -317,6 +355,15 @@ class Tokenizer(ABC):  # pylint: disable=R0903
         return TokenList(tokens, link_tokens=self.link_tokens)
 
 
+class DummyTokenizer(Tokenizer):  # pylint: disable=R0903
+    """
+    Treats any given string as a single token.
+    """
+
+    def _split_text(self, text: str) -> list[Token]:
+        return [Token(text=text, start_char=0, end_char=len(text))]
+
+
 class SpaceSplitTokenizer(Tokenizer):  # pylint: disable=R0903
     """
     Tokenizes based on splitting on whitespaces.
@@ -333,10 +380,16 @@ class SpaceSplitTokenizer(Tokenizer):  # pylint: disable=R0903
 
 class WordBoundaryTokenizer(Tokenizer):  # pylint: disable=R0903
     """
-    Tokenizes based on word boundary.
+    Tokenizes based on word boundary. Sequences of non-alphanumeric characters are also
+    represented as tokens.
 
-    Whitespaces and similar characters are included as tokens.
+    Args:
+        keep_blanks: Keep whitespace in tokens, and whitespace-only tokens?
     """
+
+    def __init__(self, keep_blanks: bool = True) -> None:
+        super().__init__()
+        self._trim = not keep_blanks
 
     def _split_text(self, text: str) -> list[Token]:
         tokens = []
@@ -347,9 +400,20 @@ class WordBoundaryTokenizer(Tokenizer):  # pylint: disable=R0903
             start_char = start_match.span(0)[0]
             end_char = end_match.span(0)[0]
 
+            if self._trim:
+                word = text[start_char:end_char]
+                word = word.rstrip()
+                end_char = start_char + len(word)
+                word = word.lstrip()
+                start_char = end_char - len(word)
+                if not word:
+                    continue
+            else:
+                word = text[start_char:end_char]
+
             tokens.append(
                 Token(
-                    text=text[start_char:end_char],
+                    text=word,
                     start_char=start_char,
                     end_char=end_char,
                 )

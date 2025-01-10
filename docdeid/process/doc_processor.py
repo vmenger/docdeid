@@ -1,8 +1,12 @@
+import logging
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from typing import Iterator, Optional, Union
 
 from docdeid.document import Document
+from docdeid.utils import annotate_doc
+
+_ROOT_LOGGER = logging.getLogger()
 
 
 class DocProcessor(ABC):  # pylint: disable=R0903
@@ -28,7 +32,7 @@ class DocProcessorGroup:
 
     def __init__(self) -> None:
         self._processors: OrderedDict[
-            str, Union[DocProcessor | DocProcessorGroup]
+            str, Union[DocProcessor, DocProcessorGroup]
         ] = OrderedDict()
 
     def get_names(self, recursive: bool = True) -> list[str]:
@@ -142,6 +146,9 @@ class DocProcessorGroup:
                 proc.process(doc)
             elif isinstance(proc, DocProcessorGroup):
                 proc.process(doc, enabled=enabled, disabled=disabled)
+
+            if _ROOT_LOGGER.isEnabledFor(logging.DEBUG):
+                logging.debug("after %s: %s", name, annotate_doc(doc))
 
     def __iter__(self) -> Iterator:
 

@@ -4,9 +4,11 @@ format:
 	python -m docformatter .
 
 lint:
-	python -m flake8 .
-	python -m pylint docdeid/
-	python -m mypy docdeid/
+	{ python -m flake8 .; fret=$$?; }; \
+		{ python -m pylint docdeid/; pret=$$?; }; \
+		{ python -m mypy docdeid/; mret=$$?; }; \
+		echo "flake8: $$fret, pylint: $$pret, mypy: $$mret"; \
+	  [ $$fret,$$pret,$$mret = "0,0,0" ]
 
 build-docs:
 	sphinx-apidoc --module-first --force --templatedir=docs/templates -o docs/source/api docdeid

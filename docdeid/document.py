@@ -1,7 +1,12 @@
+from collections import defaultdict
+from collections.abc import Mapping
+from dataclasses import dataclass
 from typing import Any, Optional
 
-from docdeid.annotation import AnnotationSet
-from docdeid.tokenizer import Tokenizer, TokenList
+from frozendict import frozendict
+
+from docdeid.annotation import Annotation, AnnotationSet
+from docdeid.tokenizer import Token, Tokenizer, TokenList
 
 
 class MetaData:
@@ -66,6 +71,12 @@ class Document:
             Will be stored in a :class:`.MetaData` object.
     """
 
+    @dataclass
+    class AnnosByToken:
+        """A cache entry associating an `AnnotationSet` with a token->annos map."""
+        anno_set: AnnotationSet
+        value: defaultdict[Token, set[Annotation]]
+
     def __init__(
         self,
         text: str,
@@ -74,7 +85,9 @@ class Document:
     ) -> None:
 
         self._text = text
-        self._tokenizers = tokenizers
+        self._tokenizers = None if tokenizers is None else frozendict(tokenizers)
+        self._default_annos_by_token = Document.AnnosByToken(None, None)
+        self._tmp_annos_by_token = Document.AnnosByToken(None, None)
 
         self.metadata = MetaData(metadata)
         """The :class:`.MetaData` of this :class:`.Document`, that can be interacted
@@ -93,6 +106,13 @@ class Document:
             The original and unmodified text.
         """
         return self._text
+
+    @property
+    def tokenizers(self) -> Mapping[str, Tokenizer]:
+        """Available tokenizers indexed by their name."""
+        if self._tokenizers is None:
+            raise RuntimeError("No tokenizers initialized.")
+        return self._tokenizers
 
     def get_tokens(self, tokenizer_name: str = "default") -> TokenList:
         """
@@ -145,6 +165,62 @@ class Document:
             annotations: The new annotations.
         """
         self._annotations = annotations
+
+    def annos_by_token(
+            self,
+            annos: AnnotationSet = None,
+    ) -> defaultdict[Token, set[Annotation]]:
+        """
+        Returns a mapping from document tokens to annotations.
+
+        Args:
+            annos: annotations for this document to index by token (default: current
+                   annotations of this `Document`)
+        """
+
+        # Fill the default arg value.
+        if annos is None:
+            eff_annos = self._annotations
+            cache = self._default_annos_by_token
+        else:
+            eff_annos = annos
+            cache = self._tmp_annos_by_token
+
+        # Try to use a cached response.
+        if eff_annos == cache.anno_set:
+            return cache.value
+
+        # Compute the return value.
+        annos_by_token = defaultdict(set)
+        for tokenizer in self.tokenizers:
+            token_list = self.get_tokens(tokenizer)
+            if not token_list:
+                continue
+            cur_tok_idx = 0
+            tok = token_list[cur_tok_idx]
+            for anno in eff_annos.sorted(by=("start_char",)):
+                try:
+                    # Iterate over tokens till we reach the annotation.
+                    while tok.end_char < anno.start_char:
+                        cur_tok_idx += 1
+                        tok = token_list[cur_tok_idx]
+                except IndexError:
+                    break
+                # Iterate over tokens in the annotation till we reach the end
+                # of it or the end of the tokens.
+                anno_tok_idx = cur_tok_idx
+                anno_tok = tok
+                while anno_tok.start_char < anno.end_char:
+                    annos_by_token[anno_tok].add(anno)
+                    if anno_tok_idx == len(token_list) - 1:
+                        break
+                    anno_tok_idx += 1
+                    anno_tok = token_list[anno_tok_idx]
+
+        # Cache the value before returning.
+        cache.anno_set = eff_annos
+        cache.value = annos_by_token
+        return annos_by_token
 
     @property
     def deidentified_text(self) -> Optional[str]:
