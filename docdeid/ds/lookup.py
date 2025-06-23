@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import codecs
 import itertools
+from collections.abc import Sequence
 from typing import Iterable, Iterator, Optional, Union
 
 from docdeid.ds.ds import Datastructure
@@ -140,7 +141,7 @@ class LookupSet(LookupStructure):
     ) -> None:
         """
         Add items from self (this items of this :class:`.LookupSet`). This can be used
-        to do a transformation or replacment of the items.
+        to do a transformation or replacement of the items.
 
         Args:
             cleaning_pipeline: A cleaning pipeline applied to the items of this set.
@@ -265,7 +266,7 @@ class LookupTrie(LookupStructure):
         self.children: dict[str, LookupTrie] = {}
         self.is_terminal = False
 
-    def add_item(self, item: list[str]) -> None:
+    def add_item(self, item: Sequence[str]) -> None:
         """
         Add an item, i.e. a list of strings, to this Trie.
 
@@ -285,7 +286,7 @@ class LookupTrie(LookupStructure):
 
             self.children[head].add_item(tail)
 
-    def __contains__(self, item: list[str]) -> bool:
+    def __contains__(self, item: Sequence[str]) -> bool:
         """
         Whether the trie contains the item. Respects the matching pipeline.
 
@@ -304,7 +305,7 @@ class LookupTrie(LookupStructure):
         return (head in self.children) and tail in self.children[head]
 
     def longest_matching_prefix(
-        self, item: list[str], start_i: int = 0
+        self, item: Sequence[str], start_i: int = 0
     ) -> Union[list[str], None]:
         """
         Finds the longest matching prefix of a list of strings. This is used to find the

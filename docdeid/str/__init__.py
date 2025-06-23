@@ -1,6 +1,7 @@
 from .processor import (
     FilterByLength,
     LowercaseString,
+    LowercaseTail,
     RemoveNonAsciiCharacters,
     ReplaceNonAsciiCharacters,
     ReplaceValue,

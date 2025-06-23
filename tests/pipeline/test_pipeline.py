@@ -2,6 +2,7 @@ import pytest
 
 from docdeid.annotation import Annotation, AnnotationSet
 from docdeid.deidentifier import DocDeid
+from docdeid.ds import LookupTrie
 from docdeid.process.annotator import (
     MultiTokenLookupAnnotator,
     SingleTokenLookupAnnotator,
@@ -49,11 +50,12 @@ class TestDeidentify:
             "name_annotator",
             SingleTokenLookupAnnotator(lookup_values=["Bob"], tag="name"),
         )
+        loc_trie = LookupTrie()
+        loc_trie.add_item("the United States of America".split())
         deidentifier.processors.add_processor(
             "location_annotator",
             MultiTokenLookupAnnotator(
-                lookup_values=["the United States of America"],
-                tokenizer=tokenizer,
+                trie=loc_trie,
                 tag="location",
             ),
         )
@@ -86,11 +88,12 @@ class TestDeidentify:
             "name_annotator",
             SingleTokenLookupAnnotator(lookup_values=["Bob"], tag="name"),
         )
+        loc_trie = LookupTrie()
+        loc_trie.add_item("the United States of America".split())
         deidentifier.processors.add_processor(
             "location_annotator",
             MultiTokenLookupAnnotator(
-                lookup_values=["the United States of America"],
-                tokenizer=tokenizer,
+                trie=loc_trie,
                 tag="location",
             ),
         )
@@ -124,11 +127,12 @@ class TestDeidentify:
             "name_annotator",
             SingleTokenLookupAnnotator(lookup_values=["Bob"], tag="name"),
         )
+        loc_trie = LookupTrie()
+        loc_trie.add_item("the United States of America".split())
         deidentifier.processors.add_processor(
             "location_annotator",
             MultiTokenLookupAnnotator(
-                lookup_values=["the United States of America"],
-                tokenizer=tokenizer,
+                trie=loc_trie,
                 tag="location",
             ),
         )

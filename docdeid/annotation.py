@@ -46,7 +46,7 @@ class Annotation:  # pylint: disable=R0902
     Should only be used when the annotation ends on a token boundary.
     """
 
-    length: int = field(init=False)
+    length: int = field(init=False, compare=False)
     """The number of characters of the annotation text."""
 
     _key_cache: dict = field(default_factory=dict, repr=False, compare=False)
@@ -100,7 +100,7 @@ class Annotation:  # pylint: disable=R0902
 
             val = getattr(self, attr, UNKNOWN_ATTR_DEFAULT)
 
-            if callbacks is not None and (attr in callbacks):
+            if callbacks is not None and attr in callbacks:
                 val = callbacks[attr](val)
 
             sort_key.append(val)
@@ -126,6 +126,9 @@ class AnnotationSet(set[Annotation]):
     It extends the builtin ``set``.
     """
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
     def sorted(
         self,
         by: tuple,  # pylint: disable=C0103
@@ -150,14 +153,14 @@ class AnnotationSet(set[Annotation]):
             A RunTimeError, if the callbacks are not provided as a frozen dict.
         """
 
-        if callbacks is not None and not isinstance(callbacks, frozendict):
+        if not isinstance(callbacks, (type(None), frozendict)):
             raise RuntimeError(
                 "Please provide the callbacks as a frozen dict, e.g. "
                 "frozendict.frozendict(end_char=lambda x: -x)"
             )
 
         return sorted(
-            list(self),
+            self,
             key=lambda x: x.get_sort_key(
                 by=by, callbacks=callbacks, deterministic=deterministic
             ),

@@ -6,9 +6,10 @@ from .annotation_processor import (
 from .annotator import (
     Annotator,
     MultiTokenLookupAnnotator,
+    MultiTokenTrieAnnotator,
     RegexpAnnotator,
+    SequenceAnnotator,
     SingleTokenLookupAnnotator,
-    TokenPatternAnnotator,
 )
 from .doc_processor import DocProcessor, DocProcessorGroup
 from .redactor import RedactAllText, Redactor, SimpleRedactor

@@ -74,6 +74,27 @@ class LowercaseString(StringModifier):
         return item.casefold()
 
 
+_WORD_RX = re.compile("\\w+", re.U)
+
+
+class LowercaseTail(StringModifier):
+    """Lowercases the tail of words."""
+
+    def __init__(self, lang: str = "nl") -> None:
+        self._lang = lang
+
+    def _process_word_match(self, match: re.Match) -> str:
+        word = match.group(0)
+        if word.isupper():
+            if self._lang == "nl" and word.startswith("IJ"):
+                return word[0:2] + word[2:].lower()
+            return word[0] + word[1:].lower()
+        return word
+
+    def process(self, item: str) -> str:
+        return _WORD_RX.sub(self._process_word_match, item)
+
+
 class StripString(StringModifier):
     """
     Strip string (whitespaces, tabs, newlines, etc.

@@ -131,3 +131,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /.idea/*
+
+# IDEs
+*.iml
+
+# misc
+*~
